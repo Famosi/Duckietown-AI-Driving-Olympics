@@ -10,11 +10,10 @@ import json
 import pickle
 import time
 
-
 STEPS = 200
 EPISODES = 1
 
-DEBUG = True
+DEBUG = False
 
 env = launch_env()
 
@@ -51,13 +50,19 @@ track = [xs, ys]
 # elapsed_time = time.time() - start_time
 # elapsed_time = time.strftime("%H:%M:%S", time.gmtime(elapsed_time))
 # print("RESET TIME", elapsed_time)
-
+rewards = 0
 # let's collect our samples
 for episode in range(0, EPISODES):
     for step in range(0, STEPS):
+
+        start_time = time.time()
+
         # we use our 'expert' to predict the next action.
         # action = expert.predict(step, env)
         action = expert.dream_forward(env, track)
+
+        elapsed_time = time.time() - start_time
+        print(time.strftime("%H:%M:%S", time.gmtime(elapsed_time)))
 
         # lane_pose = env.get_lane_pos2(env.cur_pos, env.cur_angle)
 
@@ -67,12 +72,16 @@ for episode in range(0, EPISODES):
         left_velocity = np.append(left_velocity, action[0])
         right_velocity = np.append(right_velocity, action[1])
 
+        print("NEXT ACTION:", action)
         observation, reward, done, info = env.step(action)
+        np.append(positions_x, env.cur_pos[0])
+        np.append(positions_y, env.cur_pos[2])
 
         # positions_x = np.append(positions_x, env.cur_pos[0])
         # positions_y = np.append(positions_y, env.cur_pos[2])
 
         reward_acc = np.append(reward_acc, reward)
+        rewards += reward
 
         closest_point, _ = env.closest_curve_point(env.cur_pos, env.cur_angle)
 
@@ -98,8 +107,6 @@ for episode in range(0, EPISODES):
             # if cv2.waitKey() & 0xFF == ord('q'):
             #    break
 
-        time.sleep(1)
-
         # logger.log(observation, action, reward, done, info)
         # [optional] env.render() to watch the expert interaction with the environment
         # we log here
@@ -110,17 +117,31 @@ for episode in range(0, EPISODES):
 # logger.close()
 env.close()
 
+print("TOTAL REWARD:", rewards)
+
 # plt.plot(left_velocity, label="left")
 # plt.plot(right_velocity, label="right")
-plt.subplot(2, 1, 1)
-plt.plot(reward_acc, color='red')
+try:
+    plt.subplot(3, 1, 1)
+    plt.plot(reward_acc, color='red')
+    plt.title("Reward")
 
-plt.subplot(2, 1, 2)
-plt.plot(left_velocity, color="green")
-plt.plot(right_velocity, label="orange")
-plt.title("l/r velocities")
+    plt.subplot(3, 1, 2)
+    plt.plot(left_velocity, color="green")
+    plt.plot(right_velocity, color="orange")
+    plt.legend()
+    plt.title("L(g)/R(o) Vel")
 
-plt.show()
+    plt.subplot(3, 1, 3)
+    plt.scatter(track[0], track[1], color="black", s=1)
+    plt.scatter(positions_x, positions_y, color="green", s=3)
+    plt.title("Positions on TRACK")
+
+    plt.show()
+except Exception:
+    print("reward", reward_acc)
+    print("left", left_velocity)
+    print("right", right_velocity)
 
 """ ======================================================================================== 
 Generate and save a track as a .pkl file

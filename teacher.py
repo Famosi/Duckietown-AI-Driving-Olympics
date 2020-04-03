@@ -1,6 +1,7 @@
 import numpy as np
 import networkx as nx
 from gym_duckietown.simulator import NotInLane
+import matplotlib.pyplot as plt
 import copy
 
 MIN = 100000
@@ -12,14 +13,16 @@ class PurePursuitExpert:
             [1., 1.],
             [0.6, 1.],
             [1., 0.6],
+            [0.8, 1.],
+            [1., 0.8],
             [0.4, 1.],
-            [1., 0.4]
+            [1., 0.4],
         ])
 
     def predict_rollout_head(self, n, env):
 
         m = 0
-        for i in range(0, n):
+        for i in range(0, n+1):
             m += self.actions.shape[0] ** i
 
         nodes = list(range(1, m + 1))
@@ -45,7 +48,7 @@ class PurePursuitExpert:
         def __helper__(nodes, current_parent, next_parents, rollout, denv, robot_speed, cur_pos, cur_angle, state, last_action, wheelVels, delta_time):
             if nodes:
                 for action in range (self.actions.shape[0]):
-                    denv.reset_rollout(robot_speed, cur_pos, cur_angle, state, last_action, wheelVels, delta_time)
+                    denv.set_env_params(robot_speed, cur_pos, cur_angle, state, last_action, wheelVels, delta_time)
                     denv.step(self.actions[action])
 
                     dream_position = denv.cur_pos
@@ -98,15 +101,15 @@ class PurePursuitExpert:
         wheelVels = copy.deepcopy(dream_env.wheelVels),
         delta_time = copy.deepcopy(dream_env.delta_time)
 
+        # predict 3 steps ahead
         rollout = self.predict_rollout_head(3, dream_env)
 
-        dream_env.reset_rollout(robot_speed, cur_pos, cur_angle, state[0], last_action, wheelVels, delta_time)
+        dream_env.set_env_params(robot_speed, cur_pos, cur_angle, state[0], last_action, wheelVels, delta_time)
 
         tree_x = []
         tree_y = []
         min_dist = MIN
-        min_pair = MIN
-        min_angle = MIN
+        min_loss = MIN
         best_node = None
         for node in rollout.nodes:
             # if it's it's not the root
@@ -134,21 +137,19 @@ class PurePursuitExpert:
                 dot_dir is:
                     +1: perfectly aligned looking ahead 
                     -1: perfectly aligned looking back
-                     0: angle_deg=90 
+                     0: angle_deg=90  
                 """
-                # angle_line = lane.dot.dir
-                angle_line = abs(lane.angle_deg)
-                if angle_line < min_angle:
-                    min_angle = angle_line
+                lane = dream_env.get_lane_pos2(position, angle)
+                angle_line = lane.dot_dir
 
                 # prefer nodes with FULL_SPEED sequence
                 if rollout.nodes[node]['action_sequence'] == 0:
                     aug_rew = 0.8
 
                 # the node that has the min LOSS = (LOSS-1 + LOSS-2) is the best node
-                loss = (min_dist + min_angle) * aug_rew
-                if loss < min_pair:
-                    min_pair = loss
+                loss = min_dist * aug_rew * -angle_line
+                if loss < min_loss:
+                    min_loss = loss
                     best_node = node
 
         # best_node_pos = rollout.nodes[best_node]['position']
@@ -165,5 +166,4 @@ class PurePursuitExpert:
             action = np.random.randint(0, self.actions.shape[0])
             next_action = self.actions[action]
 
-        # print(next_action)
         return next_action

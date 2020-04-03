@@ -627,7 +627,7 @@ class Simulator(gym.Env):
         # Return first observation
         return obs
 
-    def reset_rollout(self, robot_speed, cur_pos, cur_angle, state, last_action, wheelVels, delta_time):
+    def set_env_params(self, robot_speed, cur_pos, cur_angle, state, last_action, wheelVels, delta_time):
         """
         @simone
         Set the simulation at the start of new rollout
@@ -642,13 +642,13 @@ class Simulator(gym.Env):
         self.wheelVels = wheelVels
         self.delta_time = delta_time
 
-        logger.info('Starting at %s %s' % (self.cur_pos, self.cur_angle))
+        # logger.info('Starting at %s %s' % (self.cur_pos, self.cur_angle))
 
         # Generate the first camera image
-        obs = self.render_obs()
+        # obs = self.render_obs()
 
         # Return first observation
-        return obs
+        # return obs
 
     def _load_map(self, map_name):
         """
