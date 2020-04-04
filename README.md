@@ -7,11 +7,9 @@
 
 ## Imitation Learning for challenge [`aido_LF`][lf]
 
-This is a baseline for the challenge **LF** in the [the AI Driving Olympics](http://aido.duckietown.org/).
+This is the code for the challenge **LF** in the [the AI Driving Olympics](http://aido.duckietown.org/).
 
 ## Description
-
-This is a solution using Imitation Learning.
 
 :construction_worker:
 **Work in progress...**
