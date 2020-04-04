@@ -1,6 +1,4 @@
 # duckietown_aido4_Imitation_Learning
- 
-# AI Driving Olympics
 
 <a href="http://aido.duckietown.org"><img width="200" src="https://www.duckietown.org/wp-content/uploads/2018/12/AIDO_no_text-e1544555660271.png"/></a>
 
