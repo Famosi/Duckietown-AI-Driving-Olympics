@@ -17,8 +17,8 @@ class PurePursuitExpert:
             [1., 0.4],
             # [0.6, 1.],
             # [1., 0.6]
-            [0.8, 1.],
-            [1., 0.8]
+            # [0.8, 1.],
+            # [1., 0.8]
         ])
 
     def predict_rollout_head(self, n, env):
@@ -153,8 +153,8 @@ class PurePursuitExpert:
 
                 # prefer nodes with FULL_SPEED when in straight tile
                 if rollout.nodes[node]["action_sequence"][0] == 0:
-                    if not tile_kind.startswith("curve"):
-                        aug_rew = 0.8
+                    if not tile_kind.startswith("curve") and lane.dot_dir >= 0.99:
+                        aug_rew = 0.5
 
                 # the node that has the min LOSS = (LOSS-1 + LOSS-2) is the best node
                 loss = (dist_lane + angle_lane) * aug_rew

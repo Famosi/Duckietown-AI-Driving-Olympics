@@ -25,6 +25,8 @@ right_velocity = np.array([])
 positions_x = np.array([])
 positions_y = np.array([])
 
+actions = np.array([])
+
 with open('./tracks/track_' + str(1439) + '.pkl', "rb") as pickle_file:
     df = pickle.load(pickle_file)
     line = [tuple(r) for r in df.to_numpy().tolist()]
@@ -37,7 +39,7 @@ for point in line:
 
 track = [xs, ys]
 
-STEPS = 100
+STEPS = 50
 EPISODES = 1
 
 DEBUG = True
@@ -55,6 +57,8 @@ for episode in range(0, EPISODES):
 
         print("NEXT ACTION:", action)
         observation, reward, done, info = env.step(action)
+
+        actions = np.append(actions, action)
 
         positions_x = np.append(positions_x, env.cur_pos[0])
         positions_y = np.append(positions_y, env.cur_pos[2])
@@ -97,6 +101,7 @@ for episode in range(0, EPISODES):
 env.close()
 
 print("TOTAL REWARD:", rewards)
+
 
 # plt.plot(left_velocity, label="left")
 # plt.plot(right_velocity, label="right")
