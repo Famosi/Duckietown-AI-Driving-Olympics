@@ -10,11 +10,6 @@ import json
 import pickle
 import time
 
-STEPS = 200
-EPISODES = 1
-
-DEBUG = False
-
 env = launch_env()
 
 # To convert to wheel velocities
@@ -23,10 +18,9 @@ expert = PurePursuitExpert(env=env)
 
 # logger = Logger(env, log_file='train-new-controller.log')
 reward_acc = np.array([])
-reward_challenge_acc = np.array([])
+
 left_velocity = np.array([])
 right_velocity = np.array([])
-pos_curve_dist = np.array([])
 
 positions_x = np.array([])
 positions_y = np.array([])
@@ -43,42 +37,27 @@ for point in line:
 
 track = [xs, ys]
 
-# # Calculate reset() time
-# start_time = time.time()
-# for _ in range(11):
-#     env.reset()
-# elapsed_time = time.time() - start_time
-# elapsed_time = time.strftime("%H:%M:%S", time.gmtime(elapsed_time))
-# print("RESET TIME", elapsed_time)
+STEPS = 100
+EPISODES = 1
+
+DEBUG = True
+
 rewards = 0
 # let's collect our samples
 for episode in range(0, EPISODES):
     for step in range(0, STEPS):
-
-        start_time = time.time()
-
         # we use our 'expert' to predict the next action.
         # action = expert.predict(step, env)
         action = expert.dream_forward(env, track)
-
-        elapsed_time = time.time() - start_time
-        print(time.strftime("%H:%M:%S", time.gmtime(elapsed_time)))
-
-        # lane_pose = env.get_lane_pos2(env.cur_pos, env.cur_angle)
-
-        # Convert to wheel velocities
-        # action = wrapper.convert(action)
 
         left_velocity = np.append(left_velocity, action[0])
         right_velocity = np.append(right_velocity, action[1])
 
         print("NEXT ACTION:", action)
         observation, reward, done, info = env.step(action)
-        np.append(positions_x, env.cur_pos[0])
-        np.append(positions_y, env.cur_pos[2])
 
-        # positions_x = np.append(positions_x, env.cur_pos[0])
-        # positions_y = np.append(positions_y, env.cur_pos[2])
+        positions_x = np.append(positions_x, env.cur_pos[0])
+        positions_y = np.append(positions_y, env.cur_pos[2])
 
         reward_acc = np.append(reward_acc, reward)
         rewards += reward
@@ -122,20 +101,20 @@ print("TOTAL REWARD:", rewards)
 # plt.plot(left_velocity, label="left")
 # plt.plot(right_velocity, label="right")
 try:
-    plt.subplot(3, 1, 1)
-    plt.plot(reward_acc, color='red')
-    plt.title("Reward")
+    # plt.subplot(3, 1, 1)
+    # plt.plot(reward_acc, color='red')
+    # plt.title("Reward")
 
-    plt.subplot(3, 1, 2)
+    plt.subplot(1, 1, 1)
     plt.plot(left_velocity, color="green")
     plt.plot(right_velocity, color="orange")
     plt.legend()
     plt.title("L(g)/R(o) Vel")
 
-    plt.subplot(3, 1, 3)
-    plt.scatter(track[0], track[1], color="black", s=1)
-    plt.scatter(positions_x, positions_y, color="green", s=3)
-    plt.title("Positions on TRACK")
+    # plt.subplot(2, 1, 2)
+    # plt.scatter(track[0], track[1], color="black", s=2)
+    # plt.scatter(positions_x, positions_y, color="green", s=5)
+    # plt.title("Positions on TRACK")
 
     plt.show()
 except Exception:
