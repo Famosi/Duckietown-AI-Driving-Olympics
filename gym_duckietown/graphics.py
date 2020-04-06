@@ -460,4 +460,181 @@ def get_linear_bezier(cps, t):
     p += t * cps[1, :]
     return p
 
+def rotate_translate(dir_vec, points, new_center):
+    """
+    Transformation and Rotation between two 2D coordinate frames
+    :param new_center: new origin's coordinate in old frame
+    :param dir_vec: directory vector
+    :param points: The points to be transformed
+    :return: The transformed points
+    """
+    import math
+    # Get dir_vec to calculate angle
+    x_dir, _, y_dir = dir_vec
+    # Get the angle in (-180, 180)
+    x1, y1 = 0, 1
+    x2, y2 = x_dir, y_dir
+    dot = x1 * x2 + y1 * y2  # dot product
+    det = x1 * y2 - y1 * x2  # determinant
+    angle = math.atan2(det, dot)  # atan2(y, x) or atan2(sin, cos)
+    theta = -np.rad2deg(angle)
+    sin_theta = np.sin(np.deg2rad(theta))
+    cos_theta = np.cos(np.deg2rad(theta))
+    # Rotation Matrix
+    x_ = cos_theta * new_center[0] - sin_theta * new_center[2]
+    y_ = sin_theta * new_center[0] + cos_theta * new_center[2]
+    x_trans = -x_
+    y_trans = -y_
 
+    new_points = np.zeros((len(points), 3))
+    for idx, i in enumerate(points):
+        # Rotation and Translation
+        new_points[idx][0] = cos_theta * points[idx][0] - sin_theta * points[idx][2] + x_trans
+        new_points[idx][2] = sin_theta * points[idx][0] + cos_theta * points[idx][2] + y_trans
+
+    return new_points
+
+
+def compute_dist(cps, points, dir_vec, n=12, debug=False, red=False):
+
+    # Sample points from dir_line
+    pts = [get_linear_bezier(cps, t) for t in np.linspace(0, 1, n)]
+    # (y2-y1)/(x2-x1) -> slope of dir_line
+    slope = (cps[0][2] - cps[1][2]) / (cps[0][0] - cps[1][0])
+    # store features
+    features = np.zeros((len(pts), 2))
+    DIST_NOT_INTERSECT = 0
+    # For each point, draw the perpendicular line
+    for i, p in enumerate(pts):
+
+        # TODO:Transform points
+        transformed_points = rotate_translate(dir_vec, points[:50], p)
+        # TODO:Find 2 closest points to y=0
+        y = transformed_points[:, 2]
+        y_pos = y[y > 0]
+        y_neg = y[y < 0]
+
+        # This means there's no intersection
+        if len(y_pos) == 0 or len(y_neg) == 0:
+            # For top 3 points, look for points in next_tile
+            if i < (n/2):
+                # TODO:Transform points
+                transformed_points = rotate_translate(dir_vec, points[50:100], p)
+            # For below 3 points, look for points in prev_tile
+            else:
+                # TODO:Transform points
+                transformed_points = rotate_translate(dir_vec, points[100:], p)
+
+            # TODO:Find 2 closest points to y=0
+            y = transformed_points[:, 2]
+            y_pos = y[y > 0]
+            y_neg = y[y < 0]
+            if len(y_pos) == 0 or len(y_neg) == 0:
+
+                # TODO: ************ CHANGE THIS PART ************
+                # For top 3 points, look for points in next_tile
+                if i > (n/2):
+                    # TODO:Transform points
+                    transformed_points = rotate_translate(dir_vec, points[50:100], p)
+                # For below 3 points, look for points in prev_tile
+                else:
+                    # TODO:Transform points
+                    transformed_points = rotate_translate(dir_vec, points[100:], p)
+                # TODO:Find 2 closest points to y=0
+                y = transformed_points[:, 2]
+                y_pos = y[y > 0]
+                y_neg = y[y < 0]
+                if len(y_pos) == 0 or len(y_neg) == 0:
+                # TODO: ************ CHANGE THIS PART ************
+
+
+                    features[i] = [0, DIST_NOT_INTERSECT]
+                    continue
+
+        p1_idx = np.where(y == np.max(y_neg))[0][0]
+        p2_idx = np.where(y == np.min(y_pos))[0][0]
+
+        p1 = transformed_points[p1_idx]
+        p2 = transformed_points[p2_idx]
+
+        # TODO:Find intersection between that line & y=0
+        # Get the slope of the line that connects p1 & p2
+        slope_2 = (p1[2] - p2[2]) / (p1[0] - p2[0])
+        # Get the line equation
+        k2 = p1[2] - slope_2 * p1[0]
+        # Get the intersection
+        x_intersection = -k2 / slope_2
+        # TODO:Compute distance between intersection point to origin
+        dist = np.linalg.norm(x_intersection)
+        # Check where intersection is, right or left side of center line
+        # Left --> -dist,   Right --> dist
+        if x_intersection < 0:
+            dist *= -1
+
+        # TODO: Draw line from origin to x_intersect
+        # Origin in old-frame
+        start = p
+        # Inverse rotate x_intersect to get old-frame coords.
+        end = inverse_rotate_translate(dir_vec, [x_intersection, 0, 0], p)
+        # Draw line from origin the x_intersect
+        bezier_draw_line(np.vstack((start, end)))
+
+        # TODO:Draw it (DEBUG)
+        if debug:
+            # Draw intersection point
+            # from pyglet import gl
+            # gl.glPointSize(4)
+            # gl.glBegin(gl.GL_POINTS)
+            # gl.glColor3f(1, 1, 1)
+            # gl.glVertex3f(end[0], 0.1, end[2])
+            # gl.glEnd()
+
+            # Draw x-axis
+            # k = y + x/slope --> equation of each sensing(perp.) line
+            k = p[2] + p[0] / slope
+            # Sample one point from that line to find the unit vector
+            p_1 = np.array([0, 0.01, k])
+            # get unit dir_vec of perpendicular line
+            x_, _, y_ = (p_1 - p)
+            norm = np.linalg.norm([x_, y_])
+            x_ /= norm
+            y_ /= norm
+            # Get 2 points from uni dir_vec for drawing
+            dir_start = [p[0] + 0.2 * x_, 0.01, p[2] + 0.2 * y_]
+            dir_end = [p[0] - 0.2 * x_, 0.01, p[2] - 0.2 * y_]
+            # bezier_draw_line(np.vstack((dir_start, dir_end)))
+
+        features[i] = [1, dist]
+    return features
+
+def inverse_rotate_translate(dir_vec, point, new_center):
+    """
+    Inverse Transformation and Rotation between two 2D coordinate frames
+    :param new_center: new origin's coordinate in old frame
+    :param dir_vec: directory vector
+    :param point: The point to be inverse transformed
+    :return: The transformed point
+    """
+    import math
+    x_dir, _, y_dir = dir_vec
+
+    x1, y1 = 0, 1
+    x2, y2 = x_dir, y_dir
+    dot = x1 * x2 + y1 * y2  # dot product
+    det = x1 * y2 - y1 * x2  # determinant
+    angle = math.atan2(det, dot)  # atan2(y, x) or atan2(sin, cos)
+    theta = -np.rad2deg(angle)
+
+    sin_theta = np.sin(np.deg2rad(theta))
+    cos_theta = np.cos(np.deg2rad(theta))
+
+    x_ = cos_theta * new_center[0] - sin_theta * new_center[2]
+    y_ = sin_theta * new_center[0] + cos_theta * new_center[2]
+    x_trans = -x_
+    y_trans = -y_
+
+    new_point = [0, 0, 0]
+    new_point[2] = cos_theta * (point[2]-y_trans) - sin_theta * (point[0] - x_trans)
+    new_point[0] = (point[0] - x_trans + sin_theta * new_point[2]) / cos_theta
+
+    return new_point

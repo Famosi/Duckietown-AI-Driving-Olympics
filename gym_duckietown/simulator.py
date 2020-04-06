@@ -1461,7 +1461,54 @@ class Simulator(gym.Env):
         gz = grid_height * tile_size - cp[1]
         return [gx, gy, gz], angle
 
-    def compute_reward(self, pos, angle, speed):
+    def dist_centerline_curve(self, position, angle):
+        """
+        Calculate the distance between the middle sensor line(center of robot actually) and the projected point
+        on the curve.
+        """
+        DIST_NOT_INTERSECT = 50
+        # Get directory line
+        cps = get_dir_line(angle, position)
+        # Get the center point of directory line
+        cps_center = (cps[0] + cps[1]) / 2
+        # Get directory vector
+        dir_vec = get_dir_vec(angle)
+
+        i, j = self.get_grid_coords(position)
+        curves = self._get_tile(i, j)['curves']
+        curve_headings = curves[:, -1, :] - curves[:, 0, :]
+        curve_headings = curve_headings / np.linalg.norm(curve_headings).reshape(1, -1)
+        dot_prods = np.dot(curve_headings, get_dir_vec(angle))
+        # Curve points: 1->right, 0->left w.r.t car's perspective
+        ii = np.argmax(dot_prods)
+
+        # draw points on the upcoming tile
+        tile_coords = get_tiles(self.map_name)
+        idx = tile_coords.index((i, j))
+        # if we're at the end of the list return to beginning
+        i, j = tile_coords[0] if len(tile_coords) - 1 == idx else tile_coords[idx + 1]
+        curves_next = self._get_tile(i, j)['curves']
+
+        # draw points on the previous tile
+        i, j = tile_coords[idx - 1]
+        curves_prev = self._get_tile(i, j)['curves']
+
+        # Get bezier points on 3 tiles(current, prev, next) and compute dist
+        n = 50
+        pts = np.vstack((
+            [bezier_point(curves[ii], i / (n - 1)) for i in range(0, n)],
+            [bezier_point(curves_next[ii], i / (n - 1)) for i in range(0, n)],
+            [bezier_point(curves_prev[ii], i / (n - 1)) for i in range(0, n)]))
+
+        # Calculate feature: whether there's an intersection & if so, the distance
+        is_true, dist = compute_dist(np.vstack((cps_center, cps[1])), pts, dir_vec, n=1, red=True)[0]
+
+        if is_true:
+            return abs(dist)
+        else:
+            return DIST_NOT_INTERSECT
+
+    def compute_reward(self, pos, angle, speed, wheelVels):
         # Compute the collision avoidance penalty
         col_penalty = self.proximity_penalty2(pos, angle)
 
@@ -1472,18 +1519,21 @@ class Simulator(gym.Env):
             reward = 40 * col_penalty
             reward_challenge = 40 * col_penalty
         else:
-            #@simone
-            #Compute the reward
+            # @simone
+            # Compute the reward
             reward = (
-                    +1.0 * speed * lp.dot_dir +
+                    +2.0 * sum(wheelVels) +
                     -10 * np.abs(lp.dist) +
                     +40 * col_penalty
             )
 
             # reward = (
-            #     self.sum
+            #     # self.wheelVels[0] + self.wheelVels[1]  -_> instead of self.speed
+            #     # Give more reward if moving with speed
+            #     +2.0 * (self.wheelVels[0] + self.wheelVels[1]) +
+            #     # Penalize if it's far away from center line: calculate distance from the middle-sensor line
+            #     -10 * self.dist_centerline_curve()
             # )
-            #@simone
         return reward
 
     def step(self, action: np.ndarray):
@@ -1508,7 +1558,6 @@ class Simulator(gym.Env):
             msg = 'Stopping the simulator because we are at an invalid pose.'
             logger.info(msg)
             reward = REWARD_INVALID_POSE
-            reward_challenge = REWARD_INVALID_POSE
             done_code = 'invalid-pose'
             done = True
         # If the maximum time step count is reached
@@ -1517,14 +1566,14 @@ class Simulator(gym.Env):
             logger.info(msg)
             done = True
             reward = 0
-            reward_challenge = 0
             done_code = 'max-steps-reached'
         else:
             done = False
-            reward = self.compute_reward(self.cur_pos, self.cur_angle, self.robot_speed)
+            reward = self.compute_reward(self.cur_pos, self.cur_angle, self.robot_speed, self.wheelVels)
             msg = ''
             done_code = 'in-progress'
         return DoneRewardInfo(done=done, done_why=msg, reward=reward, done_code=done_code)
+
 
     def _render_img(self, width, height, multi_fbo,
                     final_fbo, img_array, top_down=True):
@@ -2017,3 +2066,5 @@ def get_tiles(env_name):
         "small_loop_cw": small_loop_cw}
 
     return tiles[env_name]
+
+
