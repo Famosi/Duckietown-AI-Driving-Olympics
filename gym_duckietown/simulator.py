@@ -1523,7 +1523,7 @@ class Simulator(gym.Env):
             # Compute the reward
             reward = (
                     +2.0 * sum(wheelVels) +
-                    -10 * np.abs(lp.dist) +
+                    -10 * self.dist_centerline_curve(pos, angle) +
                     +40 * col_penalty
             )
 
@@ -1551,6 +1551,13 @@ class Simulator(gym.Env):
         misc['Simulator']['msg'] = d.done_why
 
         return obs, d.reward, d.done, misc
+
+    def step_rollout(self, action: np.ndarray):
+        action = np.clip(action, -1, 1)
+        # Actions could be a Python list
+        action = np.array(action)
+        for _ in range(self.frame_skip):
+            self.update_physics(action)
 
     def _compute_done_reward(self) -> DoneRewardInfo:
         # If the agent is not in a valid pose (on drivable tiles)

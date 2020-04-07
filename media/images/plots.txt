@@ -1,1 +1,1 @@
-plot_[#step]_[#actions].png
+plot_[#step]_[#actions]_[rew].png
