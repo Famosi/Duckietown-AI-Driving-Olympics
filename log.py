@@ -39,7 +39,7 @@ for point in line:
 
 track = [xs, ys]
 
-STEPS = 50
+STEPS = 200
 EPISODES = 1
 
 DEBUG = True
@@ -95,7 +95,7 @@ for episode in range(0, EPISODES):
         # we log here
 
     # logger.on_episode_done()  # speed up logging by flushing the file
-    env.reset()
+    # env.reset()
 
 # logger.close()
 env.close()
@@ -106,11 +106,11 @@ print("TOTAL REWARD:", rewards)
 # plt.plot(left_velocity, label="left")
 # plt.plot(right_velocity, label="right")
 try:
-    # plt.subplot(3, 1, 1)
-    # plt.plot(reward_acc, color='red')
-    # plt.title("Reward")
+    plt.subplot(2, 1, 1)
+    plt.plot(reward_acc, color='red')
+    plt.title("Reward")
 
-    plt.subplot(1, 1, 1)
+    plt.subplot(2, 1, 2)
     plt.plot(left_velocity, color="green")
     plt.plot(right_velocity, color="orange")
     plt.legend()

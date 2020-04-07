@@ -4,7 +4,7 @@ from gym_duckietown.simulator import Simulator
 def launch_env():
     env = Simulator(
         seed=123,  # random seed
-        map_name="udem1",
+        map_name="zigzag_dists",
         max_steps=500001,  # we don't want the gym to reset itself
         domain_rand=True,
         camera_width=640,
@@ -12,9 +12,9 @@ def launch_env():
         draw_curve=True,
         frame_skip=5,
         frame_rate=30,
-        accept_start_angle_deg=1,  # @simone start close to straight
+        accept_start_angle_deg=4,  # @simone start close to straight
         full_transparency=True,
-        distortion=True,
+        distortion=False,
         randomize_maps_on_reset=False
     )
 
