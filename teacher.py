@@ -13,8 +13,8 @@ class PurePursuitExpert:
         self.env = env.unwrapped
         self.actions = np.array([
             [1., 1.],
-            [0.95, 1.],
-            [1., 0.95],
+            [0.9, 1.],
+            [1., 0.9],
             [-1., 1.],
             [1., -1.]
         ])
@@ -111,17 +111,6 @@ class PurePursuitExpert:
 
         dream_env.set_env_params(robot_speed, cur_pos, cur_angle, state[0], last_action, wheelVels, delta_time, step_count)
 
-        # cur_tile = dream_env.get_tile()[1]
-        # cur_tile_kind = dream_env._get_tile(cur_tile[0], cur_tile[1])['kind']
-
-        # try:
-        #     lane = self.env.get_lane_pos2(cur_pos, cur_angle)
-        #     dot_dir = np.abs(lane.dot_dir)
-        # except NotInLane:
-        #     dot_dir = 0
-
-        tree_x = []
-        tree_y = []
         min_loss = MIN
         best_node = None
         for node in rollout.nodes:

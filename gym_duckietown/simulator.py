@@ -1516,7 +1516,7 @@ class Simulator(gym.Env):
             # Compute the reward
             reward = (
                     +2.0 * sum(wheelVels) +
-                    -10 * self.dist_centerline_curve(pos, angle) +
+                    -10 * abs(lp.dist) +
                     +40 * col_penalty
             )
 
