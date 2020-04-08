@@ -336,55 +336,6 @@ class Simulator(gym.Env):
         self.last_action = np.array([0, 0])
         self.wheelVels = np.array([0, 0])
 
-    def __copy__(self):
-        return type(self)(
-            self.map_name,
-            self.max_steps,
-            self.draw_curve,
-            self.draw_bbox,
-            self.domain_rand,
-            self.frame_rate,
-            self.frame_skip,
-            self.camera_width,
-            self.camera_height,
-            self.robot_speed,
-            self.accept_start_angle_deg,
-            self.full_transparency,
-            self.user_tile_start,
-            self.seed,
-            self.distortion,
-            self.dynamics_rand,
-            self.camera_rand,
-            self.randomize_maps_on_reset,
-        )
-
-    def __deepcopy__(self, memo):  # memo is a dict of id's to copies
-        id_self = id(self)  # memoization avoids v recursion
-        _copy = memo.get(id_self)
-        if _copy is None:
-            _copy = type(self)(
-                deepcopy(self.map_name, memo),
-                deepcopy(self.max_steps, memo),
-                deepcopy(self.draw_curve, memo),
-                deepcopy(self.draw_bbox, memo),
-                deepcopy(self.domain_rand, memo),
-                deepcopy(self.frame_rate, memo),
-                deepcopy(self.frame_skip, memo),
-                deepcopy(self.camera_width, memo),
-                deepcopy(self.camera_height, memo),
-                deepcopy(self.robot_speed, memo),
-                deepcopy(self.accept_start_angle_deg, memo),
-                deepcopy(self.full_transparency, memo),
-                deepcopy(self.user_tile_start, memo),
-                deepcopy(self.seed, memo),
-                deepcopy(self.distortion, memo),
-                deepcopy(self.dynamics_rand, memo),
-                deepcopy(self.camera_rand, memo),
-                deepcopy(self.randomize_maps_on_reset, memo)
-            )
-            memo[id_self] = _copy
-        return _copy
-
     def _init_vlists(self):
         import pyglet
         # Create the vertex list for our road quad
@@ -627,7 +578,7 @@ class Simulator(gym.Env):
         # Return first observation
         return obs
 
-    def set_env_params(self, robot_speed, cur_pos, cur_angle, state, last_action, wheelVels, delta_time):
+    def set_env_params(self, robot_speed, cur_pos, cur_angle, state, last_action, wheelVels, delta_time, step_count):
         """
         @simone
         Set the simulation at the start of new rollout
@@ -641,14 +592,9 @@ class Simulator(gym.Env):
         self.last_action = last_action
         self.wheelVels = wheelVels
         self.delta_time = delta_time
+        self.step_count = step_count
 
-        # logger.info('Starting at %s %s' % (self.cur_pos, self.cur_angle))
 
-        # Generate the first camera image
-        # obs = self.render_obs()
-
-        # Return first observation
-        # return obs
 
     def _load_map(self, map_name):
         """
@@ -1248,6 +1194,21 @@ class Simulator(gym.Env):
 
         return True
 
+    def drivable_pos_rollout(self, pos):
+        """
+        Check that the given (x,y,z) position is on a drivable tile
+        """
+
+        coords = self.get_grid_coords(pos)
+        tile = self._get_tile(*coords)
+        if tile is None:
+            return False
+
+        if not tile['drivable']:
+            return False
+
+        return True
+
     def proximity_penalty2(self, pos, angle):
         """
         Calculates a 'safe driving penalty' (used as negative rew.)
@@ -1359,6 +1320,38 @@ class Simulator(gym.Env):
             logger.debug(f'l_pos: {l_pos}')
             logger.debug(f'r_pos: {r_pos}')
             logger.debug(f'f_pos: {f_pos}')
+
+        return res
+
+    def valid_pose_rollout(self, pos, angle, safety_factor=1.0):
+        """
+            Check that the agent is in a valid pose
+
+            safety_factor = minimum distance
+        """
+
+        # Compute the coordinates of the base of both wheels
+        pos = _actual_center(pos, angle)
+        f_vec = get_dir_vec(angle)
+        r_vec = get_right_vec(angle)
+
+        l_pos = pos - (safety_factor * 0.5 * ROBOT_WIDTH) * r_vec
+        r_pos = pos + (safety_factor * 0.5 * ROBOT_WIDTH) * r_vec
+        f_pos = pos + (safety_factor * 0.5 * ROBOT_LENGTH) * f_vec
+
+        # Check that the center position and
+        # both wheels are on drivable tiles and no collisions
+
+        all_drivable = (self.drivable_pos_rollout(pos) and
+                        self.drivable_pos_rollout(l_pos) and
+                        self.drivable_pos_rollout(r_pos) and
+                        self.drivable_pos_rollout(f_pos))
+
+        # Recompute the bounding boxes (BB) for the agent
+        agent_corners = get_agent_corners(pos, angle)
+        no_collision = not self._collision(agent_corners)
+
+        res = (no_collision and all_drivable)
 
         return res
 

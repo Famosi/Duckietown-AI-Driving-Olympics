@@ -13,10 +13,10 @@ class PurePursuitExpert:
         self.env = env.unwrapped
         self.actions = np.array([
             [1., 1.],
-            [0.45, 1.],
             [0.9, 1.],
             [1., 0.9],
-            [1., 0.45]
+            [-1., 1.],
+            [1., -1.],
         ])
 
     def predict_rollout_head(self, n, env):
@@ -36,7 +36,8 @@ class PurePursuitExpert:
             copy.deepcopy(env.state),
             copy.deepcopy(env.last_action),
             copy.deepcopy(env.wheelVels),
-            copy.deepcopy(env.delta_time)
+            copy.deepcopy(env.delta_time),
+            copy.deepcopy(env.step_count)
         )
         next_parents = []
         rollout = nx.DiGraph()
@@ -45,10 +46,10 @@ class PurePursuitExpert:
                          node_sequence=[nodes[0]])
         nodes.pop(0)
 
-        def __helper__(nodes, current_parent, next_parents, rollout, denv, robot_speed, cur_pos, cur_angle, state, last_action, wheelVels, delta_time):
+        def __helper__(nodes, current_parent, next_parents, rollout, denv, robot_speed, cur_pos, cur_angle, state, last_action, wheelVels, delta_time, step_count):
             if nodes:
                 for action in range (self.actions.shape[0]):
-                    denv.set_env_params(robot_speed, cur_pos, cur_angle, state, last_action, wheelVels, delta_time)
+                    denv.set_env_params(robot_speed, cur_pos, cur_angle, state, last_action, wheelVels, delta_time, step_count)
                     denv.step_rollout(self.actions[action])
 
                     dream_position = denv.cur_pos
@@ -66,7 +67,8 @@ class PurePursuitExpert:
                             copy.deepcopy(denv.state),
                             copy.deepcopy(denv.last_action),
                             copy.deepcopy(denv.wheelVels),
-                            copy.deepcopy(denv.delta_time)
+                            copy.deepcopy(denv.delta_time),
+                            copy.deepcopy(env.step_count)
                         )
                     )
 
@@ -83,14 +85,14 @@ class PurePursuitExpert:
                 current_parent = next_parents.pop(0)
 
                 if current_parent:
-                    return __helper__(nodes, current_parent, next_parents, rollout, current_parent[1], current_parent[2], current_parent[3], current_parent[4], current_parent[5], current_parent[6], current_parent[7], current_parent[8])
+                    return __helper__(nodes, current_parent, next_parents, rollout, current_parent[1], current_parent[2], current_parent[3], current_parent[4], current_parent[5], current_parent[6], current_parent[7], current_parent[8], current_parent[9])
                 else:
                     return rollout
             else:
                 return rollout
 
         if current_parent:
-            return __helper__(nodes, current_parent, next_parents, rollout, current_parent[1], current_parent[2], current_parent[3], current_parent[4], current_parent[5], current_parent[6], current_parent[7], current_parent[8])
+            return __helper__(nodes, current_parent, next_parents, rollout, current_parent[1], current_parent[2], current_parent[3], current_parent[4], current_parent[5], current_parent[6], current_parent[7], current_parent[8], current_parent[9])
 
         return rollout
 
@@ -102,14 +104,21 @@ class PurePursuitExpert:
         last_action = copy.deepcopy(dream_env.last_action),
         wheelVels = copy.deepcopy(dream_env.wheelVels),
         delta_time = copy.deepcopy(dream_env.delta_time)
+        step_count = copy.deepcopy(dream_env.step_count)
 
         # predict 3 steps ahead
         rollout = self.predict_rollout_head(3, dream_env)
 
-        dream_env.set_env_params(robot_speed, cur_pos, cur_angle, state[0], last_action, wheelVels, delta_time)
+        dream_env.set_env_params(robot_speed, cur_pos, cur_angle, state[0], last_action, wheelVels, delta_time, step_count)
 
-        cur_tile = dream_env.get_tile()[1]
-        tile_kind = dream_env._get_tile(cur_tile[0], cur_tile[1])['kind']
+        # cur_tile = dream_env.get_tile()[1]
+        # cur_tile_kind = dream_env._get_tile(cur_tile[0], cur_tile[1])['kind']
+
+        # try:
+        #     lane = self.env.get_lane_pos2(cur_pos, cur_angle)
+        #     dot_dir = np.abs(lane.dot_dir)
+        # except NotInLane:
+        #     dot_dir = 0
 
         tree_x = []
         tree_y = []
@@ -120,7 +129,6 @@ class PurePursuitExpert:
             if node > 1:
                 position = rollout.nodes[node]['position']
                 angle = rollout.nodes[node]['angle']
-                aug_rew = 1.
 
                 try:
                     lane = self.env.get_lane_pos2(position, angle)
@@ -128,19 +136,28 @@ class PurePursuitExpert:
                     break
 
                 # LOSS-1: distance to the center of the lane
-                dist_lane = dream_env.dist_centerline_curve(position, angle)
+                # dist_lane = dream_env.dist_centerline_curve(position, angle)
+                dist_lane = np.abs(lane.dist)
 
                 # LOSS-2: the direction of the agent in relation to the (direction of the) lane
-                angle_lane = np.abs(lane.angle_deg)
+                angle_deg = np.abs(lane.angle_deg)
 
-                # Prefer full_speed node:
-                if rollout.nodes[node]['action_sequence'][-1] == 0 \
-                        and lane.dot_dir > 0.99 \
-                        and tile_kind.startswith("straight"):
-                    aug_rew = 0.8
+                # Calculate LOSS
+                action = rollout.nodes[node]['action_sequence'][-1]
+                speed = sum(self.actions[action])
 
-                # the node that has the min LOSS = (LOSS-1 + LOSS-2) is the best node
-                loss = (dist_lane + angle_lane) * aug_rew
+                if not dream_env.valid_pose_rollout(position, angle):
+                    not_derivable = MIN
+                else:
+                    not_derivable = 0
+
+                loss = (
+                        -2 * speed +
+                        +0.1 * angle_deg +
+                        +10 * dist_lane +
+                        +1. * not_derivable
+                )
+
                 if loss < min_loss:
                     min_loss = loss
                     best_node = node
@@ -153,3 +170,4 @@ class PurePursuitExpert:
             next_action = self.actions[action]
 
         return next_action
+

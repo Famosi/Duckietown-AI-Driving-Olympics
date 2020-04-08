@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 import json
 import pickle
 import time
+from sklearn.preprocessing import MinMaxScaler
 
 env = launch_env()
 
@@ -26,6 +27,8 @@ positions_x = np.array([])
 positions_y = np.array([])
 
 actions = np.array([])
+
+dot_dirs = np.array([])
 
 with open('./tracks/track_' + str(1439) + '.pkl', "rb") as pickle_file:
     df = pickle.load(pickle_file)
@@ -66,17 +69,18 @@ for episode in range(0, EPISODES):
         reward_acc = np.append(reward_acc, reward)
         rewards += reward
 
+        # try:
+        #     lane = env.get_lane_pos2(env.cur_pos, env.cur_angle)
+        #     dot_dirs = np.append(dot_dirs, np.abs(lane.dot_dir))
+        # except Exception as e:
+        #     print(e)
+        #     break
+
         closest_point, _ = env.closest_curve_point(env.cur_pos, env.cur_angle)
 
         if closest_point is None:
             done = True
             break
-
-        # calculate distance between agent and closest point
-        # a = np.array(closest_point)
-        # b = np.array(env.cur_pos)
-        # dist = np.linalg.norm(a - b)
-        # pos_curve_dist = np.append(pos_curve_dist, dist)
 
         # we can resize the image here
         observation = cv2.resize(observation, (80, 60))
@@ -102,18 +106,18 @@ env.close()
 
 print("TOTAL REWARD:", rewards)
 
-
+# scaler = MinMaxScaler()
+# dot_dirs = scaler.fit_transform(dot_dirs.reshape(-1, 1))
 # plt.plot(left_velocity, label="left")
 # plt.plot(right_velocity, label="right")
 try:
     plt.subplot(2, 1, 1)
     plt.plot(reward_acc, color='red')
-    plt.title("Reward")
+    plt.title("reward")
 
     plt.subplot(2, 1, 2)
     plt.plot(left_velocity, color="green")
     plt.plot(right_velocity, color="orange")
-    plt.legend()
     plt.title("L(g)/R(o) Vel")
 
     # plt.subplot(2, 1, 2)
