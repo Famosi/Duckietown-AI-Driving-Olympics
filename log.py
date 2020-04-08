@@ -42,8 +42,8 @@ for point in line:
 
 track = [xs, ys]
 
-STEPS = 200
-EPISODES = 1
+STEPS = 500
+EPISODES = 5
 
 DEBUG = True
 
