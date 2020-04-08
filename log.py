@@ -58,7 +58,6 @@ for episode in range(0, EPISODES):
         left_velocity = np.append(left_velocity, action[0])
         right_velocity = np.append(right_velocity, action[1])
 
-        print("NEXT ACTION:", action)
         observation, reward, done, info = env.step(action)
 
         actions = np.append(actions, action)
