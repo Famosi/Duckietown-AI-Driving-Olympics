@@ -13,10 +13,10 @@ class PurePursuitExpert:
         self.env = env.unwrapped
         self.actions = np.array([
             [1., 1.],
-            [0.9, 1.],
-            [1., 0.9],
+            [0.95, 1.],
+            [1., 0.95],
             [-1., 1.],
-            [1., -1.],
+            [1., -1.]
         ])
 
     def predict_rollout_head(self, n, env):
