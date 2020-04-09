@@ -500,8 +500,8 @@ class Simulator(gym.Env):
             logger.info('using map pose start: %s' % self.start_pose)
 
             i, j = tile['coords']
-            x = i * self.road_tile_size + self.start_pose[0][0]
-            z = j * self.road_tile_size + self.start_pose[0][2]
+            x = i * self.road_tile_size + self.start_pose[0][0][0]
+            z = j * self.road_tile_size + self.start_pose[0][2][0]
             propose_pos = np.array([x, 0, z])
             propose_angle = self.start_pose[1]
 
@@ -544,9 +544,10 @@ class Simulator(gym.Env):
                 except NotInLane:
                     continue
                 M = self.accept_start_angle_deg
-                ok = -M < lp.angle_deg < +M
+                ok = -M < lp.angle_deg < +M and abs(lp.dist) < 0.1
                 if not ok:
                     continue
+
                 # Found a valid initial pose
                 break
             else:
@@ -1557,7 +1558,7 @@ class Simulator(gym.Env):
         if not self._valid_pose(self.cur_pos, self.cur_angle):
             msg = 'Stopping the simulator because we are at an invalid pose.'
             logger.info(msg)
-            reward = REWARD_INVALID_POSE
+            reward = 0
             done_code = 'invalid-pose'
             done = True
         # If the maximum time step count is reached
@@ -1567,6 +1568,20 @@ class Simulator(gym.Env):
             done = True
             reward = 0
             done_code = 'max-steps-reached'
+        # @riza :If duckie is turning around, doing circular motion
+        elif abs(self.get_lane_pos2(self.cur_pos, self.cur_angle).angle_deg) > 100:
+            msg = 'Stopping the simulator because duckie is turning around!'
+            logger.info(msg)
+            done = True
+            reward = REWARD_INVALID_POSE
+            done_code = 'doing a circular action'
+        # @riza :If duckie is too far from center line (on the other lane, etc.)
+        elif abs(self.get_lane_pos2(self.cur_pos, self.cur_angle).dist) > 0.2:
+            msg = 'Stopping the simulator because duckie is too far from center-line!'
+            logger.info(msg)
+            done = False
+            reward = self.compute_reward(self.cur_pos, self.cur_angle, self.robot_speed, self.wheelVels)
+            done_code = 'far from center line'
         else:
             done = False
             reward = self.compute_reward(self.cur_pos, self.cur_angle, self.robot_speed, self.wheelVels)

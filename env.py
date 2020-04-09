@@ -6,7 +6,6 @@ def launch_env():
         seed=123,  # random seed
         map_name="zigzag_dists",
         max_steps=500001,  # we don't want the gym to reset itself
-        domain_rand=False,
         camera_width=640,
         camera_height=480,
         draw_curve=False,
