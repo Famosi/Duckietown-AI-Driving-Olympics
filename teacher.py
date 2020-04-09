@@ -138,7 +138,7 @@ class PurePursuitExpert:
 
                 loss = (
                         -1. * speed +
-                        +0.5 * angle_deg +
+                        +1. * angle_deg +
                         +100 * dist_lane +
                         +1. * not_derivable
                 )
