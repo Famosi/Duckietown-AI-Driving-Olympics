@@ -11,13 +11,6 @@ MIN = 100000
 class PurePursuitExpert:
     def __init__(self, env, actions):
         self.env = env.unwrapped
-        # self.actions = np.array([
-        #     [1., 1.],
-        #     [0.9, 1.],
-        #     [1., 0.9],
-        #     [-1., 1.],
-        #     [1., -1.]
-        # ])
         self.actions = actions
 
     def predict_rollout_head(self, n, env):
@@ -122,7 +115,6 @@ class PurePursuitExpert:
             if node > 1:
                 position = rollout.nodes[node]['position']
                 angle = rollout.nodes[node]['angle']
-                aug_rew = 1.
 
                 try:
                     lane = self.env.get_lane_pos2(position, angle)
@@ -150,7 +142,7 @@ class PurePursuitExpert:
                         +0.5 * angle_deg +
                         +100 * dist_lane +
                         +1. * not_derivable
-                ) * aug_rew
+                )
 
                 if loss < min_loss:
                     min_loss = loss
