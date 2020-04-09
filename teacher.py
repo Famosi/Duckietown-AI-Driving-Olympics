@@ -7,7 +7,6 @@ import copy
 MIN = 100000
 
 
-
 class PurePursuitExpert:
     def __init__(self, env, actions):
         self.env = env.unwrapped
