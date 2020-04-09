@@ -13,47 +13,33 @@ from sklearn.preprocessing import MinMaxScaler
 
 env = launch_env()
 
-# To convert to wheel velocities
-wrapper = SteeringToWheelVelWrapper()
-expert = PurePursuitExpert(env=env)
-
 # logger = Logger(env, log_file='train-new-controller.log')
 reward_acc = np.array([])
 
 left_velocity = np.array([])
 right_velocity = np.array([])
 
-positions_x = np.array([])
-positions_y = np.array([])
-
-actions = np.array([])
-
-dot_dirs = np.array([])
-
-with open('./tracks/track_' + str(1439) + '.pkl', "rb") as pickle_file:
-    df = pickle.load(pickle_file)
-    line = [tuple(r) for r in df.to_numpy().tolist()]
-
-xs = []
-ys = []
-for point in line:
-    xs.append(point[:1][0])
-    ys.append(point[1:3][0])
-
-track = [xs, ys]
-
-STEPS = 500
-EPISODES = 5
-
 DEBUG = True
 
 rewards = 0
+
+actions = np.array([
+    [1., 1.],
+    [0.9, 1.],
+    [1., 0.9],
+    [-1., 1.],
+    [1., -1.]
+])
+
+STEPS = 500
+EPISODES = 1
+expert = PurePursuitExpert(env=env, actions=actions)
 # let's collect our samples
 for episode in range(0, EPISODES):
     for step in range(0, STEPS):
         # we use our 'expert' to predict the next action.
         # action = expert.predict(step, env)
-        action = expert.dream_forward(env, track)
+        action = expert.dream_forward(env)
 
         left_velocity = np.append(left_velocity, action[0])
         right_velocity = np.append(right_velocity, action[1])
@@ -62,24 +48,8 @@ for episode in range(0, EPISODES):
 
         actions = np.append(actions, action)
 
-        positions_x = np.append(positions_x, env.cur_pos[0])
-        positions_y = np.append(positions_y, env.cur_pos[2])
-
         reward_acc = np.append(reward_acc, reward)
         rewards += reward
-
-        # try:
-        #     lane = env.get_lane_pos2(env.cur_pos, env.cur_angle)
-        #     dot_dirs = np.append(dot_dirs, np.abs(lane.dot_dir))
-        # except Exception as e:
-        #     print(e)
-        #     break
-
-        closest_point, _ = env.closest_curve_point(env.cur_pos, env.cur_angle)
-
-        if closest_point is None:
-            done = True
-            break
 
         # we can resize the image here
         observation = cv2.resize(observation, (80, 60))
@@ -98,7 +68,7 @@ for episode in range(0, EPISODES):
         # we log here
 
     # logger.on_episode_done()  # speed up logging by flushing the file
-    # env.reset()
+    env.reset()
 
 # logger.close()
 env.close()

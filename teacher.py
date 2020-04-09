@@ -5,19 +5,20 @@ import matplotlib.pyplot as plt
 import copy
 
 MIN = 100000
-MAX = -10000000
+
 
 
 class PurePursuitExpert:
-    def __init__(self, env):
+    def __init__(self, env, actions):
         self.env = env.unwrapped
-        self.actions = np.array([
-            [1., 1.],
-            [0.9, 1.],
-            [1., 0.9],
-            [-1., 1.],
-            [1., -1.]
-        ])
+        # self.actions = np.array([
+        #     [1., 1.],
+        #     [0.9, 1.],
+        #     [1., 0.9],
+        #     [-1., 1.],
+        #     [1., -1.]
+        # ])
+        self.actions = actions
 
     def predict_rollout_head(self, n, env):
 
@@ -96,7 +97,7 @@ class PurePursuitExpert:
 
         return rollout
 
-    def dream_forward(self, dream_env, track):
+    def dream_forward(self, dream_env):
         robot_speed = copy.deepcopy(dream_env.robot_speed)
         cur_pos = copy.deepcopy(dream_env.cur_pos)
         cur_angle = copy.deepcopy(dream_env.cur_angle)
@@ -109,6 +110,9 @@ class PurePursuitExpert:
         # predict 3 steps ahead
         rollout = self.predict_rollout_head(3, dream_env)
 
+        cur_tile = dream_env.get_tile()[1]
+        tile_kind = dream_env._get_tile(cur_tile[0], cur_tile[1])['kind']
+
         dream_env.set_env_params(robot_speed, cur_pos, cur_angle, state[0], last_action, wheelVels, delta_time, step_count)
 
         min_loss = MIN
@@ -118,6 +122,7 @@ class PurePursuitExpert:
             if node > 1:
                 position = rollout.nodes[node]['position']
                 angle = rollout.nodes[node]['angle']
+                aug_rew = 1.
 
                 try:
                     lane = self.env.get_lane_pos2(position, angle)
@@ -132,7 +137,7 @@ class PurePursuitExpert:
                 angle_deg = np.abs(lane.angle_deg)
 
                 # Calculate LOSS
-                action = rollout.nodes[node]['action_sequence'][-1]
+                action = rollout.nodes[node]['action_sequence'][0]
                 speed = sum(self.actions[action])
 
                 if not dream_env.valid_pose_rollout(position, angle):
@@ -141,11 +146,11 @@ class PurePursuitExpert:
                     not_derivable = 0
 
                 loss = (
-                        -2 * speed +
-                        +0.1 * angle_deg +
-                        +10 * dist_lane +
+                        -1. * speed +
+                        +0.5 * angle_deg +
+                        +100 * dist_lane +
                         +1. * not_derivable
-                )
+                ) * aug_rew
 
                 if loss < min_loss:
                     min_loss = loss
