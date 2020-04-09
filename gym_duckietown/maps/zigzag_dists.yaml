@@ -7,7 +7,7 @@
 # start_tile: [0, 3]
 
 # Fixed initial pose
-start_pose: [[[1.00619996], [0.],         [3.62699986]], 1.5707963267948963]
+# start_pose: [[[1.00619996], [0.],         [3.62699986]], 1.5707963267948963]
 
 tiles:
 - [asphalt, asphalt     , asphalt       , asphalt       , asphalt       , asphalt   , asphalt       , asphalt, asphalt]
