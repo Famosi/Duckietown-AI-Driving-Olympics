@@ -5,28 +5,26 @@ import matplotlib.pyplot as plt
 import copy
 
 MAX = -100000
-# parameters for the pure pursuit controller
-POSITION_THRESHOLD = 0.04
-REF_VELOCITY = 0.1
-GAIN = 10
-FOLLOWING_DISTANCE = 0.3
-
+COEF_SPEED = 10
+COEF_LANE = 1000
+COEF_ALIGN = 10000
 
 class PurePursuitExpert:
-    def __init__(self, env, actions, ref_velocity=REF_VELOCITY, position_threshold=POSITION_THRESHOLD,
-                 following_distance=FOLLOWING_DISTANCE, max_iterations=1000):
+    def __init__(self, env):
         self.env = env
-        self.actions = actions
-        self.following_distance = following_distance
-        self.max_iterations = max_iterations
-        self.ref_velocity = ref_velocity
-        self.position_threshold = position_threshold
+        self.action_space = np.array([
+            [1., 1.],
+            [0.9, 1.],
+            [1., 0.9],
+            [0.1, 1.],
+            [1., 0.1]
+        ])
 
     def predict_rollout_head(self, n, env):
 
         m = 0
         for i in range(0, n):
-            m += self.actions.shape[0] ** i
+            m += self.action_space.shape[0] ** i
 
         nodes = list(range(1, m + 1))
 
@@ -51,9 +49,9 @@ class PurePursuitExpert:
 
         def __helper__(nodes, current_parent, next_parents, rollout, denv, robot_speed, cur_pos, cur_angle, state, last_action, wheelVels, delta_time, step_count):
             if nodes:
-                for action in range (self.actions.shape[0]):
+                for action in range (self.action_space.shape[0]):
                     denv.set_env_params(robot_speed, cur_pos, cur_angle, state, last_action, wheelVels, delta_time, step_count)
-                    denv.step_rollout(self.actions[action])
+                    denv.step_rollout(self.action_space[action])
 
                     dream_position = denv.cur_pos
                     dream_angle = denv.cur_angle
@@ -99,7 +97,24 @@ class PurePursuitExpert:
 
         return rollout
 
-    def dream_forward(self, dream_env):
+    def predict(self, dream_env):
+        try:
+            curve = dream_env._get_tile(dream_env.get_tile()[1][0], dream_env.get_tile()[1][1])['kind'].startswith('curve')
+        except ValueError:
+            curve = False
+
+        dist = dream_env.get_lane_pos2(dream_env.cur_pos, dream_env.cur_angle).dist
+
+        if not curve:
+            COEF_SPEED = 50
+            if dist < -0.078:
+                return [1., 0.9]
+            elif dist > 0.078:
+                return [0.9, 1.]
+        else:
+            return self.collect_rollout(dream_env)
+
+    def collect_rollout(self, dream_env):
         robot_speed = copy.deepcopy(dream_env.robot_speed)
         cur_pos = copy.deepcopy(dream_env.cur_pos)
         cur_angle = copy.deepcopy(dream_env.cur_angle)
@@ -112,10 +127,8 @@ class PurePursuitExpert:
         # predict 3 steps ahead
         rollout = self.predict_rollout_head(3, dream_env)
 
-        dream_env.set_env_params(robot_speed, cur_pos, cur_angle, state[0], last_action, wheelVels, delta_time, step_count)
-
-        curve = dream_env._get_tile(dream_env.get_tile()[1][0], dream_env.get_tile()[1][1])['kind'].startswith('curve')
-        dist = dream_env.get_lane_pos2(dream_env.cur_pos, dream_env.cur_angle).dist
+        dream_env.set_env_params(robot_speed, cur_pos, cur_angle, state[0], last_action, wheelVels, delta_time,
+                                 step_count)
 
         min_loss = MAX
         best_node = None
@@ -130,32 +143,27 @@ class PurePursuitExpert:
                 except NotInLane:
                     break
 
-                # LOSS-1: distance to the center of the lane
-                # dist_lane = dream_env.dist_centerline_curve(position, angle)
-                dist_lane = abs(lane.dist)
-
-                # LOSS-2: the direction of the agent in relation to the (direction of the) lane
-                angle_deg = np.abs(lane.angle_deg)
-
-                # Calculate LOSS
-                action = rollout.nodes[node]['action_sequence'][0]
-                speed = sum(self.actions[action])
-
                 if not dream_env.valid_pose_rollout(position, angle):
                     not_derivable = MAX
                 else:
                     not_derivable = 0
 
-                if not curve:
-                    coef_speed = 50
-                else:
-                    coef_speed = 10
+                # Distance from the center of the lane
+                dist = abs(lane.dist) * COEF_LANE
 
+                # Alignment of the agent
+                align = lane.dot_dir * COEF_ALIGN
+
+                # Speed of the agent
+                # TODO: check [-1]
+                action = rollout.nodes[node]['action_sequence'][0]
+                speed = sum(self.action_space[action]) * COEF_SPEED
+
+                # Calculate LOSS
                 loss = (
-                        + coef_speed*speed
-                        # - 10*angle_deg
-                        + 10000*lane.dot_dir
-                        - 1000*dist_lane
+                        + speed
+                        + align
+                        - dist
                         + not_derivable
                 )
 
@@ -165,46 +173,11 @@ class PurePursuitExpert:
 
         if best_node is not None:
             action_seq = rollout.nodes[best_node]['action_sequence']
-            next_action = self.actions[action_seq[0]]
+            next_action = self.action_space[action_seq[0]]
         else:
             print("RANDOM")
-            action = np.random.randint(0, self.actions.shape[0])
-            next_action = self.actions[action]
-
-        if not curve and dist < -0.07:
-            next_action = [1., 0.95]
-        if not curve and dist > 0.07:
-            next_action = [0.9, 1.]
+            action = np.random.randint(0, self.action_space.shape[0])
+            next_action = self.action_space[action]
 
         return next_action
-
-    def align(self, env):
-        closest_point, closest_tangent = self.env.closest_curve_point(self.env.cur_pos, self.env.cur_angle)
-        if closest_point is None:
-            return 0.0, 0.0  # Should return done in the environment
-
-        iterations = 0
-        lookup_distance = self.following_distance
-        curve_point = None
-        while iterations < self.max_iterations:
-            # Project a point ahead along the curve tangent,
-            # then find the closest point to to that
-            follow_point = closest_point + closest_tangent * lookup_distance
-            curve_point, _ = self.env.closest_curve_point(follow_point, self.env.cur_angle)
-
-            # If we have a valid point on the curve, stop
-            if curve_point is not None:
-                break
-
-            iterations += 1
-            lookup_distance *= 0.5
-
-        # Compute a normalized vector to the curve point
-        point_vec = curve_point - self.env.cur_pos
-        point_vec /= np.linalg.norm(point_vec)
-
-        dot = np.dot(self.env.get_right_vec(), point_vec)
-        steering = GAIN * -dot
-
-        return self.ref_velocity, steering
 

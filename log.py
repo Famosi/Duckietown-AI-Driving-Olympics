@@ -23,24 +23,15 @@ right_velocity = np.array([])
 DEBUG = True
 
 rewards = 0
-
-actions = np.array([
-    [1., 1.],
-    [0.9, 1.],
-    [1., 0.9],
-    [0.1, 1.],
-    [1., 0.1]
-])
-
 STEPS = 200
 EPISODES = 10
-expert = PurePursuitExpert(env=env, actions=actions)
+expert = PurePursuitExpert(env=env)
 # let's collect our samples
 for episode in range(0, EPISODES):
     for step in range(0, STEPS):
         # we use our 'expert' to predict the next action.
 
-        action = expert.dream_forward(env)
+        action = expert.predict(env)
 
         print(action)
 
@@ -51,8 +42,6 @@ for episode in range(0, EPISODES):
 
         left_velocity = np.append(left_velocity, action[0])
         right_velocity = np.append(right_velocity, action[1])
-
-        actions = np.append(actions, action)
 
         reward_acc = np.append(reward_acc, reward)
         rewards += reward
