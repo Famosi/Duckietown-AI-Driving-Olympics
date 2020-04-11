@@ -33,19 +33,18 @@ actions = np.array([
 ])
 
 STEPS = 200
-EPISODES = 3
+EPISODES = 10
 expert = PurePursuitExpert(env=env, actions=actions)
 # let's collect our samples
 for episode in range(0, EPISODES):
     for step in range(0, STEPS):
         # we use our 'expert' to predict the next action.
-        # action = expert.predict(step, env)
 
         action = expert.dream_forward(env)
 
-        observation, reward, done, info = env.step(action)
+        print(action)
 
-        # dot = env.get_lane_pos2(env.cur_pos, env.cur_angle).dot_dir
+        observation, reward, done, info = env.step(action)
 
         if done:
             break

@@ -114,6 +114,9 @@ class PurePursuitExpert:
 
         dream_env.set_env_params(robot_speed, cur_pos, cur_angle, state[0], last_action, wheelVels, delta_time, step_count)
 
+        curve = dream_env._get_tile(dream_env.get_tile()[1][0], dream_env.get_tile()[1][1])['kind'].startswith('curve')
+        dist = dream_env.get_lane_pos2(dream_env.cur_pos, dream_env.cur_angle).dist
+
         min_loss = MAX
         best_node = None
         for node in rollout.nodes:
@@ -143,8 +146,8 @@ class PurePursuitExpert:
                 else:
                     not_derivable = 0
 
-                if dream_env._get_tile(dream_env.get_tile()[1][0], dream_env.get_tile()[1][1])['kind'].startswith('straight'):
-                    coef_speed = 20
+                if not curve:
+                    coef_speed = 50
                 else:
                     coef_speed = 10
 
@@ -167,6 +170,11 @@ class PurePursuitExpert:
             print("RANDOM")
             action = np.random.randint(0, self.actions.shape[0])
             next_action = self.actions[action]
+
+        if not curve and dist < -0.07:
+            next_action = [1., 0.95]
+        if not curve and dist > 0.07:
+            next_action = [0.9, 1.]
 
         return next_action
 
