@@ -5,7 +5,7 @@ import numpy as np
 
 along_lane = 1
 only_straight = True
-m = dw.load_map("zigzag_dists")
+m = dw.load_map("udem1")
 q = sample_good_starting_pose(m, only_straight=only_straight)
 
 translation, angle = geo.translation_angle_from_SE2(q)

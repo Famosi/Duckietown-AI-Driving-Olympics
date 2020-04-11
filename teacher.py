@@ -4,13 +4,23 @@ from gym_duckietown.simulator import NotInLane
 import matplotlib.pyplot as plt
 import copy
 
-MIN = 100000
+MAX = -100000
+# parameters for the pure pursuit controller
+POSITION_THRESHOLD = 0.04
+REF_VELOCITY = 0.1
+GAIN = 10
+FOLLOWING_DISTANCE = 0.3
 
 
 class PurePursuitExpert:
-    def __init__(self, env, actions):
-        self.env = env.unwrapped
+    def __init__(self, env, actions, ref_velocity=REF_VELOCITY, position_threshold=POSITION_THRESHOLD,
+                 following_distance=FOLLOWING_DISTANCE, max_iterations=1000):
+        self.env = env
         self.actions = actions
+        self.following_distance = following_distance
+        self.max_iterations = max_iterations
+        self.ref_velocity = ref_velocity
+        self.position_threshold = position_threshold
 
     def predict_rollout_head(self, n, env):
 
@@ -102,12 +112,9 @@ class PurePursuitExpert:
         # predict 3 steps ahead
         rollout = self.predict_rollout_head(3, dream_env)
 
-        cur_tile = dream_env.get_tile()[1]
-        tile_kind = dream_env._get_tile(cur_tile[0], cur_tile[1])['kind']
-
         dream_env.set_env_params(robot_speed, cur_pos, cur_angle, state[0], last_action, wheelVels, delta_time, step_count)
 
-        min_loss = MIN
+        min_loss = MAX
         best_node = None
         for node in rollout.nodes:
             # if it's it's not the root
@@ -122,7 +129,7 @@ class PurePursuitExpert:
 
                 # LOSS-1: distance to the center of the lane
                 # dist_lane = dream_env.dist_centerline_curve(position, angle)
-                dist_lane = np.abs(lane.dist)
+                dist_lane = abs(lane.dist)
 
                 # LOSS-2: the direction of the agent in relation to the (direction of the) lane
                 angle_deg = np.abs(lane.angle_deg)
@@ -132,18 +139,24 @@ class PurePursuitExpert:
                 speed = sum(self.actions[action])
 
                 if not dream_env.valid_pose_rollout(position, angle):
-                    not_derivable = MIN
+                    not_derivable = MAX
                 else:
                     not_derivable = 0
 
+                if dream_env._get_tile(dream_env.get_tile()[1][0], dream_env.get_tile()[1][1])['kind'].startswith('straight'):
+                    coef_speed = 20
+                else:
+                    coef_speed = 10
+
                 loss = (
-                        -1. * speed +
-                        +1. * angle_deg +
-                        +100 * dist_lane +
-                        +1. * not_derivable
+                        + coef_speed*speed
+                        # - 10*angle_deg
+                        + 10000*lane.dot_dir
+                        - 1000*dist_lane
+                        + not_derivable
                 )
 
-                if loss < min_loss:
+                if loss > min_loss:
                     min_loss = loss
                     best_node = node
 
@@ -151,8 +164,39 @@ class PurePursuitExpert:
             action_seq = rollout.nodes[best_node]['action_sequence']
             next_action = self.actions[action_seq[0]]
         else:
+            print("RANDOM")
             action = np.random.randint(0, self.actions.shape[0])
             next_action = self.actions[action]
 
         return next_action
+
+    def align(self, env):
+        closest_point, closest_tangent = self.env.closest_curve_point(self.env.cur_pos, self.env.cur_angle)
+        if closest_point is None:
+            return 0.0, 0.0  # Should return done in the environment
+
+        iterations = 0
+        lookup_distance = self.following_distance
+        curve_point = None
+        while iterations < self.max_iterations:
+            # Project a point ahead along the curve tangent,
+            # then find the closest point to to that
+            follow_point = closest_point + closest_tangent * lookup_distance
+            curve_point, _ = self.env.closest_curve_point(follow_point, self.env.cur_angle)
+
+            # If we have a valid point on the curve, stop
+            if curve_point is not None:
+                break
+
+            iterations += 1
+            lookup_distance *= 0.5
+
+        # Compute a normalized vector to the curve point
+        point_vec = curve_point - self.env.cur_pos
+        point_vec /= np.linalg.norm(point_vec)
+
+        dot = np.dot(self.env.get_right_vec(), point_vec)
+        steering = GAIN * -dot
+
+        return self.ref_velocity, steering
 

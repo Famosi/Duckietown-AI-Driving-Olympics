@@ -9,12 +9,12 @@ def launch_env():
         camera_width=640,
         camera_height=480,
         draw_curve=False,
-        frame_skip=1,
-        frame_rate=10,
-        accept_start_angle_deg=1,  # @simone start close to straight
+        frame_skip=2,
+        frame_rate=15,
+        accept_start_angle_deg=4,  # @simone start close to straight
         full_transparency=True,
         distortion=False,
-        randomize_maps_on_reset=False
+        randomize_maps_on_reset=True
     )
 
     return env

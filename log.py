@@ -12,6 +12,7 @@ import time
 from sklearn.preprocessing import MinMaxScaler
 
 env = launch_env()
+logger = Logger(env, log_file='train.log')
 
 # logger = Logger(env, log_file='train-new-controller.log')
 reward_acc = np.array([])
@@ -27,24 +28,30 @@ actions = np.array([
     [1., 1.],
     [0.9, 1.],
     [1., 0.9],
-    [-1., 1.],
-    [1., -1.]
+    [0.1, 1.],
+    [1., 0.1]
 ])
 
-STEPS = 500
-EPISODES = 1
+STEPS = 200
+EPISODES = 3
 expert = PurePursuitExpert(env=env, actions=actions)
 # let's collect our samples
 for episode in range(0, EPISODES):
     for step in range(0, STEPS):
         # we use our 'expert' to predict the next action.
         # action = expert.predict(step, env)
+
         action = expert.dream_forward(env)
+
+        observation, reward, done, info = env.step(action)
+
+        # dot = env.get_lane_pos2(env.cur_pos, env.cur_angle).dot_dir
+
+        if done:
+            break
 
         left_velocity = np.append(left_velocity, action[0])
         right_velocity = np.append(right_velocity, action[1])
-
-        observation, reward, done, info = env.step(action)
 
         actions = np.append(actions, action)
 
@@ -60,13 +67,13 @@ for episode in range(0, EPISODES):
         if DEBUG:
             cv2.imshow('debug', observation)
             cv2.waitKey(1)
-            # if cv2.waitKey() & 0xFF == ord('q'):
-            #    break
+        # cv2.imshow("obs", observation)
+        # if cv2.waitKey() & 0xFF == ord('q'):
+        #     break
 
         # logger.log(observation, action, reward, done, info)
         # [optional] env.render() to watch the expert interaction with the environment
         # we log here
-
     # logger.on_episode_done()  # speed up logging by flushing the file
     env.reset()
 
@@ -81,12 +88,12 @@ print("TOTAL REWARD:", rewards)
 # plt.plot(right_velocity, label="right")
 try:
     plt.subplot(2, 1, 1)
-    plt.plot(reward_acc, color='red')
+    plt.plot(reward_acc, color='red', linewidth=2)
     plt.title("reward")
 
     plt.subplot(2, 1, 2)
-    plt.plot(left_velocity, color="green")
-    plt.plot(right_velocity, color="orange")
+    plt.plot(left_velocity, color="green", linewidth=2)
+    plt.plot(right_velocity, color="orange", linewidth=2)
     plt.title("L(g)/R(o) Vel")
 
     # plt.subplot(2, 1, 2)

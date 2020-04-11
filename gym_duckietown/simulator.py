@@ -544,7 +544,7 @@ class Simulator(gym.Env):
                 except NotInLane:
                     continue
                 M = self.accept_start_angle_deg
-                ok = -M < lp.angle_deg < +M and abs(lp.dist) < 0.1
+                ok = -M < lp.angle_deg < +M and abs(lp.dist) < 0.03
                 if not ok:
                     continue
 
@@ -1576,10 +1576,10 @@ class Simulator(gym.Env):
             reward = REWARD_INVALID_POSE
             done_code = 'doing a circular action'
         # @riza :If duckie is too far from center line (on the other lane, etc.)
-        elif abs(self.get_lane_pos2(self.cur_pos, self.cur_angle).dist) > 0.2:
+        elif abs(self.get_lane_pos2(self.cur_pos, self.cur_angle).dist) > 0.12:
             msg = 'Stopping the simulator because duckie is too far from center-line!'
             logger.info(msg)
-            done = False
+            done = True
             reward = self.compute_reward(self.cur_pos, self.cur_angle, self.robot_speed, self.wheelVels)
             done_code = 'far from center line'
         else:

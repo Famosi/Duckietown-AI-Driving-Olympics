@@ -5,6 +5,7 @@
 # Each tile contains a string with the kind of tile and its orientation.
 # The orientations are North, South, East, West. This is the direction in
 # which the agent is expected to drive when going onto this tile.
+
 tiles:
 - [floor    , floor         , floor     , floor         , floor     , floor         , floor         , floor]
 - [floor    , curve_left/W  , straight/W, 3way_left/W   , straight/W, straight/W    , curve_left/N  , asphalt]
