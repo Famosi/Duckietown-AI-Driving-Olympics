@@ -5,13 +5,16 @@ import matplotlib.pyplot as plt
 import copy
 
 MAX = -100000
-COEF_SPEED = 10
-COEF_LANE = 1000
-COEF_ALIGN = 10000
+COF_LANE = 1000
+COF_ALIGN = 10000
+COF_SPEED = 10
 
 class PurePursuitExpert:
-    def __init__(self, env):
+    def __init__(self, env, cof_lane=COF_LANE, cof_align=COF_ALIGN, cof_speed=COF_SPEED):
         self.env = env
+        self.cof_lane = COF_LANE
+        self.cof_align = COF_ALIGN
+        self.cof_speed = COF_SPEED
         self.action_space = np.array([
             [1., 1.],
             [0.9, 1.],
@@ -106,13 +109,13 @@ class PurePursuitExpert:
         dist = dream_env.get_lane_pos2(dream_env.cur_pos, dream_env.cur_angle).dist
 
         if not curve:
-            COEF_SPEED = 50
-            if dist < -0.078:
-                return [1., 0.9]
-            elif dist > 0.078:
-                return [0.9, 1.]
-        else:
-            return self.collect_rollout(dream_env)
+            self.cof_speed *= 5
+            if dist < -0.075:
+                return [1., 0.95]
+            elif dist > 0.075:
+                return [0.95, 1.]
+
+        return self.collect_rollout(dream_env)
 
     def collect_rollout(self, dream_env):
         robot_speed = copy.deepcopy(dream_env.robot_speed)
@@ -149,15 +152,15 @@ class PurePursuitExpert:
                     not_derivable = 0
 
                 # Distance from the center of the lane
-                dist = abs(lane.dist) * COEF_LANE
+                dist = abs(lane.dist) * self.cof_lane
 
                 # Alignment of the agent
-                align = lane.dot_dir * COEF_ALIGN
+                align = lane.dot_dir * self.cof_align
 
                 # Speed of the agent
                 # TODO: check [-1]
                 action = rollout.nodes[node]['action_sequence'][0]
-                speed = sum(self.action_space[action]) * COEF_SPEED
+                speed = sum(self.action_space[action]) * COF_SPEED
 
                 # Calculate LOSS
                 loss = (
