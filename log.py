@@ -11,9 +11,8 @@ import time
 from sklearn.preprocessing import MinMaxScaler
 
 env = launch_env()
-logger = Logger(env, log_file='train.log')
+# logger = Logger(env, log_file='train.log')
 
-# logger = Logger(env, log_file='train-new-controller.log')
 reward_acc = np.array([])
 
 left_velocity = np.array([])
