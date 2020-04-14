@@ -4,11 +4,6 @@ from teacher import Expert
 from _loggers import Logger
 import numpy as np
 import matplotlib.pyplot as plt
-import pandas as pd
-import json
-import pickle
-import time
-from sklearn.preprocessing import MinMaxScaler
 
 env = launch_env()
 # logger = Logger(env, log_file='train.log')
@@ -23,11 +18,11 @@ DEBUG = True
 rewards = 0
 STEPS = 200
 EPISODES = 10
+
 expert = Expert(env=env)
 
 # let's collect our samples
 for episode in range(0, EPISODES):
-    print("Episode:", episode+1)
     for step in range(0, STEPS):
         # we use our 'expert' to predict the next action.
         action = expert.predict_action(env)
@@ -52,9 +47,6 @@ for episode in range(0, EPISODES):
         if DEBUG:
             cv2.imshow('debug', observation)
             cv2.waitKey(1)
-        # cv2.imshow("obs", observation)
-        # if cv2.waitKey() & 0xFF == ord('q'):
-        #     break
 
         # logger.log(observation, action, reward, done, info)
         # [optional] env.render() to watch the expert interaction with the environment
@@ -67,6 +59,7 @@ env.close()
 
 print("TOTAL REWARD:", rewards)
 
+# Plots - debugging purpose
 plt.subplot(2, 1, 1)
 plt.plot(reward_acc, color='red', linewidth=2)
 plt.title("reward")

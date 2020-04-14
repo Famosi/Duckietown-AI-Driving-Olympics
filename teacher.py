@@ -180,8 +180,10 @@ class Expert:
         except ValueError:
             curve = True
 
+        # Distance of the agent from the center of the lane
         dist = dream_env.get_lane_pos2(dream_env.cur_pos, dream_env.cur_angle).dist
 
+        # Prevent the agent to go outside or in the other lane
         if not curve:
             self.cof_speed *= 5
             if dist < -0.075:
@@ -190,4 +192,3 @@ class Expert:
                 return [0.95, 1.]
 
         return self.collect_rollout(dream_env)
-
