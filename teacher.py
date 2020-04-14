@@ -172,6 +172,7 @@ class PurePursuitExpert:
                         + not_derivable
                 )
 
+                # The node with the highest loss is the best node
                 if loss > max_loss:
                     max_loss = loss
                     best_node = node
@@ -185,4 +186,3 @@ class PurePursuitExpert:
             action = self.action_space[action]
 
         return action
-
