@@ -104,7 +104,7 @@ class PurePursuitExpert:
         try:
             curve = dream_env._get_tile(dream_env.get_tile()[1][0], dream_env.get_tile()[1][1])['kind'].startswith('curve')
         except ValueError:
-            curve = False
+            curve = True
 
         dist = dream_env.get_lane_pos2(dream_env.cur_pos, dream_env.cur_angle).dist
 
@@ -133,7 +133,7 @@ class PurePursuitExpert:
         dream_env.set_env_params(robot_speed, cur_pos, cur_angle, state[0], last_action, wheelVels, delta_time,
                                  step_count)
 
-        min_loss = MAX
+        max_loss = MAX
         best_node = None
         for node in rollout.nodes:
             # if it's it's not the root
@@ -154,13 +154,12 @@ class PurePursuitExpert:
                 # Distance from the center of the lane
                 dist = abs(lane.dist) * self.cof_lane
 
-                # Alignment of the agent
+                # Alignment with the lane
                 align = lane.dot_dir * self.cof_align
 
                 # Speed of the agent
-                # TODO: check [-1]
-                action = rollout.nodes[node]['action_sequence'][0]
-                speed = sum(self.action_space[action]) * COF_SPEED
+                cur_action = rollout.nodes[node]['action_sequence'][-1]
+                speed = sum(self.action_space[cur_action]) * COF_SPEED
 
                 # Calculate LOSS
                 loss = (
@@ -170,17 +169,17 @@ class PurePursuitExpert:
                         + not_derivable
                 )
 
-                if loss > min_loss:
-                    min_loss = loss
+                if loss > max_loss:
+                    max_loss = loss
                     best_node = node
 
+        # if there is no node from rollout take a random action
         if best_node is not None:
             action_seq = rollout.nodes[best_node]['action_sequence']
-            next_action = self.action_space[action_seq[0]]
+            action = self.action_space[action_seq[0]]
         else:
-            print("RANDOM")
             action = np.random.randint(0, self.action_space.shape[0])
-            next_action = self.action_space[action]
+            action = self.action_space[action]
 
-        return next_action
+        return action
 
