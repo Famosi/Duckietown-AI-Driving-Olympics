@@ -171,8 +171,12 @@ class Expert:
         return action
 
     def predict_action(self, dream_env):
+        # Check if the agent is in a curve
         try:
-            curve = dream_env._get_tile(dream_env.get_tile()[1][0], dream_env.get_tile()[1][1])['kind'].startswith('curve')
+            curve = dream_env._get_tile(
+                dream_env.get_tile()[1][0],
+                dream_env.get_tile()[1][1]
+            )['kind'].startswith('curve')
         except ValueError:
             curve = True
 
