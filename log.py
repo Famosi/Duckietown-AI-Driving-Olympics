@@ -1,6 +1,6 @@
 import cv2
 from env import launch_env
-from teacher import PurePursuitExpert
+from teacher import Expert
 from _loggers import Logger
 import numpy as np
 import matplotlib.pyplot as plt
@@ -23,14 +23,14 @@ DEBUG = True
 rewards = 0
 STEPS = 200
 EPISODES = 10
-expert = PurePursuitExpert(env=env)
+expert = Expert(env=env)
 
 # let's collect our samples
 for episode in range(0, EPISODES):
     print("Episode:", episode+1)
     for step in range(0, STEPS):
         # we use our 'expert' to predict the next action.
-        action = expert.predict(env)
+        action = expert.predict_action(env)
 
         observation, reward, done, info = env.step(action)
 

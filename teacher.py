@@ -1,7 +1,6 @@
 import numpy as np
 import networkx as nx
 from gym_duckietown.simulator import NotInLane
-import matplotlib.pyplot as plt
 import copy
 
 MAX = -100000
@@ -9,8 +8,9 @@ COF_LANE = 1000
 COF_ALIGN = 10000
 COF_SPEED = 10
 
-class PurePursuitExpert:
-    def __init__(self, env, cof_lane=COF_LANE, cof_align=COF_ALIGN, cof_speed=COF_SPEED):
+
+class Expert:
+    def __init__(self, env):
         self.env = env
         self.cof_lane = COF_LANE
         self.cof_align = COF_ALIGN
@@ -23,7 +23,7 @@ class PurePursuitExpert:
             [1., 0.1]
         ])
 
-    def predict_rollout_head(self, n, env):
+    def predict_rollout(self, n, env):
 
         m = 0
         for i in range(0, n):
@@ -100,23 +100,6 @@ class PurePursuitExpert:
 
         return rollout
 
-    def predict(self, dream_env):
-        try:
-            curve = dream_env._get_tile(dream_env.get_tile()[1][0], dream_env.get_tile()[1][1])['kind'].startswith('curve')
-        except ValueError:
-            curve = True
-
-        dist = dream_env.get_lane_pos2(dream_env.cur_pos, dream_env.cur_angle).dist
-
-        if not curve:
-            self.cof_speed *= 5
-            if dist < -0.075:
-                return [1., 0.95]
-            elif dist > 0.075:
-                return [0.95, 1.]
-
-        return self.collect_rollout(dream_env)
-
     def collect_rollout(self, dream_env):
         robot_speed = copy.deepcopy(dream_env.robot_speed)
         cur_pos = copy.deepcopy(dream_env.cur_pos)
@@ -128,7 +111,7 @@ class PurePursuitExpert:
         step_count = copy.deepcopy(dream_env.step_count)
 
         # predict 3 steps ahead
-        rollout = self.predict_rollout_head(3, dream_env)
+        rollout = self.predict_rollout(3, dream_env)
 
         # Reset the env to original one
         dream_env.set_env_params(robot_speed, cur_pos, cur_angle, state[0], last_action, wheelVels, delta_time,
@@ -186,3 +169,21 @@ class PurePursuitExpert:
             action = self.action_space[action]
 
         return action
+
+    def predict_action(self, dream_env):
+        try:
+            curve = dream_env._get_tile(dream_env.get_tile()[1][0], dream_env.get_tile()[1][1])['kind'].startswith('curve')
+        except ValueError:
+            curve = True
+
+        dist = dream_env.get_lane_pos2(dream_env.cur_pos, dream_env.cur_angle).dist
+
+        if not curve:
+            self.cof_speed *= 5
+            if dist < -0.075:
+                return [1., 0.95]
+            elif dist > 0.075:
+                return [0.95, 1.]
+
+        return self.collect_rollout(dream_env)
+
