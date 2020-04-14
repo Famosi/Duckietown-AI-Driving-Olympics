@@ -130,14 +130,16 @@ class PurePursuitExpert:
         # predict 3 steps ahead
         rollout = self.predict_rollout_head(3, dream_env)
 
+        # Reset the env to original one
         dream_env.set_env_params(robot_speed, cur_pos, cur_angle, state[0], last_action, wheelVels, delta_time,
                                  step_count)
 
         max_loss = MAX
         best_node = None
         for node in rollout.nodes:
-            # if it's it's not the root
+            # if it's not the root
             if node > 1:
+                # node's state of the agent
                 position = rollout.nodes[node]['position']
                 angle = rollout.nodes[node]['angle']
 
@@ -146,18 +148,19 @@ class PurePursuitExpert:
                 except NotInLane:
                     break
 
+                # Check if current action leads to a non-derivable tile
                 if not dream_env.valid_pose_rollout(position, angle):
                     not_derivable = MAX
                 else:
                     not_derivable = 0
 
-                # Distance from the center of the lane
+                # Distance from the center of the lane, the smaller the better
                 dist = abs(lane.dist) * self.cof_lane
 
-                # Alignment with the lane
+                # Alignment with the lane, the higher the better
                 align = lane.dot_dir * self.cof_align
 
-                # Speed of the agent
+                # Speed of the agent, the higher the better
                 cur_action = rollout.nodes[node]['action_sequence'][-1]
                 speed = sum(self.action_space[cur_action]) * COF_SPEED
 

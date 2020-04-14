@@ -18,10 +18,10 @@ reward_acc = np.array([])
 left_velocity = np.array([])
 right_velocity = np.array([])
 
-DEBUG = False
+DEBUG = True
 
 rewards = 0
-STEPS = 500
+STEPS = 200
 EPISODES = 10
 expert = PurePursuitExpert(env=env)
 
