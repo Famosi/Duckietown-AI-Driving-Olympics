@@ -144,8 +144,8 @@ class Expert:
                 align = lane.dot_dir * self.cof_align
 
                 # Speed of the agent, the higher the better
-                cur_action = rollout.nodes[node]['action_sequence'][-1]
-                speed = sum(self.action_space[cur_action]) * COF_SPEED
+                cur_action = rollout.nodes[node]['action_sequence'][0]
+                speed = sum(self.action_space[cur_action]) * self.cof_speed
 
                 # Calculate LOSS
                 loss = (
@@ -178,17 +178,19 @@ class Expert:
                 dream_env.get_tile()[1][1]
             )['kind'].startswith('curve')
         except ValueError:
-            curve = True
+            curve = False
 
         # Distance of the agent from the center of the lane
         dist = dream_env.get_lane_pos2(dream_env.cur_pos, dream_env.cur_angle).dist
 
         # Prevent the agent to go outside or in the other lane
         if not curve:
-            self.cof_speed *= 5
-            if dist < -0.075:
+            self.cof_speed = COF_SPEED * 10
+            if dist < -0.06:
                 return [1., 0.95]
-            elif dist > 0.075:
+            elif dist > 0.06:
                 return [0.95, 1.]
+        else:
+            self.cof_speed = COF_SPEED
 
         return self.collect_rollout(dream_env)
