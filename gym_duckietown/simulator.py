@@ -16,6 +16,7 @@ class DoneRewardInfo:
     done_code: str
     reward: float
 
+
 @dataclass
 class DynamicsInfo:
     motor_left: float
@@ -23,7 +24,6 @@ class DynamicsInfo:
 
 import gym
 import yaml
-from copy import copy, deepcopy
 from gym import spaces
 from gym.utils import seeding
 
@@ -105,7 +105,7 @@ DEFAULT_FRAMERATE = 30
 
 DEFAULT_MAX_STEPS = 1500
 
-DEFAULT_MAP_NAME = 'zigzag_dists'
+DEFAULT_MAP_NAME = 'udem1'
 
 DEFAULT_FRAME_SKIP = 1
 
@@ -171,7 +171,6 @@ class Simulator(gym.Env):
             randomize_maps_on_reset=False,
     ):
         """
-
         :param map_name:
         :param max_steps:
         :param draw_curve:
@@ -258,11 +257,6 @@ class Simulator(gym.Env):
         # Window for displaying the environment to humans
         self.window = None
 
-        # @simone
-        self.sum = 0
-        self.pts = []
-        self.exclude = 12
-
         import pyglet
         # Invisible window to render into (shadow OpenGL context)
         self.shadow_window = pyglet.window.Window(width=1,
@@ -335,6 +329,10 @@ class Simulator(gym.Env):
 
         self.last_action = np.array([0, 0])
         self.wheelVels = np.array([0, 0])
+
+        # @riza
+        # The state consists of sensor readings & wheel velocities
+        self.last_state = np.zeros((1, 104))
 
     def _init_vlists(self):
         import pyglet
@@ -480,13 +478,13 @@ class Simulator(gym.Env):
 
         # If the map specifies a starting tile
         if self.user_tile_start:
-            logger.info('using user tile start: %s' % self.user_tile_start)
+            # logger.info('using user tile start: %s' % self.user_tile_start)
             i, j = self.user_tile_start
             tile = self._get_tile(i, j)
             if tile is None:
                 msg = 'The tile specified does not exist.'
                 raise Exception(msg)
-            logger.debug('tile: %s' % tile)
+            # logger.debug('tile: %s' % tile)
         else:
             if self.start_tile is not None:
                 tile = self.start_tile
@@ -500,12 +498,17 @@ class Simulator(gym.Env):
             logger.info('using map pose start: %s' % self.start_pose)
 
             i, j = tile['coords']
-            x = i * self.road_tile_size + self.start_pose[0][0][0]
-            z = j * self.road_tile_size + self.start_pose[0][2][0]
+            x = i * self.road_tile_size + self.start_pose[0][0]
+            z = j * self.road_tile_size + self.start_pose[0][2]
             propose_pos = np.array([x, 0, z])
             propose_angle = self.start_pose[1]
 
             logger.info('Using map pose start. \n Pose: %s, Angle: %s' %(propose_pos, propose_angle) )
+
+        elif self.map_name == "zigzag_dists":
+            # @riza: Start at a fixed position and angle (a very good-aligned pose)
+            propose_angle = 1.5
+            propose_pos = np.array([1., 0., 2.7])
 
         else:
             # Keep trying to find a valid spawn position on this tile
@@ -513,14 +516,15 @@ class Simulator(gym.Env):
                 i, j = tile['coords']
 
                 # Choose a random position on this tile
-                x = self.np_random.uniform(i, i + 1) * self.road_tile_size
-                z = self.np_random.uniform(j, j + 1) * self.road_tile_size
+                # @riza Don't start at the edges of the tile
+                x = self.np_random.uniform(i+0.2, i + 0.8) * self.road_tile_size  # x = self.np_random.uniform(i, i + 1) * self.road_tile_size
+                z = self.np_random.uniform(j+0.2, j + 0.8) * self.road_tile_size  # z = self.np_random.uniform(j, j + 1) * self.road_tile_size
                 propose_pos = np.array([x, 0, z])
 
                 # Choose a random direction
                 propose_angle = self.np_random.uniform(0, 2 * math.pi)
 
-                # logger.debug('Sampled %s %s angle %s' % (propose_pos[0],
+                # # logger.debug('Sampled %s %s angle %s' % (propose_pos[0],
                 #                                          propose_pos[1],
                 #                                          np.rad2deg(propose_angle)))
 
@@ -544,10 +548,9 @@ class Simulator(gym.Env):
                 except NotInLane:
                     continue
                 M = self.accept_start_angle_deg
-                ok = -M < lp.angle_deg < +M and abs(lp.dist) < 0.03
+                ok = -M < lp.angle_deg < +M
                 if not ok:
                     continue
-
                 # Found a valid initial pose
                 break
             else:
@@ -576,6 +579,9 @@ class Simulator(gym.Env):
         # Generate the first camera image
         obs = self.render_obs()
 
+        # @riza: reset last_state's value
+        self.last_state = np.zeros((1, 104))
+
         # Return first observation
         return obs
 
@@ -595,8 +601,6 @@ class Simulator(gym.Env):
         self.delta_time = delta_time
         self.step_count = step_count
 
-
-
     def _load_map(self, map_name):
         """
         Load the map layout from a YAML file
@@ -608,7 +612,7 @@ class Simulator(gym.Env):
         # Get the full map file path
         self.map_file_path = get_file_path('maps', map_name, 'yaml')
 
-        logger.debug('loading map file "%s"' % self.map_file_path)
+        # logger.debug('loading map file "%s"' % self.map_file_path)
 
         with open(self.map_file_path, 'r') as f:
             self.map_data = yaml.load(f, Loader=yaml.Loader)
@@ -886,10 +890,8 @@ class Simulator(gym.Env):
     def get_grid_coords(self, abs_pos):
         """
         Compute the tile indices (i,j) for a given (x,_,z) world position
-
         x-axis maps to increasing i indices
         z-axis maps to increasing j indices
-
         Note: may return coordinates outside of the grid if the
         position entered is outside of the grid.
         """
@@ -947,33 +949,33 @@ class Simulator(gym.Env):
 
         elif kind == 'curve_right':
             pts = np.array([
-                [
-                    [-0.20, 0, -0.50],
-                    [-0.20, 0, -0.20],
-                    [-0.30, 0, -0.20],
-                    [-0.50, 0, -0.20],
-                ],
-                [
-                    [-0.50, 0, 0.20],
-                    [-0.30, 0, 0.20],
-                    [0.30, 0, 0.00],
-                    [0.20, 0, -0.50],
-                ]
-
-                # The control points for the tile was wrong!
-                # @riza
                 # [
                 #     [-0.20, 0, -0.50],
-                #     [-0.20, 0, -0.30],
                 #     [-0.20, 0, -0.20],
+                #     [-0.30, 0, -0.20],
                 #     [-0.50, 0, -0.20],
                 # ],
                 # [
                 #     [-0.50, 0, 0.20],
-                #     [0, 0, 0.20],
-                #     [0.20, 0, 0],
+                #     [-0.30, 0, 0.20],
+                #     [0.30, 0, 0.00],
                 #     [0.20, 0, -0.50],
                 # ]
+
+                # The control points for the tile was wrong!
+                # @riza
+                [
+                    [-0.20, 0, -0.50],
+                    [-0.20, 0, -0.30],
+                    [-0.20, 0, -0.20],
+                    [-0.50, 0, -0.20],
+                ],
+                [
+                    [-0.50, 0, 0.20],
+                    [0, 0, 0.20],
+                    [0.20, 0, 0],
+                    [0.20, 0, -0.50],
+                ]
             #     @riza
 
             ]) * self.road_tile_size
@@ -1103,7 +1105,6 @@ class Simulator(gym.Env):
         """
             Get the closest point on the curve to a given point
             Also returns the tangent at that point.
-
             Returns None, None if not in a lane.
         """
 
@@ -1129,16 +1130,11 @@ class Simulator(gym.Env):
         point = bezier_point(cps, t)
         tangent = bezier_tangent(cps, t)
 
-        # if self.step_count > 1:
-        #     get_fw_pts(cps, t, self.cur_pos, self.cur_angle)
-        #     get_intersect(cps, self.cur_angle, self.cur_pos)
-
         return point, tangent
 
     def get_lane_pos2(self, pos, angle):
         """
         Get the position of the agent relative to the center of the right lane
-
         Raises NotInLane if the Duckiebot is not in a lane.
         """
 
@@ -1185,12 +1181,12 @@ class Simulator(gym.Env):
         tile = self._get_tile(*coords)
         if tile is None:
             msg = f'No tile found at {pos} {coords}'
-            logger.debug(msg)
+            # logger.debug(msg)
             return False
 
         if not tile['drivable']:
             msg = f'{pos} corresponds to tile at {coords} which is not drivable: {tile}'
-            logger.debug(msg)
+            # logger.debug(msg)
             return False
 
         return True
@@ -1214,7 +1210,6 @@ class Simulator(gym.Env):
         """
         Calculates a 'safe driving penalty' (used as negative rew.)
         as described in Issue #24
-
         Describes the amount of overlap between the "safety circles" (circles
         that extend further out than BBoxes, giving an earlier collision 'signal'
         The number is max(0, prox.penalty), where a lower (more negative) penalty
@@ -1286,7 +1281,6 @@ class Simulator(gym.Env):
     def _valid_pose(self, pos, angle, safety_factor=1.0):
         """
             Check that the agent is in a valid pose
-
             safety_factor = minimum distance
         """
 
@@ -1307,20 +1301,19 @@ class Simulator(gym.Env):
                         self._drivable_pos(r_pos) and
                         self._drivable_pos(f_pos))
 
-
         # Recompute the bounding boxes (BB) for the agent
         agent_corners = get_agent_corners(pos, angle)
         no_collision = not self._collision(agent_corners)
 
         res = (no_collision and all_drivable)
 
-        if not res:
-            logger.debug(f'Invalid pose. Collision free: {no_collision} On drivable area: {all_drivable}')
-            logger.debug(f'safety_factor: {safety_factor}')
-            logger.debug(f'pos: {pos}')
-            logger.debug(f'l_pos: {l_pos}')
-            logger.debug(f'r_pos: {r_pos}')
-            logger.debug(f'f_pos: {f_pos}')
+        # if not res:
+            # logger.debug(f'Invalid pose. Collision free: {no_collision} On drivable area: {all_drivable}')
+            # logger.debug(f'safety_factor: {safety_factor}')
+            # logger.debug(f'pos: {pos}')
+            # logger.debug(f'l_pos: {l_pos}')
+            # logger.debug(f'r_pos: {r_pos}')
+            # logger.debug(f'f_pos: {f_pos}')
 
         return res
 
@@ -1359,7 +1352,8 @@ class Simulator(gym.Env):
     def update_physics(self, action, delta_time=None):
         if delta_time is None:
             delta_time = self.delta_time
-        self.wheelVels = action * self.robot_speed * 1
+        # @riza: Make the interval of these two the same
+        self.wheelVels = action             # self.wheelVels = action * self.robot_speed * 1
         prev_pos = self.cur_pos
 
         # Update the robot's position
@@ -1455,53 +1449,6 @@ class Simulator(gym.Env):
         gz = grid_height * tile_size - cp[1]
         return [gx, gy, gz], angle
 
-    def dist_centerline_curve(self, position, angle):
-        """
-        Calculate the distance between the middle sensor line(center of robot actually) and the projected point
-        on the curve.
-        """
-        DIST_NOT_INTERSECT = 50
-        # Get directory line
-        cps = get_dir_line(angle, position)
-        # Get the center point of directory line
-        cps_center = (cps[0] + cps[1]) / 2
-        # Get directory vector
-        dir_vec = get_dir_vec(angle)
-
-        i, j = self.get_grid_coords(position)
-        curves = self._get_tile(i, j)['curves']
-        curve_headings = curves[:, -1, :] - curves[:, 0, :]
-        curve_headings = curve_headings / np.linalg.norm(curve_headings).reshape(1, -1)
-        dot_prods = np.dot(curve_headings, get_dir_vec(angle))
-        # Curve points: 1->right, 0->left w.r.t car's perspective
-        ii = np.argmax(dot_prods)
-
-        # draw points on the upcoming tile
-        tile_coords = get_tiles(self.map_name)
-        idx = tile_coords.index((i, j))
-        # if we're at the end of the list return to beginning
-        i, j = tile_coords[0] if len(tile_coords) - 1 == idx else tile_coords[idx + 1]
-        curves_next = self._get_tile(i, j)['curves']
-
-        # draw points on the previous tile
-        i, j = tile_coords[idx - 1]
-        curves_prev = self._get_tile(i, j)['curves']
-
-        # Get bezier points on 3 tiles(current, prev, next) and compute dist
-        n = 50
-        pts = np.vstack((
-            [bezier_point(curves[ii], i / (n - 1)) for i in range(0, n)],
-            [bezier_point(curves_next[ii], i / (n - 1)) for i in range(0, n)],
-            [bezier_point(curves_prev[ii], i / (n - 1)) for i in range(0, n)]))
-
-        # Calculate feature: whether there's an intersection & if so, the distance
-        is_true, dist = compute_dist(np.vstack((cps_center, cps[1])), pts, dir_vec, n=1, red=True)[0]
-
-        if is_true:
-            return abs(dist)
-        else:
-            return DIST_NOT_INTERSECT
-
     def compute_reward(self, pos, angle, speed, wheelVels):
         # Compute the collision avoidance penalty
         col_penalty = self.proximity_penalty2(pos, angle)
@@ -1511,27 +1458,21 @@ class Simulator(gym.Env):
             lp = self.get_lane_pos2(pos, angle)
         except NotInLane:
             reward = 40 * col_penalty
-            reward_challenge = 40 * col_penalty
         else:
-            # @simone
+
             # Compute the reward
             reward = (
+                    # self.wheelVels[0] + self.wheelVels[1]  -_> instead of self.speed
+                    # Give more reward if moving with speed
                     +2.0 * sum(wheelVels) +
-                    -10 * abs(lp.dist) +
-                    +40 * col_penalty
-            )
+                    # Penalize if it's far away from center line: calculate distance from the middle-sensor line
+                    -10 * self.dist_centerline_curve(pos, angle))
 
-            # reward = (
-            #     # self.wheelVels[0] + self.wheelVels[1]  -_> instead of self.speed
-            #     # Give more reward if moving with speed
-            #     +2.0 * (self.wheelVels[0] + self.wheelVels[1]) +
-            #     # Penalize if it's far away from center line: calculate distance from the middle-sensor line
-            #     -10 * self.dist_centerline_curve()
-            # )
         return reward
 
     def step(self, action: np.ndarray):
-        action = np.clip(action, -1, 1)
+        # @riza: don't go backwards
+        action = np.clip(action, 0, 1)       # action = np.clip(action, -1, 1)
         # Actions could be a Python list
         action = np.array(action)
         for _ in range(self.frame_skip):
@@ -1558,7 +1499,7 @@ class Simulator(gym.Env):
         if not self._valid_pose(self.cur_pos, self.cur_angle):
             msg = 'Stopping the simulator because we are at an invalid pose.'
             logger.info(msg)
-            reward = 0
+            reward = REWARD_INVALID_POSE
             done_code = 'invalid-pose'
             done = True
         # If the maximum time step count is reached
@@ -1576,11 +1517,11 @@ class Simulator(gym.Env):
             reward = REWARD_INVALID_POSE
             done_code = 'doing a circular action'
         # @riza :If duckie is too far from center line (on the other lane, etc.)
-        elif abs(self.get_lane_pos2(self.cur_pos, self.cur_angle).dist) > 0.13:
+        elif abs(self.get_lane_pos2(self.cur_pos, self.cur_angle).dist) > 0.12:
             msg = 'Stopping the simulator because duckie is too far from center-line!'
             logger.info(msg)
             done = True
-            reward = self.compute_reward(self.cur_pos, self.cur_angle, self.robot_speed, self.wheelVels)
+            reward = REWARD_INVALID_POSE
             done_code = 'far from center line'
         else:
             done = False
@@ -1588,7 +1529,6 @@ class Simulator(gym.Env):
             msg = ''
             done_code = 'in-progress'
         return DoneRewardInfo(done=done, done_why=msg, reward=reward, done_code=done_code)
-
 
     def _render_img(self, width, height, multi_fbo,
                     final_fbo, img_array, top_down=True):
@@ -1707,8 +1647,6 @@ class Simulator(gym.Env):
                 angle = tile['angle']
                 color = tile['color']
                 texture = tile['texture']
-                # @simone
-                kind = tile['kind']
 
                 gl.glColor3f(*color)
 
@@ -1732,11 +1670,7 @@ class Simulator(gym.Env):
 
                     # Current ("closest") curve drawn in Red
                     pts = curves[np.argmax(dot_prods)]
-
-                    # @simone-bezier
-                    # self.pts.append(pts)
-                    bezier_draw(pts, n=20, red=True, env=self, kind=kind)
-
+                    bezier_draw(pts, n=20, red=True)
 
                     pts = self._get_curve(i, j)
                     for idx, pt in enumerate(pts):
@@ -1760,51 +1694,12 @@ class Simulator(gym.Env):
             gl.glVertex3f(corners[3, 0], 0.01, corners[3, 1])
             gl.glEnd()
 
-            ############################################################################################################
-            # @riza
-            """
-            This is for getting which part are we in tile-> right, or left
-            """
-            # curve_headings = curves[:, -1, :] - curves[:, 0, :]
-            # curve_headings = curve_headings / np.linalg.norm(curve_headings).reshape(1, -1)
-            # dirVec = get_dir_vec(angle)
-            # dot_prods = np.dot(curve_headings, dirVec)
-            # curve = np.argmax(dot_prods)
-            # bezier_draw_points_curve(curves[curve])
-
-            # Draw points on bezier curve on the current tile
-            i, j = self.get_grid_coords(self.cur_pos)
-            curves = self._get_tile(i, j)['curves']
-            bezier_draw_points_curve(curves[1])
-
-            # draw points on the upcoming tile
-            tile_coords = get_tiles(self.map_name)
-            idx = tile_coords.index((i, j))
-            if len(tile_coords)-1 == idx:
-                i, j = tile_coords[0]
-            else:
-                i, j = tile_coords[idx+1]
-
-            curves_next = self._get_tile(i, j)['curves']
-            bezier_draw_points_curve(curves_next[1])
-            # draw points on the previous tile
-            i, j = tile_coords[idx-1]
-            curves_prev = self._get_tile(i, j)['curves']
-            bezier_draw_points_curve(curves_prev[1])
-
-            """
-            Draw intersection point of the line that's perpendicular to dir_vec and bezier_curve
-            """
-            # cps = np.vstack((curves_prev[1], curves[1], curves_next[1]))
-
-            self.sum = bezier_draw_line(get_dir_line(self.cur_angle, self.cur_pos),
-                             grid_coords=self.get_grid_coords, get_tile=self._get_tile,
-                             n=6, perpendicular=True)
-
-            bezier_draw_points(get_dir_line(self.cur_angle, self.cur_pos), n=6)
-
-
-            ############################################################################################################
+            # @riza: Uncomment to draw features (sensing lines)
+            self.draw_features()
+            # @riza: Uncomment to draw the line b/w closest curve point & center of robot
+            # self.get_distance()
+            # @riza: Uncomment to draw the line b/w closest curve point & center of robot (perpendicular line)
+            # self.dist_centerline_curve()
 
         if top_down:
             gl.glPushMatrix()
@@ -1956,6 +1851,143 @@ class Simulator(gym.Env):
         # Force execution of queued commands
         gl.glFlush()
 
+    def draw_features(self):
+        # @riza
+        """This is for getting which part are we in tile-> right, or left"""
+        # if self.step_count < 10:
+        i, j = self.get_grid_coords(self.cur_pos)
+        tile = self._get_tile(i, j)
+
+        if tile is None or not tile['drivable']:
+            return None
+
+        curves = tile['curves']
+        curve_headings = curves[:, -1, :] - curves[:, 0, :]
+        curve_headings = curve_headings / np.linalg.norm(curve_headings).reshape(1, -1)
+        dirVec = get_dir_vec(self.cur_angle)
+        dot_prods = np.dot(curve_headings, dirVec)
+        curve = np.argmax(dot_prods)
+
+        # Curve points: 1->right, 0->left w.r.t car's perspective
+        ii = curve # 1
+        # Draw points on bezier curve on the current tile
+        i, j = self.get_grid_coords(self.cur_pos)
+        curves = self._get_tile(i, j)['curves']
+        bezier_draw_points_curve(curves[ii])
+
+        # draw points on the upcoming tile
+        tile_coords = get_tiles(self.map_name)
+        idx = tile_coords.index((i, j))
+        # if we're at the end of the list return to beginning
+        if len(tile_coords) - 1 == idx:
+            i, j = tile_coords[0]
+        else:
+            i, j = tile_coords[idx + 1]
+
+        curves_next = self._get_tile(i, j)['curves']
+        bezier_draw_points_curve(curves_next[ii])
+        # draw points on the previous tile
+        i, j = tile_coords[idx - 1]
+        curves_prev = self._get_tile(i, j)['curves']
+        bezier_draw_points_curve(curves_prev[ii])
+
+        # Get bezier points on 3 tiles(current, prev, next) and compute dist
+        n = 50
+        pts = np.vstack((
+            [bezier_point(curves[ii], i / (n - 1)) for i in range(0, n)],
+            [bezier_point(curves_next[ii], i / (n - 1)) for i in range(0, n)],
+            [bezier_point(curves_prev[ii], i / (n - 1)) for i in range(0, n)]))
+
+        bezier_draw_line(get_dir_line(self.cur_angle, self.cur_pos))
+        # Draw the center of the robot
+        draw_point(_actual_center(self.cur_pos, self.cur_angle))
+
+        return compute_dist(get_dir_line(self.cur_angle, self.cur_pos),
+                     list(pts),
+                     self.get_dir_vec(self.cur_angle),
+                     debug=False)
+
+    def get_features(self):
+        """
+        Feature vector for DDPG
+        """
+        dists = np.array(self.draw_features()).flatten()
+        wheelVels = np.array([self.wheelVels[0], self.wheelVels[1]])
+        # self.last_action
+        # Get state representation
+        state = np.concatenate((dists, wheelVels), axis=None)
+        # Concatenate last state & current state
+        feature = np.concatenate((self.last_state, state), axis=None)
+        # Store last state
+        self.last_state = np.append(self.last_state, state)
+        self.last_state = self.last_state[26:]
+        assert len(self.last_state) == 104
+
+        return feature
+
+    def get_distance(self):
+        """
+        Distance from center of the robot to the closest curve point
+        """
+        # Get the actual center of car
+        center = _actual_center(self.cur_pos, self.cur_angle)
+        # Get closest curve point w.r.t. current position of car
+        closest, _ = self.closest_curve_point(self.cur_pos, self.cur_angle)
+        # Calculate distance b/w center and closest curve point
+        dist = np.linalg.norm(center - closest)
+        # Set z-dimension to 0.01 -> required for the line to be seen in the top-down view
+        center[1], closest[1] = 0.01, 0.01
+        # Draw the line
+        bezier_draw_line(np.vstack((center, closest)))
+        return dist
+
+    def dist_centerline_curve(self, pos, angle):
+        """
+        Calculate the distance between the middle sensor line(center of robot actually) and the projected point
+        on the curve.
+        """
+        DIST_NOT_INTERSECT = 50
+        # Get directory line
+        cps = get_dir_line(angle, pos)
+        # Get the center point of directory line
+        cps_center = (cps[0] + cps[1]) / 2
+        # Get directory vector
+        dir_vec = get_dir_vec(angle)
+
+        i, j = self.get_grid_coords(pos)
+        curves = self._get_tile(i, j)['curves']
+        curve_headings = curves[:, -1, :] - curves[:, 0, :]
+        curve_headings = curve_headings / np.linalg.norm(curve_headings).reshape(1, -1)
+        dot_prods = np.dot(curve_headings, get_dir_vec(angle))
+        # Curve points: 1->right, 0->left w.r.t car's perspective
+        ii = np.argmax(dot_prods)
+
+        # draw points on the upcoming tile
+        tile_coords = get_tiles(self.map_name)
+        idx = tile_coords.index((i, j))
+        # if we're at the end of the list return to beginning
+        i, j = tile_coords[0] if len(tile_coords)-1 == idx else tile_coords[idx + 1]
+        curves_next = self._get_tile(i, j)['curves']
+
+        # draw points on the previous tile
+        i, j = tile_coords[idx - 1]
+        curves_prev = self._get_tile(i, j)['curves']
+
+        # Get bezier points on 3 tiles(current, prev, next) and compute dist
+        n = 50
+        pts = np.vstack((
+            [bezier_point(curves[ii], i / (n - 1)) for i in range(0, n)],
+            [bezier_point(curves_next[ii], i / (n - 1)) for i in range(0, n)],
+            [bezier_point(curves_prev[ii], i / (n - 1)) for i in range(0, n)]))
+
+        # Calculate feature: whether there's an intersection & if so, the distance
+        is_true, dist = compute_dist(np.vstack((cps_center, cps[1])), pts, dir_vec, n=1, red=True)[0]
+
+        if is_true:
+            return abs(dist)
+        else:
+            return DIST_NOT_INTERSECT
+
     def get_tile(self):
         # Get grid coords
         i, j = self.get_grid_coords(self.cur_pos)
@@ -2000,7 +2032,6 @@ def get_right_vec(cur_angle):
 def _update_pos(self, action):
     """
     Update the position of the robot, simulating differential drive
-
     returns pos, angle
     """
 
@@ -2051,8 +2082,9 @@ def get_dir_line(angle, pos):
     y_ /= norm
     # This pos is the geometric center of robot(same as: _actual_center())
     pos = pos + (CAMERA_FORWARD_DIST - (ROBOT_LENGTH / 2)) * get_dir_vec(angle)
-    dir_start = [pos[0] + 0.15 * x_, 0.01, pos[2] + 0.15 * y_]
-    dir_end   = [pos[0] - 0.15 * x_, 0.01, pos[2] - 0.15 * y_]
+
+    dir_start = [pos[0] + 0.25 * x_, 0.01, pos[2] + 0.25 * y_]
+    dir_end   = [pos[0] - 0.25 * x_, 0.01, pos[2] - 0.25 * y_]
 
     return np.vstack((dir_start, dir_end))
 

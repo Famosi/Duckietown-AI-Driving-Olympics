@@ -6,7 +6,7 @@ import copy
 MAX = -100000
 COF_LANE = 1000
 COF_ALIGN = 10000
-COF_SPEED = 10
+COF_SPEED = 100
 
 
 class Expert:
@@ -19,8 +19,8 @@ class Expert:
             [1., 1.],
             [0.9, 1.],
             [1., 0.9],
-            [0.1, 1.],
-            [1., 0.1]
+            [0., 1.],
+            [1., 0.]
         ])
 
     def predict_rollout(self, n, env):
@@ -117,7 +117,7 @@ class Expert:
         dream_env.set_env_params(robot_speed, cur_pos, cur_angle, state[0], last_action, wheelVels, delta_time,
                                  step_count)
 
-        max_loss = MAX
+        max_reward = MAX
         best_node = None
         for node in rollout.nodes:
             # if it's not the root
@@ -138,26 +138,27 @@ class Expert:
                     not_derivable = 0
 
                 # Distance from the center of the lane, the smaller the better
-                dist = abs(lane.dist) * self.cof_lane
+                # dist = abs(lane.dist) * self.cof_lane
+                dist = dream_env.dist_centerline_curve(position, angle)  # * self.cof_lane
 
                 # Alignment with the lane, the higher the better
-                align = lane.dot_dir * self.cof_align
+                align = lane.dot_dir  # * self.cof_align
 
                 # Speed of the agent, the higher the better
-                cur_action = rollout.nodes[node]['action_sequence'][0]
-                speed = sum(self.action_space[cur_action]) * self.cof_speed
+                cur_action = rollout.nodes[node]['action_sequence'][-1]
+                speed = sum(self.action_space[cur_action])  # * self.cof_speed
 
                 # Calculate LOSS
-                loss = (
-                        + speed
-                        + align
-                        - dist
+                reward = (
+                        + speed * self.cof_speed
+                        + align * 100000
+                        - dist * 10000
                         + not_derivable
                 )
 
-                # The node with the highest loss is the best node
-                if loss > max_loss:
-                    max_loss = loss
+                # The node with the highest reward is the best node
+                if reward > max_reward:
+                    max_reward = reward
                     best_node = node
 
         # if there is no node from rollout take a random action
@@ -179,18 +180,21 @@ class Expert:
             )['kind'].startswith('curve')
         except ValueError:
             curve = False
-
-        # Distance of the agent from the center of the lane
+        #
+        # # Distance of the agent from the center of the lane
         dist = dream_env.get_lane_pos2(dream_env.cur_pos, dream_env.cur_angle).dist
-
+        align = dream_env.get_lane_pos2(dream_env.cur_pos, dream_env.cur_angle).dot_dir * 1000000
+        # - dist + align
         # Prevent the agent to go outside or in the other lane
         if not curve:
-            self.cof_speed = COF_SPEED * 10
-            if dist < -0.06:
-                return [1., 0.95]
-            elif dist > 0.06:
-                return [0.95, 1.]
+            if dist < -0.05:
+                self.cof_speed = COF_SPEED * 0
+            elif dist > 0.05:
+                self.cof_speed = COF_SPEED * 0
         else:
             self.cof_speed = COF_SPEED
+
+
+
 
         return self.collect_rollout(dream_env)

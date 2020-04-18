@@ -28,6 +28,7 @@ for episode in range(0, EPISODES):
         action = expert.predict_action(env)
 
         observation, reward, done, info = env.step(action)
+        print(action)
 
         if done:
             break
@@ -44,12 +45,12 @@ for episode in range(0, EPISODES):
         observation = cv2.cvtColor(observation, cv2.COLOR_BGR2RGB)
 
         # we may use this to debug our expert.
-        if DEBUG:
-            cv2.imshow('debug', observation)
-            cv2.waitKey(1)
+        # if DEBUG:
+        #     cv2.imshow('debug', observation)
+        #     cv2.waitKey(1)
 
         # logger.log(observation, action, reward, done, info)
-        # [optional] env.render() to watch the expert interaction with the environment
+        env.render()  # to watch the expert interaction with the environment
         # we log here
     # logger.on_episode_done()  # speed up logging by flushing the file
     env.reset()
