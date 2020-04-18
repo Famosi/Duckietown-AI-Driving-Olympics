@@ -183,8 +183,13 @@ class Expert:
 
         dist = dream_env.get_lane_pos2(dream_env.cur_pos, dream_env.cur_angle).dist
 
-        if not curve and abs(dist) < 0.05 :
-            self.cof_speed = COF_SPEED * 5
+        if not curve:
+            if abs(dist) < 0.05:
+                self.cof_speed = COF_SPEED * 5
+            if dist < -0.06:
+                return [1., 0.9]
+            elif dist > 0.06:
+                return [0.9, 1.]
         else:
             self.cof_speed = COF_SPEED
 

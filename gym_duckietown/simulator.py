@@ -105,7 +105,7 @@ DEFAULT_FRAMERATE = 30
 
 DEFAULT_MAX_STEPS = 1500
 
-DEFAULT_MAP_NAME = 'udem1'
+DEFAULT_MAP_NAME = 'zigzag_dists'
 
 DEFAULT_FRAME_SKIP = 1
 
@@ -1695,7 +1695,7 @@ class Simulator(gym.Env):
             gl.glEnd()
 
             # @riza: Uncomment to draw features (sensing lines)
-            self.draw_features()
+            # self.draw_features()
             # @riza: Uncomment to draw the line b/w closest curve point & center of robot
             # self.get_distance()
             # @riza: Uncomment to draw the line b/w closest curve point & center of robot (perpendicular line)
@@ -1972,6 +1972,9 @@ class Simulator(gym.Env):
         # draw points on the previous tile
         i, j = tile_coords[idx - 1]
         curves_prev = self._get_tile(i, j)['curves']
+
+        if ii >= 2:
+            ii = 0
 
         # Get bezier points on 3 tiles(current, prev, next) and compute dist
         n = 50
