@@ -186,9 +186,9 @@ class Expert:
         if not curve:
             if abs(dist) < 0.05:
                 self.cof_speed = COF_SPEED * 5
-            if dist < -0.06:
+            if dist < -0.04:
                 return [1., 0.9]
-            elif dist > 0.06:
+            elif dist > 0.04:
                 return [0.9, 1.]
         else:
             self.cof_speed = COF_SPEED

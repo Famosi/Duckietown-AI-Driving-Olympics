@@ -14,8 +14,8 @@ def launch_env():
         accept_start_angle_deg=4,  # @simone start close to straight
         full_transparency=True,
         distortion=False,
-        randomize_maps_on_reset=False,
-        draw_bbox=False
+        randomize_maps_on_reset=True,
+        draw_bbox=True
     )
 
     return env
