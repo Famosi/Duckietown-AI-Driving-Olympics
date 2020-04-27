@@ -4,7 +4,7 @@ from statistics import median
 from gym_duckietown.simulator import Simulator
 import matplotlib.pyplot as plt
 
-env = env = Simulator(
+env = Simulator(
         seed=123,  # random seed
         map_name="zigzag_dists",
         max_steps=500001,  # we don't want the gym to reset itself
