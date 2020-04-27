@@ -105,13 +105,13 @@ DEFAULT_FRAMERATE = 30
 
 DEFAULT_MAX_STEPS = 1500
 
-DEFAULT_MAP_NAME = 'zigzag_dists'
+DEFAULT_MAP_NAME = 'udem1'
 
 DEFAULT_FRAME_SKIP = 1
 
 DEFAULT_ACCEPT_START_ANGLE_DEG = 60
 
-REWARD_INVALID_POSE = -1000
+REWARD_INVALID_POSE = -100
 
 MAX_SPAWN_ATTEMPTS = 5000
 
@@ -169,6 +169,7 @@ class Simulator(gym.Env):
             dynamics_rand=False,
             camera_rand=False,
             randomize_maps_on_reset=False,
+            evaluate=False,
     ):
         """
         :param map_name:
@@ -189,6 +190,7 @@ class Simulator(gym.Env):
         :param dynamics_rand: If true, perturbs the trim of the Duckiebot
         :param camera_rand: If true randomizes over camera miscalibration
         :param randomize_maps_on_reset: If true, randomizes the map on reset (Slows down training)
+        :param evaluate: If true, start at a specified point "zigzag_dists" map for evaluation purposes
         """
         # first initialize the RNG
         self.seed_value = seed
@@ -324,6 +326,11 @@ class Simulator(gym.Env):
             self.map_names = os.listdir('maps')
             self.map_names = [mapfile.replace('.yaml', '') for mapfile in self.map_names]
 
+        # Flag for evaluation over a map
+        self.evaluate = evaluate
+        # required for evalutaion
+        self.env_count = 0
+
         # Initialize the state
         self.reset()
 
@@ -331,8 +338,10 @@ class Simulator(gym.Env):
         self.wheelVels = np.array([0, 0])
 
         # @riza
-        # The state consists of sensor readings & wheel velocities
-        self.last_state = np.zeros((1, 104))
+        # The last_state consists of previous states, each storing sensor readings & wheel velocities & speed
+        self.last_state = np.zeros((1, 189))
+
+
 
     def _init_vlists(self):
         import pyglet
@@ -505,10 +514,17 @@ class Simulator(gym.Env):
 
             logger.info('Using map pose start. \n Pose: %s, Angle: %s' %(propose_pos, propose_angle) )
 
-        elif self.map_name == "zigzag_dists":
-            # @riza: Start at a fixed position and angle (a very good-aligned pose)
-            propose_angle = 1.5
-            propose_pos = np.array([1., 0., 2.7])
+        # elif self.map_name == "zigzag_dists":
+        #     # @riza: Start at a fixed position and angle (a very good-aligned pose)
+        #     propose_angle = 1.5
+        #     propose_pos = np.array([1., 0., 2.7])
+
+        elif self.evaluate:
+            assert self.map_name == "zigzag_dists", "Evaluation can only be done on 'zigzag_dists' map!"
+            assert self.env_count < 6, "Evaluation can only be done for 5 episodes!"
+            propose_pos, propose_angle = get_start_pose(self.env_count)
+            self.env_count += 1
+
 
         else:
             # Keep trying to find a valid spawn position on this tile
@@ -547,6 +563,11 @@ class Simulator(gym.Env):
                     lp = self.get_lane_pos2(propose_pos, propose_angle)
                 except NotInLane:
                     continue
+
+                # @riza: start in a good pose
+                if abs(lp.dist) > 0.12:
+                    continue
+
                 M = self.accept_start_angle_deg
                 ok = -M < lp.angle_deg < +M
                 if not ok:
@@ -580,7 +601,7 @@ class Simulator(gym.Env):
         obs = self.render_obs()
 
         # @riza: reset last_state's value
-        self.last_state = np.zeros((1, 104))
+        self.last_state = np.zeros((1, 189))
 
         # Return first observation
         return obs
@@ -1353,7 +1374,7 @@ class Simulator(gym.Env):
         if delta_time is None:
             delta_time = self.delta_time
         # @riza: Make the interval of these two the same
-        self.wheelVels = action             # self.wheelVels = action * self.robot_speed * 1
+        self.wheelVels = action   # * self.robot_speed * 1
         prev_pos = self.cur_pos
 
         # Update the robot's position
@@ -1449,7 +1470,7 @@ class Simulator(gym.Env):
         gz = grid_height * tile_size - cp[1]
         return [gx, gy, gz], angle
 
-    def compute_reward(self, pos, angle, speed, wheelVels):
+    def compute_reward(self, pos, angle, speed):
         # Compute the collision avoidance penalty
         col_penalty = self.proximity_penalty2(pos, angle)
 
@@ -1461,13 +1482,7 @@ class Simulator(gym.Env):
         else:
 
             # Compute the reward
-            reward = (
-                    # self.wheelVels[0] + self.wheelVels[1]  -_> instead of self.speed
-                    # Give more reward if moving with speed
-                    +2.0 * sum(wheelVels) +
-                    # Penalize if it's far away from center line: calculate distance from the middle-sensor line
-                    -10 * abs(lp.dist)
-            )
+            reward = (-1.0 + self.speed / 0.6 - 5.0 * abs(lp.dist) / 0.18)
 
         return reward
 
@@ -1518,7 +1533,7 @@ class Simulator(gym.Env):
             reward = REWARD_INVALID_POSE
             done_code = 'doing a circular action'
         # @riza :If duckie is too far from center line (on the other lane, etc.)
-        elif abs(self.get_lane_pos2(self.cur_pos, self.cur_angle).dist) > 0.12:
+        elif abs(self.get_lane_pos2(self.cur_pos, self.cur_angle).dist) > 0.18:
             msg = 'Stopping the simulator because duckie is too far from center-line!'
             logger.info(msg)
             done = True
@@ -1526,7 +1541,7 @@ class Simulator(gym.Env):
             done_code = 'far from center line'
         else:
             done = False
-            reward = self.compute_reward(self.cur_pos, self.cur_angle, self.robot_speed, self.wheelVels)
+            reward = self.compute_reward(self.cur_pos, self.cur_angle, self.robot_speed)
             msg = ''
             done_code = 'in-progress'
         return DoneRewardInfo(done=done, done_why=msg, reward=reward, done_code=done_code)
@@ -1696,7 +1711,7 @@ class Simulator(gym.Env):
             gl.glEnd()
 
             # @riza: Uncomment to draw features (sensing lines)
-            # self.draw_features()
+            self.draw_features()
             # @riza: Uncomment to draw the line b/w closest curve point & center of robot
             # self.get_distance()
             # @riza: Uncomment to draw the line b/w closest curve point & center of robot (perpendicular line)
@@ -1913,16 +1928,22 @@ class Simulator(gym.Env):
         Feature vector for DDPG
         """
         dists = np.array(self.draw_features()).flatten()
+        # When using frame_skip, agent can get out of tile & bezier curve points can't be observed
+        # hence, sensor readings will be None
+        if None in dists:
+            dists = np.zeros((1, 24))
+
         wheelVels = np.array([self.wheelVels[0], self.wheelVels[1]])
+        speed = np.asarray(self.speed)
         # self.last_action
         # Get state representation
-        state = np.concatenate((dists, wheelVels), axis=None)
+        state = np.concatenate((dists, wheelVels, speed), axis=None)
         # Concatenate last state & current state
         feature = np.concatenate((self.last_state, state), axis=None)
         # Store last state
         self.last_state = np.append(self.last_state, state)
-        self.last_state = self.last_state[26:]
-        assert len(self.last_state) == 104
+        self.last_state = self.last_state[27:]
+        assert len(self.last_state) == 189
 
         return feature
 
@@ -1947,7 +1968,7 @@ class Simulator(gym.Env):
         Calculate the distance between the middle sensor line(center of robot actually) and the projected point
         on the curve.
         """
-        DIST_NOT_INTERSECT = 50
+        DIST_NOT_INTERSECT = 5
         # Get directory line
         cps = get_dir_line(angle, pos)
         # Get the center point of directory line
@@ -1973,9 +1994,6 @@ class Simulator(gym.Env):
         # draw points on the previous tile
         i, j = tile_coords[idx - 1]
         curves_prev = self._get_tile(i, j)['curves']
-
-        if ii >= 2:
-            ii = 0
 
         # Get bezier points on 3 tiles(current, prev, next) and compute dist
         n = 50
@@ -2099,39 +2117,26 @@ def get_tiles(env_name):
     :param env_name:
     :return:
     """
-    # zigzag_dists = [(2, 1), (2, 2), (3, 2), (4, 2), (4, 1), (5, 1), (6, 1), (7, 1), (7, 2), (6, 2), (6, 3), (6, 4), (5, 4), (4, 4), (4, 5), (3, 5), (3, 6), (3, 7), (2, 7), (1, 7), (1, 6), (1, 5), (1, 4), (1, 3), (1, 2), (1, 1)]
-    # way = [(4, 2), (4, 1), (4, 0), (3, 0), (2, 0), (1, 0), (0, 0), (0, 1), (0, 2), (0, 3), (0, 4), (1, 4), (2, 4), (3, 4), (4, 4), (4, 3)]
-    # loop_empty = [(6, 2), (6, 1), (5, 1), (4, 1), (3, 1), (2, 1), (1, 1), (1, 2), (1, 3), (1, 4), (1, 5), (2, 5), (3, 5), (4, 5), (4, 4), (5, 4), (6, 4), (6, 3)]
-    # small_loop = [(0, 0), (0, 1), (0, 2), (1, 2), (2, 2), (2, 1), (2, 0), (1, 0)]
-    # udem1 = [(3, 5), (3, 4), (3, 3), (2, 3), (1, 3), (1, 2), (1, 1), (2, 1), (3, 2), (3, 1), (4, 1), (5, 1), (6, 1), (6, 2), (6, 3), (6, 4), (5, 4), (5, 5), (4, 5), (2, 5), (1, 5), (1, 4)]
-    # small_loop_cw = [(0, 2), (1, 2), (2, 2), (2, 1), (2, 0), (1, 0), (0, 0), (0, 1)]
-    # straight_road = [(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0), (6, 0), (7, 0), (8, 0), (9, 0), (10, 0), (11, 0), (12, 0), (13, 0), (14, 0), (15, 0), (16, 0), (17, 0), (18, 0), (19, 0), (20, 0), (21, 0), (22, 0), (23, 0), (24, 0), (25, 0), (26, 0), (27, 0), (28, 0), (29, 0), (30, 0), (31, 0), (32, 0), (33, 0), (34, 0), (35, 0), (36, 0)]
-    #
-    # tiles = {
-    #     "zigzag_dists": zigzag_dists,
-    #     "4way": way,
-    #     "loop_empty": loop_empty,
-    #     "small_loop": small_loop,
-    #     "udem1": udem1,
-    #     "straight_road": straight_road,
-    #     "small_loop_cw": small_loop_cw}
-
-    """
-        These values are taken from 'tile_coordinates.py'
-        :param env_name:
-        :return:
-    """
-    zigzag_dists = [(2, 1), (2, 2), (3, 2), (4, 2), (4, 1), (5, 1), (6, 1), (7, 1), (7, 2), (6, 2), (6, 3), (6, 4),
-                    (5, 4), (4, 4), (4, 5), (3, 5), (3, 6), (3, 7), (2, 7), (1, 7), (1, 6), (1, 5), (1, 4), (1, 3),
-                    (1, 2), (1, 1)]
-    way = [(4, 2), (4, 1), (4, 0), (3, 0), (2, 0), (1, 0), (0, 0), (0, 1), (0, 2), (0, 3), (0, 4), (1, 4), (2, 4),
-           (3, 4), (4, 4), (4, 3)]
-    loop_empty = [(6, 2), (6, 1), (5, 1), (4, 1), (3, 1), (2, 1), (1, 1), (1, 2), (1, 3), (1, 4), (1, 5), (2, 5),
-                  (3, 5), (4, 5), (4, 4), (5, 4), (6, 4), (6, 3)]
+    zigzag_dists = [(2, 1), (2, 2), (3, 2), (4, 2), (4, 1), (5, 1), (6, 1), (7, 1), (7, 2), (6, 2), (6, 3), (6, 4), (5, 4), (4, 4), (4, 5), (3, 5), (3, 6), (3, 7), (2, 7), (1, 7), (1, 6), (1, 5), (1, 4), (1, 3), (1, 2), (1, 1)]
+    way = [(4, 2), (4, 1), (4, 0), (3, 0), (2, 0), (1, 0), (0, 0), (0, 1), (0, 2), (0, 3), (0, 4), (1, 4), (2, 4), (3, 4), (4, 4), (4, 3)]
+    loop_empty = [(6, 2), (6, 1), (5, 1), (4, 1), (3, 1), (2, 1), (1, 1), (1, 2), (1, 3), (1, 4), (1, 5), (2, 5), (3, 5), (4, 5), (4, 4), (5, 4), (6, 4), (6, 3)]
     small_loop = [(0, 0), (0, 1), (0, 2), (1, 2), (2, 2), (2, 1), (2, 0), (1, 0)]
 
     tiles = {"zigzag_dists": zigzag_dists, "4way": way, "loop_empty": loop_empty, "small_loop": small_loop}
 
     return tiles[env_name]
 
-
+def get_start_pose(env_count):
+    """
+    This function is called only when evaluation=True. While evaluating, 5 slightly different poses are set in
+    'zigzag_dists' map.
+    :param env_count: counts env. for returning corresponding pose
+    :return: the starting position & angle in the map
+    """
+    poses = [([1., 0., 4.], 1.5),
+             ([1., 0., 4.], 1.5),
+             ([1., 0., 4.], 1.7),
+             ([1.07, 0., 4.], 1.5),
+             ([1., 0., 4.1], 1.5),
+             ([1.07, 0., 4.1], 1.7)]
+    return poses[env_count][0], poses[env_count][1]

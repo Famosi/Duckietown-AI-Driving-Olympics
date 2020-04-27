@@ -16,7 +16,7 @@ right_velocity = np.array([])
 DEBUG = False
 
 rewards = 0
-STEPS = 100
+STEPS = 200
 EPISODES = 5
 
 expert = Expert(env=env)
