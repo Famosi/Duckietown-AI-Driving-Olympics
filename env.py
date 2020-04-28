@@ -10,7 +10,7 @@ def launch_env():
         camera_height=480,
         draw_curve=False,
         frame_skip=2,
-        frame_rate=10,
+        frame_rate=15,
         accept_start_angle_deg=4,  # @simone start close to straight
         full_transparency=True,
         distortion=False,

@@ -606,7 +606,7 @@ class Simulator(gym.Env):
         # Return first observation
         return obs
 
-    def set_env_params(self, robot_speed, cur_pos, cur_angle, state, last_action, wheelVels, delta_time, step_count):
+    def set_env_params(self, robot_speed, cur_pos, cur_angle, state, last_action, wheelVels, delta_time, step_count, timestamp):
         """
         @simone
         Set the simulation at the start of new rollout
@@ -621,6 +621,7 @@ class Simulator(gym.Env):
         self.wheelVels = wheelVels
         self.delta_time = delta_time
         self.step_count = step_count
+        self.timestamp = copy.deepcopy(timestamp)
 
     def _load_map(self, map_name):
         """

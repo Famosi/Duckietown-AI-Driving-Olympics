@@ -41,7 +41,8 @@ class Expert:
             copy.deepcopy(env.last_action),
             copy.deepcopy(env.wheelVels),
             copy.deepcopy(env.delta_time),
-            copy.deepcopy(env.step_count)
+            copy.deepcopy(env.step_count),
+            copy.deepcopy(env.timestamp)
         )
         next_parents = []
         rollout = nx.DiGraph()
@@ -50,10 +51,10 @@ class Expert:
                          node_sequence=[nodes[0]])
         nodes.pop(0)
 
-        def __helper__(nodes, current_parent, next_parents, rollout, denv, robot_speed, cur_pos, cur_angle, state, last_action, wheelVels, delta_time, step_count):
+        def __helper__(nodes, current_parent, next_parents, rollout, denv, robot_speed, cur_pos, cur_angle, state, last_action, wheelVels, delta_time, step_count, timestamp):
             if nodes:
                 for action in range (self.action_space.shape[0]):
-                    denv.set_env_params(robot_speed, cur_pos, cur_angle, state, last_action, wheelVels, delta_time, step_count)
+                    denv.set_env_params(robot_speed, cur_pos, cur_angle, state, last_action, wheelVels, delta_time, step_count, timestamp)
                     denv.step_rollout(self.action_space[action])
 
                     dream_position = denv.cur_pos
@@ -72,7 +73,8 @@ class Expert:
                             copy.deepcopy(denv.last_action),
                             copy.deepcopy(denv.wheelVels),
                             copy.deepcopy(denv.delta_time),
-                            copy.deepcopy(env.step_count)
+                            copy.deepcopy(denv.step_count),
+                            copy.deepcopy(denv.timestamp)
                         )
                     )
 
@@ -89,14 +91,21 @@ class Expert:
                 current_parent = next_parents.pop(0)
 
                 if current_parent:
-                    return __helper__(nodes, current_parent, next_parents, rollout, current_parent[1], current_parent[2], current_parent[3], current_parent[4], current_parent[5], current_parent[6], current_parent[7], current_parent[8], current_parent[9])
+                    return __helper__(nodes, current_parent, next_parents, rollout, current_parent[1],
+                                      current_parent[2], current_parent[3], current_parent[4], current_parent[5],
+                                      current_parent[6], current_parent[7], current_parent[8], current_parent[9],
+                                      current_parent[10]
+                                      )
                 else:
                     return rollout
             else:
                 return rollout
 
         if current_parent:
-            return __helper__(nodes, current_parent, next_parents, rollout, current_parent[1], current_parent[2], current_parent[3], current_parent[4], current_parent[5], current_parent[6], current_parent[7], current_parent[8], current_parent[9])
+            return __helper__(nodes, current_parent, next_parents, rollout, current_parent[1], current_parent[2],
+                              current_parent[3], current_parent[4], current_parent[5], current_parent[6],
+                              current_parent[7], current_parent[8], current_parent[9], current_parent[10]
+                              )
 
         return rollout
 
@@ -104,18 +113,19 @@ class Expert:
         robot_speed = copy.deepcopy(dream_env.robot_speed)
         cur_pos = copy.deepcopy(dream_env.cur_pos)
         cur_angle = copy.deepcopy(dream_env.cur_angle)
-        state = copy.deepcopy(dream_env.state),
-        last_action = copy.deepcopy(dream_env.last_action),
-        wheelVels = copy.deepcopy(dream_env.wheelVels),
+        state = copy.deepcopy(dream_env.state)
+        last_action = copy.deepcopy(dream_env.last_action)
+        wheelVels = copy.deepcopy(dream_env.wheelVels)
         delta_time = copy.deepcopy(dream_env.delta_time)
         step_count = copy.deepcopy(dream_env.step_count)
+        timestamp = copy.deepcopy(dream_env.timestamp)
 
         # predict 3 steps ahead
         rollout = self.predict_rollout(3, dream_env)
 
         # Reset the env to original one
-        dream_env.set_env_params(robot_speed, cur_pos, cur_angle, state[0], last_action, wheelVels, delta_time,
-                                 step_count)
+        dream_env.set_env_params(robot_speed, cur_pos, cur_angle, state, last_action, wheelVels, delta_time, step_count,
+                            timestamp)
 
         max_reward = MAX
         best_node = None
