@@ -5,7 +5,7 @@
 
 ## Challenge [`aido_LF`][lf]
 
-Challenge **LF** in the [AI Driving Olympics](http://aido.duckietown.org/).
+Challenge [`aido_LF`] in the [AI Driving Olympics](http://aido.duckietown.org/).
 
 ## Description
 
