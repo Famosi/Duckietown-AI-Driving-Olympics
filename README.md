@@ -73,6 +73,8 @@ What this is script does is:
 * Use the `expert` to collect observations from the environment 
 * Save these observations in the `train.log` file.
 
+
+
 ### Train the model 
 :construction_worker:
 
