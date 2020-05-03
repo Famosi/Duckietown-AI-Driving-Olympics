@@ -22,7 +22,8 @@ More info about the Duckietown Project [here](http://aido.duckietown.org/).
 * [Prerequisite](#prerequisite)
 * [Getting Started](#getting-started)
     * [Install](#install)
-    * [Run](#run-the-agent)
+    * [Collect Data](#collect-data)
+    * [Train The Model](#train-the-model)
 * [Submit](#submit)
 * [Author](#author)
 
@@ -37,30 +38,32 @@ The expert, at each step, produces a prediction tree and takes the action that m
 ## Prerequisite
 **It's highly recommended to create a virtual environment using `virtualenv` or `anaconda`**
 
+Before proceeding:
 * Make sure you have `pip` installed
 * This project is tested on `Python 3.7`
 * Install the `duckietown-shell` following [the official guide](https://github.com/duckietown/duckietown-shell/blob/daffy-aido4/README.md)
 
 ## Getting Started
-Now you have all the requisite to continue.
+### Install The Environment
 
-### Install
-
-First of all, clone this repo:
+* Clone this repository:
 ```
 git clone https://github.com/FaMoSi/duckietown_aido4.git
 ```
 
-Then, install all the required dependencies using the `requirements.txt` file:
+* Move into the repository:
+```
+cd duckietown_aido4
+```
+
+* Install all the required dependencies using the `requirements.txt` file:
 ```
 cd learning && pip install -r requirements.txt
 ```
 
 That's all, everything is installed and you can run the agent!
 
-### Run the agent
-
-#### Collect data
+### Collect data
 You can now collect data using the [collect_data.py](learning/collect_data.py) script.
 
 What this is script does is:
@@ -74,7 +77,7 @@ the value of `STEPS` and/or `EPISODES`
 python collect_data.py
 ```
 
-#### Train the model 
+### Train the model 
 :construction_worker:
 
 Work in progres...
