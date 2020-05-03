@@ -5,7 +5,8 @@ import copy
 
 MAX = -100000
 COF_LANE = 1000
-COF_ALIGN = 10000
+COF_ALIGN = 100000
+COF_DIST = 10000
 COF_SPEED = 100
 
 
@@ -14,6 +15,7 @@ class Expert:
         self.env = env
         self.cof_lane = COF_LANE
         self.cof_align = COF_ALIGN
+        self.cof_dist = COF_DIST
         self.cof_speed = COF_SPEED
         self.action_space = np.array([
             [1., 1.],
@@ -158,11 +160,11 @@ class Expert:
                 cur_action = rollout.nodes[node]['action_sequence'][-1]
                 speed = sum(self.action_space[cur_action])  # * self.cof_speed
 
-                # Calculate LOSS
+                # Compute reward
                 reward = (
                         + speed * self.cof_speed
-                        + align * 100000
-                        - dist * 10000
+                        + align * self.cof_align
+                        - dist * self.cof_dist
                         + not_derivable
                 )
 

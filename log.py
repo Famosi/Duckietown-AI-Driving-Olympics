@@ -1,6 +1,6 @@
 import cv2
 from env import launch_env
-from teacher import Expert
+from expert import Expert
 from _loggers import Logger
 import numpy as np
 import matplotlib.pyplot as plt
