@@ -2,11 +2,9 @@ import cv2
 from .env import launch_env
 from .expert import Expert
 from ._loggers import Logger
-import numpy as np
-import matplotlib.pyplot as plt
 
 env = launch_env()
-# logger = Logger(env, log_file='train.log')
+logger = Logger(env, log_file='train.log')
 
 DEBUG = False
 
@@ -36,10 +34,10 @@ for episode in range(0, EPISODES):
             cv2.imshow('debug', observation)
             cv2.waitKey(1)
 
-        # logger.log(observation, action, reward, done, info)
+        logger.log(observation, action, reward, done, info)
         # env.render()  # to watch the expert interaction with the environment
         # we log here
-    # logger.on_episode_done()  # speed up logging by flushing the file
+    logger.on_episode_done()  # speed up logging by flushing the file
     env.reset()
 
 # logger.close()
