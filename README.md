@@ -42,18 +42,16 @@ The expert, at each step, produces a prediction tree and takes the action that m
 * Install the `duckietown-shell` following [the official guide](https://github.com/duckietown/duckietown-shell/blob/daffy-aido4/README.md)
 
 ## Getting Started
-Now you have all the requisite to continue. You will download the code and  
+Now you have all the requisite to continue.
 
 ### Install
 
-First of all, clone the repository
-
+First of all, clone this repo:
 ```
 git clone https://github.com/FaMoSi/duckietown_aido4.git
 ```
 
 Then, install all the required dependencies using the `requirements.txt` file:
-
 ```
 cd learning && pip install -r requirements.txt
 ```
