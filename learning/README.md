@@ -1,19 +1,32 @@
 # Duckietown - AI Driving Olympics
 <a href="http://aido.duckietown.org"><img width="200" src="https://www.duckietown.org/wp-content/uploads/2018/12/AIDO_no_text-e1544555660271.png"/></a>
 
-The [“AI Driving Olympics” (AI-DO)](http://aido.duckietown.org/) is a competition with the objective of evaluating the state of the art in machine learning and artificial intelligence for mobile robotics.
+The [“AI Driving Olympics” (AI-DO)](http://aido.duckietown.org/) is a competition with the objective of 
+evaluating the state of the art in machine learning and artificial intelligence for mobile robotics.
+The goal of the competition is to build a machine learning (ML) model that allows a self-driving "car", called `Duckiebot`, to drive on streets within `Duckietown`.
 
 The AI Driving Olympics competition is structured into the following separate challenges:
-* Lane Following - `LF`
-* Lane Following + Vehicles - `LFV`
-* Lane following with vehicles and intersections- `LFVI`
+* Lane Following - `LF` 
+* Lane Following with Vehicles - `LFV`
+* Lane following with Vehicles and Intersections- `LFVI`
 * Autonomous Mobility-on-Demand - `AMoD`
 
-This project is a solution for the `LF` challenge: control of a Duckiebot to drive on the right lane on streets within Duckietown without other moving Duckiebots present. 
+This project is a solution for the `LF` challenge: 
+* **control of a Duckiebot to drive on the right lane on streets within Duckietown without other moving Duckiebots present.**
+
+More info about the Duckietown Project [here](http://aido.duckietown.org/).
 
 ## Table of contents
 * [Introduction](#introduction)
 * [Overview](#overview)
+* [Prerequisite](#prerequisite)
+* [Getting Started](#getting-started)
+    * [Install](#install)
+    * [Run](#run-the-agent)
+        * [Collect Data](#collect-data)
+        * [Train The Model](#train-the-model)
+* [Submit](#submit)
+* [Author](#author)
 
 ## Overview
 
@@ -33,20 +46,17 @@ reward = (
 ```
 
 ## Prerequisite
-* Make sure you have `pip` installed (follow [this guide]())
+* Make sure you have `pip` installed
 * This project is tested on `Python 3.7`
+* Install the `duckietown-shell` following [this guide](https://github.com/duckietown/duckietown-shell/blob/daffy-aido4/README.md)
 
-... duckietown-shell
-
-**It's highly recommended to create a virtual environment `  a `conda` environment**
+**It's highly recommended to create a virtual environment using `virtualenv` or `anaconda`**
 
 ## Getting Started
+Now you have all the requisite to continue.
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. 
-See deployment for notes on how to deploy the project on a live system.
-
-### Installing
-First of all clone this repository:
+### Install
+First of all, clone this repository:
 
 ```
 git clone https://github.com/FaMoSi/duckietown_aido4.git
@@ -60,7 +70,7 @@ cd learning && pip install -r requirements.txt
 
 That's all, everything is installed and you can run the agent!
 
-## Running the agent
+## Run the agent
 
 ### Collect data
 Let's use the `collect_data.py` script to collect data.
@@ -70,7 +80,7 @@ python collect_data.py
 ```
 
 What this is script does is use the `expert` to collect observations from the environment.
-The script save this observations in the `train.log` file.
+The script saves these observations in the `train.log` file.
 
 ### Train the model 
 
@@ -89,7 +99,8 @@ dts challengs submit
 
 ## Author
 
-**[Simone Faggi](https://github.com/FaMoSi)**
+* **[Simone Faggi (GitHub)](https://github.com/FaMoSi)**
+* Email: simone.faggi@yahoo.it
 
 
 
