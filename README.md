@@ -43,7 +43,7 @@ reward = (
 )
 ```
 
-![topview-gif]()
+![topview-gif](https://github.com/FaMoSi/duckietown_aido4/blob/master/gifs/topview.gif)
 
 ## Prerequisite
 * Make sure you have `pip` installed
