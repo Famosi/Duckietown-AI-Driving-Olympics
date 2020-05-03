@@ -33,20 +33,8 @@ Collected data are used to train a neural network and build a model to predict, 
 
 The expert, at each step, produces a prediction tree and takes the action that maximize the reward.
 
-```
-# Compute reward
-reward = (
-        + speed * self.cof_speed
-        + align * self.cof_align
-        - dist * self.cof_dist
-        + not_derivable
-)
-```
-<p align="center"><img width="250" height="250" src="gifs/topview.gif">
+<img width="350" height="350" src="gifs/topview.gif">
   
-  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-
-
 ## Prerequisite
 * Make sure you have `pip` installed
 * This project is tested on `Python 3.7`
