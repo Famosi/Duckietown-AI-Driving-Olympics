@@ -42,7 +42,7 @@ reward = (
         + not_derivable
 )
 ```
-<p align="center"><img width="250" height="250" src="gifs/topview.gif.gif">
+<p align="center"><img width="250" height="250" src="gifs/topview.gif">
   
   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
