@@ -73,6 +73,9 @@ What this is script does is use the `expert` to collect observations from the en
 The script saves these observations in the `train.log` file.
 
 ### Train the model 
+:construction_worker:
+
+Work in progres...
 
 ## Submit
 **Remember to install the `duckietown-shell` in order to make a submission.**
