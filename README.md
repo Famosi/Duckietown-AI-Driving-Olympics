@@ -23,8 +23,6 @@ More info about the Duckietown Project [here](http://aido.duckietown.org/).
 * [Getting Started](#getting-started)
     * [Install](#install)
     * [Run](#run-the-agent)
-        * [Collect Data](#collect-data)
-        * [Train The Model](#train-the-model)
 * [Submit](#submit)
 * [Author](#author)
 
