@@ -43,6 +43,8 @@ reward = (
 )
 ```
 
+![topview-gif]()
+
 ## Prerequisite
 * Make sure you have `pip` installed
 * This project is tested on `Python 3.7`
