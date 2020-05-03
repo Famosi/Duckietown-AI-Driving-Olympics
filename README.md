@@ -42,8 +42,10 @@ reward = (
         + not_derivable
 )
 ```
+<p align="center"><img width="250" height="250" src="gifs/topview.gif.gif">
+  
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
-![topview-gif](https://github.com/FaMoSi/duckietown_aido4/blob/master/gifs/topview.gif)
 
 ## Prerequisite
 * Make sure you have `pip` installed
