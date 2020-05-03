@@ -63,14 +63,15 @@ That's all, everything is installed and you can run the agent!
 ## Run the agent
 
 ### Collect data
-Let's use the `collect_data.py` script to collect data.
+Let's use the `collect_data.py` script to collect data:
 
 ``` 
 python collect_data.py
 ```
 
-What this is script does is use the `expert` to collect observations from the environment.
-The script saves these observations in the `train.log` file.
+What this is script does is:
+* Use the `expert` to collect observations from the environment 
+* Save these observations in the `train.log` file.
 
 ### Train the model 
 :construction_worker:
@@ -92,7 +93,7 @@ dts challengs submit
 
 ## Author
 
-* **[Simone Faggi (GitHub)](https://github.com/FaMoSi)**
+* **[Simone Faggi](https://github.com/FaMoSi)**
 * Email: simone.faggi@yahoo.it
 
 
