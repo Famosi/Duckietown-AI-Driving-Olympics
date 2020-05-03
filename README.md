@@ -9,5 +9,5 @@
 
 ## Description
 
-Challenge **LF** in the [the AI Driving Olympics](http://aido.duckietown.org/).
+Challenge `aido_LF` in the [AI Driving Olympics](http://aido.duckietown.org/).
 
