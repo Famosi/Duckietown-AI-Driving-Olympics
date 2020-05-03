@@ -28,9 +28,8 @@ More info about the Duckietown Project [here](http://aido.duckietown.org/).
 
 ## Overview
 
-The approach is to build an "expert" using reinforcement learning (RL) and use this expert to collect data.
-Collected data are used to train a neural network and build a model to predict, at each step, which action to take.
-
+The approach is to build an `Expert` and use it to collect data.
+Collected data are used to train a neural network and build a model to predict which action to take.
 The expert, at each step, produces a prediction tree and takes the action that maximize the reward.
 
 <img width="350" height="350" src="gifs/topview.gif">
@@ -43,10 +42,11 @@ The expert, at each step, produces a prediction tree and takes the action that m
 **It's highly recommended to create a virtual environment using `virtualenv` or `anaconda`**
 
 ## Getting Started
-Now you have all the requisite to continue.
+Now you have all the requisite to continue. You will download the code and  
 
 ### Install
-First of all, clone this repository:
+
+First of all, clone the repository
 
 ```
 git clone https://github.com/FaMoSi/duckietown_aido4.git
@@ -60,22 +60,23 @@ cd learning && pip install -r requirements.txt
 
 That's all, everything is installed and you can run the agent!
 
-## Run the agent
+### Run the agent
 
-### Collect data
-Let's use the `collect_data.py` script to collect data:
+#### Collect data
+You can now collect data using the [collect_data.py](learning/collect_data.py) script.
+
+What this is script does is:
+* Use the `Expert` to collect observations from the environment
+* Save these observations in the `train.log` file.
+
+It is possible to increase/decrease the number of observations increasing/decreasing 
+the value of `STEPS` and/or `EPISODES`
 
 ``` 
 python collect_data.py
 ```
 
-What this is script does is:
-* Use the `expert` to collect observations from the environment 
-* Save these observations in the `train.log` file.
-
-
-
-### Train the model 
+#### Train the model 
 :construction_worker:
 
 Work in progres...
