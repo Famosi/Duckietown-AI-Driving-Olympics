@@ -35,11 +35,11 @@ The expert, at each step, produces a prediction tree and takes the action that m
 <img width="350" height="350" src="gifs/topview.gif">
   
 ## Prerequisite
+**It's highly recommended to create a virtual environment using `virtualenv` or `anaconda`**
+
 * Make sure you have `pip` installed
 * This project is tested on `Python 3.7`
 * Install the `duckietown-shell` following [the official guide](https://github.com/duckietown/duckietown-shell/blob/daffy-aido4/README.md)
-
-**It's highly recommended to create a virtual environment using `virtualenv` or `anaconda`**
 
 ## Getting Started
 Now you have all the requisite to continue. You will download the code and  
