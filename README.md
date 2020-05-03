@@ -21,6 +21,7 @@ The AI Driving Olympics competition is structured into the following separate ch
 This project is a solution for the `LF` challenge: control of a Duckiebot to drive on the right lane on streets within Duckietown without other moving Duckiebots present. 
 
 ##Overview
+
 The approach is to build an "expert" using reinforcement learning (RL) and use this expert to collect data.
 Collected data are used to train a neural network and build a model to predict, at each step, which action to take.
 
