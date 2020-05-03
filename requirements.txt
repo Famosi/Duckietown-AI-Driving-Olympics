@@ -1,7 +1,0 @@
-pandas
-tensorflow-gpu==1.15.2
-opencv-python==4.1.0.25
-numpy
-tqdm
-duckietown-gym-daffy>=5.0.16
-networkx
