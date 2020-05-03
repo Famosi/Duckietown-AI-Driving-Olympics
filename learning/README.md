@@ -33,7 +33,12 @@ reward = (
 ```
 
 ## Prerequisite
+* Make sure you have `pip` installed (follow [this guide]())
+* This project is tested on `Python 3.7`
+
 ... duckietown-shell
+
+**It's highly recommended to create a virtual environment `  a `conda` environment**
 
 ## Getting Started
 
@@ -47,10 +52,10 @@ First of all clone this repository:
 git clone https://github.com/FaMoSi/duckietown_aido4.git
 ```
 
-Now install all the required dependencies using the `requirements.txt` file:
+Then, install all the required dependencies using the `requirements.txt` file:
 
 ```
-pip install -r requirements.txt
+cd learning && pip install -r requirements.txt
 ```
 
 That's all, everything is installed and you can run the agent!
@@ -58,7 +63,7 @@ That's all, everything is installed and you can run the agent!
 ## Running the agent
 
 ### Collect data
-To collect data let's use the `collect_data.py` script.
+Let's use the `collect_data.py` script to collect data.
 
 ``` 
 python collect_data.py
