@@ -96,7 +96,6 @@ dts challengs submit
 ```
 
 ## Author
-
 * **[Simone Faggi](https://github.com/FaMoSi)**
 * Email: **simone.faggi@yahoo.it**
 
