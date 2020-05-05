@@ -11,8 +11,8 @@ The AI Driving Olympics competition is structured into the following separate ch
 * Lane following with Vehicles and Intersections- `LFVI`
 * Autonomous Mobility-on-Demand - `AMoD`
 
-This project is a solution for the `LF` challenge: 
-* **control of a Duckiebot to drive on the right lane on streets within Duckietown without other moving Duckiebots present.**
+This project is a solution for the `LF challenge`: 
+* **Control of a Duckiebot to drive on the right lane on streets within Duckietown without other moving Duckiebots present.**
 
 More info about the Duckietown Project [here](http://aido.duckietown.org/).
 
@@ -29,11 +29,18 @@ More info about the Duckietown Project [here](http://aido.duckietown.org/).
 
 ## Overview
 
-The approach is to build an `Expert` and use it to collect data.
+The approach is to build an `expert` and use it to collect data.
 Collected data are used to train a neural network and build a model to predict which action to take.
-The expert, at each step, produces a prediction tree and takes the action that maximize the reward.
+The `expert`, at each step, produces a prediction tree and takes the action that maximize the reward.
+
+You can see below the `expert` running:
 
 <img width="350" height="350" src="gifs/topview.gif">
+
+Trough this tutorial you will:
+* Use the expert to collect data
+* Train a neural network and build the final model
+* Submit the solution to the [“AI Driving Olympics” (AI-DO)](http://aido.duckietown.org/)
   
 ## Prerequisite
 **It's highly recommended to create a virtual environment using `virtualenv` or `anaconda`**
@@ -51,33 +58,44 @@ Before proceeding:
 git clone https://github.com/FaMoSi/duckietown_aido4.git
 ```
 
-* Move into the repository:
+* Change into the repository:
 ```
-cd duckietown_aido4
+cd duckietown_aido4/learning
 ```
 
-* Install all the required dependencies using the `requirements.txt` file:
+* Install all the dependencies using the `requirements.txt` file:
 ```
-cd learning && pip install -r requirements.txt
+pip install -r requirements.txt
 ```
 
 That's all, everything is installed and you can run the agent!
 
 ### Collect data
-You can now collect data using the [collect_data.py](learning/collect_data.py) script.
+Let's collect data using the [collect_data.py](learning/collect_data.py) script.
 
 What this is script does is:
-* Use the `Expert` to collect observations from the environment
-* Save these observations in the `train.log` file.
+* Run an `expert` on a variety of gym-duckietown `maps` (see [maps](learning/maps)).  
+* Record the actions it takes and save the pairs <action, observation> in the `train.log` file.
 
 It is possible to increase/decrease the number of observations increasing/decreasing 
-the value of `STEPS` and/or `EPISODES`
+the value of `STEPS` and/or `EPISODES` in the [collect_data.py](learning/collect_data.py) file.
 
+Run the expert and collect data:
 ``` 
 python collect_data.py
 ```
 
 ### Train the model 
+Given the `expert` trajectories (which we recorded in the previous [section](#collect-data)), 
+we want to learn a policy that learns from those trajectories.
+
+To do so, you will train a neural network running the [train.py](learning/train.py) script 
+that uses the collected trajectories.
+
+``` 
+python train.py
+```
+
 :construction_worker:
 
 Work in progres...
@@ -85,7 +103,7 @@ Work in progres...
 ## Submit
 **Remember to install the `duckietown-shell` in order to make a submission.**
 
-You need to copy the relevant files from the `learning/` directory to the `submission/` one. 
+To submit the `agent` for the evaluation you need to copy the relevant files from the `learning/` directory to the `submission/` one. 
 In particular, you will need to overwrite `submission/model.py` to match any update you’ve made to the model, 
 and place your final model inside of `submission/tf_models/` so you can load it correctly. 
 
@@ -94,6 +112,8 @@ Now you are ready to make a submission for the `LF` challenge:
 ```
 dts challengs submit
 ```
+
+Congreats! You made a submission for the [“AI Driving Olympics” (AI-DO)](http://aido.duckietown.org/) `LF challange`s
 
 ## Author
 * **[Simone Faggi](https://github.com/FaMoSi)**
