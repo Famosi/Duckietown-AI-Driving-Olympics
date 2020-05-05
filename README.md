@@ -17,7 +17,6 @@ This project is a solution for the `LF challenge`:
 More info about the Duckietown Project [here](http://aido.duckietown.org/).
 
 ## Table of contents
-* [Introduction](#introduction)
 * [Overview](#overview)
 * [Prerequisite](#prerequisite)
 * [Getting Started](#getting-started)
@@ -33,37 +32,38 @@ The approach is to build an `expert` and use it to collect data.
 Collected data are used to train a neural network and build a model to predict which action to take.
 The `expert`, at each step, produces a prediction tree and takes the action that maximize the reward.
 
-You can see below the `expert` running:
+You can see here below the `expert` running:
 
 <img width="350" height="350" src="gifs/topview.gif">
 
 Trough this tutorial you will:
-* Use the expert to collect data
-* Train a neural network and build the final model
-* Submit the solution to the [“AI Driving Olympics” (AI-DO)](http://aido.duckietown.org/)
+* Use the expert to collect data.
+* Train a neural network and build the final model.
+* Submit the solution to the [“AI Driving Olympics” (AI-DO)](http://aido.duckietown.org/).
   
 ## Prerequisite
 **It's highly recommended to create a virtual environment using `virtualenv` or `anaconda`**
 
 Before proceeding:
-* Make sure you have `pip` installed
-* This project is tested on `Python 3.7`
-* Install the `duckietown-shell` following [the official guide](https://github.com/duckietown/duckietown-shell/blob/daffy-aido4/README.md)
+* Make sure you have `pip` installed.
+* This project is tested on `Python 3.7`.
+* Install the `duckietown-shell` following [the official guide](https://github.com/duckietown/duckietown-shell/blob/daffy-aido4/README.md).
 
 ## Getting Started
 ### Install The Environment
 
-* Clone this repository:
+Clone this repository:
 ```
 git clone https://github.com/FaMoSi/duckietown_aido4.git
 ```
 
-* Change into the repository:
+Change into it:
 ```
 cd duckietown_aido4/learning
 ```
 
-* Install all the dependencies using the `requirements.txt` file:
+Install all the dependencies using the [requirements.txt](learning/requirements.txt) file:
+
 ```
 pip install -r requirements.txt
 ```
@@ -75,12 +75,14 @@ Let's collect data using the [collect_data.py](learning/collect_data.py) script.
 
 What this is script does is:
 * Run an `expert` on a variety of gym-duckietown `maps` (see [maps](learning/maps)).  
-* Record the actions it takes and save the pairs <action, observation> in the `train.log` file.
+* Record the actions it takes and save them (pairs `<observation, action>`) in the `train.log` file.
 
-It is possible to increase/decrease the number of observations increasing/decreasing 
+An important aspect is the number of samples. 
+It is possible to increase/decrease the number of samples increasing/decreasing 
 the value of `STEPS` and/or `EPISODES` in the [collect_data.py](learning/collect_data.py) file.
 
 Run the expert and collect data:
+
 ``` 
 python collect_data.py
 ```
