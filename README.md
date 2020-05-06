@@ -18,12 +18,12 @@ More info about the Duckietown Project [here](http://aido.duckietown.org/).
 
 ## Table of contents
 * [Overview](#overview)
-* [Prerequisite](#prerequisite)
+* [Prerequisite](#prerequisite) 
 * [Getting Started](#getting-started)
     * [Install](#install)
-    * [Collect Data](#collect-data)
-    * [Train The Model](#train-the-model)
-* [Submit](#submit)
+    * [Collect Data](#collect-data) 
+    * [Train The Model](#train-the-model) :construction_worker:
+* [Submit](#submit) :construction_worker:
 * [Author](#author)
 
 ## Overview
@@ -32,11 +32,12 @@ The approach is to build an `expert` and use it to collect data.
 Collected data are pairs `<observation, action>` used to train a neural network.
 
 The `expert`, at each step, computes a prediction tree 
-and uses information from the simulated environment (e.g distance from the center of the lane) 
+and uses information from the simulated environment (e.g. the distance from the center of the right lane) 
 to calculate the reward of each action. Then, it takes the action that maximize the reward 
 (check the [expert.py](learning/expert.py) file for more info).
 
 You can see here below the `expert` running:
+
 <img width="350" height="350" src="gifs/topview.gif">
 
 Trough this tutorial you will:
@@ -77,14 +78,17 @@ That's all, everything is installed and you can run the agent!
 Let's collect data using the [collect_data.py](learning/collect_data.py) script.
 
 What this is script does is:
-* Run an `expert` on a `map` (see [maps](learning/maps)).  
+* Run an `expert` on a variety of `maps` (see [maps](learning/maps)).  
 * Record the actions it takes and save them (pairs `<observation, action>`) in the `train.log` file.
 
 An important aspect is the number and the variety of samples:
 * To increase/decrease the number of samples you can increase/decrease 
 the value of `STEPS` and/or `EPISODES` in the [collect_data.py](learning/collect_data.py) file.
-* It is possible to run the `expert` on a variety of gym-duckietown `maps`. To do so use the `randomize_maps_on_reset`.
-If `True`, then the `map` change at each episode, otherwise you'll use always the same `map`.
+* It is possible to run the `expert` on a single/variety of gym-duckietown `maps`. 
+To do so use the `randomize_maps_on_reset` parameters of the class `Simulator`. (see [env.py](learning/env.py).
+
+In general, you can use the parameters of the `Simulator` class (see [env.py](learning/env.py))
+to change the environment settings.
 
 Run the expert and collect data:
 ``` 
