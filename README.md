@@ -88,34 +88,18 @@ python collect_data.py
 ```
 
 ### Train the model 
-Given the `expert` trajectories (which we recorded in the previous [section](#collect-data)), 
-we want to learn a policy that learns from those trajectories.
-
-To do so, you will train a neural network running the [train.py](learning/train.py) script 
-that uses the collected trajectories.
-
-``` 
-python train.py
-```
 
 :construction_worker:
 
-Work in progres...
+**Work in progres...**
+
 
 ## Submit
 **Remember to install the `duckietown-shell` in order to make a submission.**
 
-To submit the `agent` for the evaluation you need to copy the relevant files from the `learning/` directory to the `submission/` one. 
-In particular, you will need to overwrite `submission/model.py` to match any update you’ve made to the model, 
-and place your final model inside of `submission/tf_models/` so you can load it correctly. 
+:construction_worker:
 
-Now you are ready to make a submission for the `LF` challenge:
-
-```
-dts challengs submit
-```
-
-Congreats! You made a submission for the [“AI Driving Olympics” (AI-DO)](http://aido.duckietown.org/) `LF challange`s
+**Work in progres...**
 
 ## Author
 * **[Simone Faggi](https://github.com/FaMoSi)**
