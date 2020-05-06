@@ -87,7 +87,7 @@ the value of `STEPS` and/or `EPISODES` in the [collect_data.py](learning/collect
 * It is possible to run the `expert` on a single/variety of gym-duckietown `maps`. 
 To do so use the `randomize_maps_on_reset` parameters of the class `Simulator` (see [env.py](learning/env.py)).
 
-In general, you can use the instance parameters of the `Simulator` class
+In general, you can use the parameters of the `Simulator` class
 to change the environment settings.
 
 Run the expert and collect data:
