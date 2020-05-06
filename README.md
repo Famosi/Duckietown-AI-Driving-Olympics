@@ -29,11 +29,14 @@ More info about the Duckietown Project [here](http://aido.duckietown.org/).
 ## Overview
 
 The approach is to build an `expert` and use it to collect data.
-Collected data are pairs `<observation, action>` used to train a neural network and build a model to predict which action to take.
-The `expert`, at each step, produces a prediction tree and takes the action that maximize the reward.
+Collected data are pairs `<observation, action>` used to train a neural network.
+
+The `expert`, at each step, computes a prediction tree 
+and uses information from the simulated environment (e.g distance from the center of the lane) 
+to calculate the reward of each action. Then, it takes the action that maximize the reward 
+(check the [expert.py](learning/expert.py) file for more info).
 
 You can see here below the `expert` running:
-
 <img width="350" height="350" src="gifs/topview.gif">
 
 Trough this tutorial you will:
