@@ -6,7 +6,7 @@ from ._loggers import Logger
 env = launch_env()
 logger = Logger(env, log_file='train.log')
 
-DEBUG = False
+DEBUG = True
 
 STEPS = 200
 EPISODES = 5
@@ -36,10 +36,10 @@ for episode in range(0, EPISODES):
 
         logger.log(observation, action, reward, done, info)
         # env.render()  # to watch the expert interaction with the environment
-        # we log here
+
     logger.on_episode_done()  # speed up logging by flushing the file
     env.reset()
 
-# logger.close()
+logger.close()
 env.close()
 
