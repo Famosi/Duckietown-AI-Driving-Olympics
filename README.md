@@ -85,9 +85,9 @@ An important aspect is the number and the variety of samples:
 * To increase/decrease the number of samples you can increase/decrease 
 the value of `STEPS` and/or `EPISODES` in the [collect_data.py](learning/collect_data.py) file.
 * It is possible to run the `expert` on a single/variety of gym-duckietown `maps`. 
-To do so use the `randomize_maps_on_reset` parameters of the class `Simulator`. (see [env.py](learning/env.py).
+To do so use the `randomize_maps_on_reset` parameters of the class `Simulator` (see [env.py](learning/env.py)).
 
-In general, you can use the parameters of the `Simulator` class (see [env.py](learning/env.py))
+In general, you can use the instance parameters of the `Simulator` class
 to change the environment settings.
 
 Run the expert and collect data:
