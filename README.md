@@ -40,7 +40,7 @@ Trough this tutorial you will:
 * Use the expert to collect data.
 * Train a neural network and build the model. (:construction_worker: **Work in progres...**)
 * Submit the solution to the [“AI Driving Olympics” (AI-DO)](http://aido.duckietown.org/). (:construction_worker: **Work in progres...**)
-  
+
 ## Prerequisite
 **It's highly recommended to create a virtual environment using `virtualenv` or `anaconda`**
 
@@ -74,15 +74,16 @@ That's all, everything is installed and you can run the agent!
 Let's collect data using the [collect_data.py](learning/collect_data.py) script.
 
 What this is script does is:
-* Run an `expert` on a variety of gym-duckietown `maps` (see [maps](learning/maps)).  
+* Run an `expert` on a `map` (see [maps](learning/maps)).  
 * Record the actions it takes and save them (pairs `<observation, action>`) in the `train.log` file.
 
-An important aspect is the number of samples. 
-It is possible to increase/decrease the number of samples increasing/decreasing 
+An important aspect is the number and the variety of samples:
+* To increase/decrease the number of samples you can increase/decrease 
 the value of `STEPS` and/or `EPISODES` in the [collect_data.py](learning/collect_data.py) file.
+* It is possible to run the `expert` on a variety of gym-duckietown `maps`. To do so use the `randomize_maps_on_reset`.
+If `True`, then the `map` change at each episode, otherwise you'll use always the same `map`.
 
 Run the expert and collect data:
-
 ``` 
 python collect_data.py
 ```
