@@ -1,6 +1,6 @@
 import numpy as np
 import networkx as nx
-from gym_duckietown.simulator import NotInLane
+from .gym_duckietown.simulator import NotInLane
 import copy
 
 MAX = -100000
@@ -125,7 +125,7 @@ class Expert:
         # predict 3 steps ahead
         rollout = self.predict_rollout(3, dream_env)
 
-        # Reset the env to original one
+        # Reset the env to the original one
         dream_env.set_env_params(robot_speed, cur_pos, cur_angle, state, last_action, wheelVels, delta_time, step_count,
                             timestamp)
 
@@ -193,6 +193,7 @@ class Expert:
         except ValueError:
             curve = False
 
+        # distance from the center of the right lane
         dist = dream_env.get_lane_pos2(dream_env.cur_pos, dream_env.cur_angle).dist
 
         if not curve:
