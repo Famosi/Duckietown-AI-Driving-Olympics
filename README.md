@@ -29,7 +29,7 @@ More info about the Duckietown Project [here](http://aido.duckietown.org/).
 ## Overview
 
 The approach is to build an `expert` and use it to collect data.
-Collected data are used to train a neural network and build a model to predict which action to take.
+Collected data are pairs `<observation, action>` used to train a neural network and build a model to predict which action to take.
 The `expert`, at each step, produces a prediction tree and takes the action that maximize the reward.
 
 You can see here below the `expert` running:
@@ -38,8 +38,8 @@ You can see here below the `expert` running:
 
 Trough this tutorial you will:
 * Use the expert to collect data.
-* Train a neural network and build the final model.
-* Submit the solution to the [“AI Driving Olympics” (AI-DO)](http://aido.duckietown.org/).
+* Train a neural network and build the final model. (:construction_worker: **Work in progres...**)
+* Submit the solution to the [“AI Driving Olympics” (AI-DO)](http://aido.duckietown.org/). (:construction_worker: **Work in progres...**)
   
 ## Prerequisite
 **It's highly recommended to create a virtual environment using `virtualenv` or `anaconda`**
