@@ -1,7 +1,7 @@
 import cv2
-from .env import launch_env
-from .expert import Expert
-from ._loggers import Logger
+from env import launch_env
+from expert import Expert
+from _loggers import Logger
 
 env = launch_env()
 logger = Logger(env, log_file='train.log')

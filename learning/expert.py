@@ -1,6 +1,6 @@
 import numpy as np
 import networkx as nx
-from .gym_duckietown.simulator import NotInLane
+from gym_duckietown.simulator import NotInLane
 import copy
 
 MAX = -100000

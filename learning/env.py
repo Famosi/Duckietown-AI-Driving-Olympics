@@ -1,4 +1,4 @@
-from .gym_duckietown.simulator import Simulator
+from gym_duckietown.simulator import Simulator
 
 
 def launch_env():
@@ -15,7 +15,7 @@ def launch_env():
         full_transparency=True,
         distortion=True,
         randomize_maps_on_reset=True,
-        draw_bbox=True,
+        draw_bbox=False,  # top view
         evaluate=True
     )
 
