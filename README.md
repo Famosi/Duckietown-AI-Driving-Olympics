@@ -38,7 +38,7 @@ You can see here below the `expert` running:
 
 Trough this tutorial you will:
 * Use the expert to collect data.
-* Train a neural network and build the final model. (:construction_worker: **Work in progres...**)
+* Train a neural network and build the model. (:construction_worker: **Work in progres...**)
 * Submit the solution to the [“AI Driving Olympics” (AI-DO)](http://aido.duckietown.org/). (:construction_worker: **Work in progres...**)
   
 ## Prerequisite
