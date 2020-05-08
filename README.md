@@ -33,8 +33,20 @@ Collected data are pairs `<observation, action>` used to train a neural network.
 
 The `expert`, at each step, computes a prediction tree 
 and uses information from the simulated environment (e.g. the distance from the center of the right lane) 
-to calculate the reward of each action. Then, it takes the action that maximize the reward 
+to calculate the reward of each action. Then, it takes the action that maximize the [reward](https://github.com/FaMoSi/Duckietown-Aido4/blob/6d05e3ef26ccde7283a6f4d97e3ace311565865a/learning/expert.py#L164) 
 (check the [expert.py](learning/expert.py) file for more info).
+
+**Note:** To produce rollouts, the `expert` modify the environment (e.g. position and angle of the agent). 
+Thus, when the agent has to take the "best" action, the environment is modified.
+There are two main solutions:
+* For each rollout create a new environment: 
+to produce rollouts the `expert` uses a different environment and the original one remains unchanged. 
+This solution is **too slow**, because at each step, we have to instantiate a new `environment` (you can try). 
+* Reset the environment after each rollout prediction: store the environment parameters (e.g. position and angle of the agent)
+before the rollout prediction and, at the end of the computation,
+the environment is restored. This is a **faster** solution. 
+To do so, I've implemented the [set_env_params](https://github.com/FaMoSi/Duckietown-Aido4/blob/6d05e3ef26ccde7283a6f4d97e3ace311565865a/learning/gym_duckietown/simulator.py#L609) 
+function.
 
 You can see here below the `expert` running:
 
