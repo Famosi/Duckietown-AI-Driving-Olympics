@@ -50,7 +50,7 @@ function.
 
 You can see here below the `expert` running:
 
-<img width="350" height="350" src="gifs/topview.gif">
+<img width="350" height="350" src="learning/media/gifs/duckie.gif">
 
 Trough this tutorial you will:
 * Use the expert to collect data.
