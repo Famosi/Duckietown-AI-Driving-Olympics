@@ -15,7 +15,7 @@ def launch_env():
         full_transparency=True,
         distortion=True,
         randomize_maps_on_reset=False,
-        draw_bbox=True,  # top view
+        draw_bbox=False,  # top view
         evaluate=False
     )
 
