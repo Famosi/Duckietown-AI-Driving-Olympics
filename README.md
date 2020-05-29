@@ -89,16 +89,6 @@ pip install -r requirements.txt
 
 That's all, everything is installed and you can run all the scripts in this project!
 
-
-
-
-## Submit
-**Remember to install the `duckietown-shell` in order to make a submission.**
-
-:construction_worker:
-
-**Work in progres...**
-
 ## Author
 * **[Simone Faggi](https://github.com/FaMoSi)**
 * Email: **simone.faggi@yahoo.it**
