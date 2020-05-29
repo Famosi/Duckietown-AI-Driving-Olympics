@@ -70,7 +70,6 @@ python evaluation.py
 
 <details>
 <summary><b><i>env.py</i></b></summary>
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1-b0Ng1A5C34iSTqXOxWZufNmpImWMCUb?usp=sharing)
 </details>
 
 <details>
