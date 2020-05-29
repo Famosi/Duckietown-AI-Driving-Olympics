@@ -21,9 +21,6 @@ More info about the Duckietown Project and aido-LF challenge [here](http://aido.
 * [Prerequisite](#prerequisite) 
 * [Getting Started](#getting-started)
     * [Install](#install)
-    * [Collect Data](#collect-data) 
-    * [Train The Model](#train-the-model) :construction_worker:
-* [Submit](#submit) :construction_worker:
 * [Author](#author)
 
 ## Overview
