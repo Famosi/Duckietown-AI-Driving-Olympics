@@ -31,9 +31,9 @@ Data are pairs `<observation, actions>`collected in different maps/environments 
 Finally, you have a self-driving car that navigates within Duckietown using only one single sensor, the camera.
 
 Trough this tutorial you will:
-* Use the [Reinforcement Learning](expert_RL) approach (Decision Tree) to build an `expert`.
-* Use the `expert` to [collect data](duckiebot_IL/collect_data.py).
-* Use the [Imitation Learning](duckiebot_IL) approach to train the `Duckiebot`. (:construction_worker: **Work in progres...**)
+* Use the [Reinforcement Learning](duckietown_RL) approach (Decision Tree) to build an `expert`.
+* Use the `expert` to [collect data](duckietown_IL/collect_data.py).
+* Use the [Imitation Learning](duckietown_IL) approach to train the `Duckiebot`. (:construction_worker: **Work in progres...**)
 * [Submit](submission) the solution to the [“AI Driving Olympics” (AI-DO)](http://aido.duckietown.org/). (:construction_worker: **Work in progres...**)
 
 ## Prerequisite
