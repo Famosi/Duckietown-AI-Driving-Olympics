@@ -35,7 +35,7 @@ You can see here below the `expert` running in the [`zigzag_dists` map](https://
 ## Getting Started
 
 ### Prerequisite
-Remember to [install all the dependencies](../README.md#prerequisite)
+[Install all the environment dependencies](../README.md#install-the-environment)
 
 ### Run The Expert
 :construction_worker:
