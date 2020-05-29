@@ -1,5 +1,6 @@
 pandas
 tensorflow-gpu==1.15.2
+tensorflow
 opencv-python==4.1.0.25
 numpy
 tqdm

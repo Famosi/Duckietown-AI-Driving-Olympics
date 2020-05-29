@@ -1,7 +1,7 @@
 import numpy as np
 from expert import Expert
 from statistics import median
-from learning.gym_duckietown.simulator import Simulator
+from expert_RL.gym_duckietown.simulator import Simulator
 import matplotlib.pyplot as plt
 
 env = Simulator(
@@ -22,7 +22,7 @@ env = Simulator(
     )
 
 env.reset()  # obs = env.reset()
-# obs = env.get_features()  # @riza
+# obs = env.get_features()
 # env.render()
 EPISODES, STEPS = 5, 200  # in simulation 200*frame_skip = 800 timesteps
 log = {}
@@ -36,10 +36,8 @@ for episode in range(0, EPISODES):
     for steps in range(0, STEPS):
         action = expert.predict_action(env)
         _, rew, done, misc = env.step(action)
-        # obs = env.get_features()  # @riza
         rewards.append(rew)
         dists.append(env.delta_time * env.speed * env.frame_skip)
-        # env.render()
 
         if done:
             break
