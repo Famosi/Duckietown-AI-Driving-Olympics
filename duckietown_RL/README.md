@@ -14,7 +14,7 @@ This folder contains all the scripts required for the Reinforcement Learning (De
 The `expert`, at each step, computes the prediction tree 
 and uses information from the simulated environment (e.g. the distance from the center of the right lane) 
 to calculate the Q-value of each state. Then, it takes the action that leads to the state that maximize the [reward](https://github.com/FaMoSi/Duckietown-Aido4/blob/6d05e3ef26ccde7283a6f4d97e3ace311565865a/exper_RL/expert.py#L164) 
-(check the [expert.py](expert_RL/expert.py) file for more info).
+(check the [expert.py](expert.py) file for more info).
 
 **Note:** To produce rollouts, the `expert` modify the environment (e.g. position and angle of the agent). 
 Thus, when the agent has to take the "best" action, the environment is modified.
@@ -25,10 +25,10 @@ This solution is **too slow**, because at each step, we have to instantiate a ne
 * **Reset the environment after each rollout prediction**: store the environment parameters (e.g. position and angle of the agent)
 before the rollout prediction and, at the end of the computation,
 the environment is restored. This is a **faster** solution. 
-To do so, you'll use the [set_env_params](https://github.com/FaMoSi/Duckietown-Aido4/blob/6d05e3ef26ccde7283a6f4d97e3ace311565865a/expert_RL/gym_duckietown/simulator.py#L609) 
+To do so, you'll use the [set_env_params](https://github.com/FaMoSi/Duckietown-Aido4/blob/6d05e3ef26ccde7283a6f4d97e3ace311565865a/duckietown_RL/gym_duckietown/simulator.py#L609) 
 function.
 
-You can see here below the `expert` running in the [`zigzag_dists` map](https://github.com/FaMoSi/Duckietown-Aido4/blob/master/expert_RL/maps/zigzag_dists.yaml):
+You can see here below the `expert` running in the [`zigzag_dists` map](https://github.com/FaMoSi/Duckietown-Aido4/blob/master/duckietown_RL/maps/zigzag_dists.yaml):
 
 <img width="350" height="350" src="./media/gifs/duckie.gif">
 

@@ -20,15 +20,15 @@ This folder contains all the scripts required for the Imitation Learning approac
 Remember to [install all the dependencies](../README.md#prerequisite)
 
 ### Collect data
-Let's collect data using the [collect_data.py](duckiebot_IL/collect_data.py) script.
+Let's collect data using the [collect_data.py](collect_data.py) script.
 
 What this is script does is:
-* Run an `expert` on a variety of `maps` (see [maps](duckiebot_IL/maps)).  
+* Run an `expert` on a variety of `maps` (see [maps](maps)).  
 * Record the actions it takes and save them (pairs `<observation, action>`) in the `train.log` file.
 
 An important aspect is the number and the variety of samples:
 * To increase/decrease the number of samples you can increase/decrease 
-the value of `STEPS` and/or `EPISODES` in the [collect_data.py](duckiebot_IL/collect_data.py) file.
+the value of `STEPS` and/or `EPISODES` in the [collect_data.py](collect_data.py) file.
 * It is possible to run the `expert` on a single/variety of gym-duckietown `maps`. 
 To do so use the `randomize_maps_on_reset` parameters of the class `Simulator` (see [env.py](duckiebot_IL/env.py)).
 

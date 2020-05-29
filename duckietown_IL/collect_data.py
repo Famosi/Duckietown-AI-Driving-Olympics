@@ -1,6 +1,6 @@
 import cv2
 from env import launch_env
-from expert_RL/expert import Expert
+from duckietown_RL/expert import Expert
 from _loggers import Logger
 
 env = launch_env()
