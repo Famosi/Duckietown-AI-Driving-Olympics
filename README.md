@@ -1,8 +1,6 @@
 # Duckietown - AI Driving Olympics
 <a href="http://aido.duckietown.org"><img width="200" src="https://www.duckietown.org/wp-content/uploads/2018/12/AIDO_no_text-e1544555660271.png"/></a>
 
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)]()
-
 The [“AI Driving Olympics” (AI-DO)](http://aido.duckietown.org/) is a competition with the objective of 
 evaluating the state of the art in machine learning and artificial intelligence for mobile robotics.
 The goal of the competition is to build a machine learning (ML) model that allows a self-driving "car", called `Duckiebot`, to drive on streets within `Duckietown`.
@@ -13,10 +11,10 @@ The AI Driving Olympics competition is structured into the following separate ch
 * Lane following with Vehicles and Intersections- `LFVI`
 * Autonomous Mobility-on-Demand - `AMoD`
 
-This project is a solution for the `LF challenge`: 
+This project is a solution for the `aido-LF` challenge: 
 * **Control of a Duckiebot to drive on the right lane on streets within Duckietown without other moving Duckiebots present.**
 
-More info about the Duckietown Project [here](http://aido.duckietown.org/).
+More info about the Duckietown Project and aido-LF challenge [here](http://aido.duckietown.org/).
 
 ## Table of contents
 * [Overview](#overview)
@@ -30,13 +28,15 @@ More info about the Duckietown Project [here](http://aido.duckietown.org/).
 
 ## Overview
 
-The approach is to build an `expert` and use it to collect data.
-Collected data are pairs `<observation, action>` used to train a neural network.
+The approach is to train a Reinforcement Learning (RL) agent to build an `expert` that drives 
+perfectly within an environment, then use this `expert` to collect data. 
+Data are pairs `<observation, actions>`collected in different maps/environments used to train an agent that imitates the expert's behaviour (Imitation Learning / Behavioural Cloning) .
+Finally, you have a self-driving car that navigates within Duckietown using only one single sensor, the camera.
 
 The `expert`, at each step, computes a prediction tree 
 and uses information from the simulated environment (e.g. the distance from the center of the right lane) 
-to calculate the reward of each action. Then, it takes the action that maximize the [reward](https://github.com/FaMoSi/Duckietown-Aido4/blob/6d05e3ef26ccde7283a6f4d97e3ace311565865a/learning/expert.py#L164) 
-(check the [expert.py](learning/expert.py) file for more info).
+to calculate the Q-value of each state. Then, it takes the action that leads to the state that maximize the [reward](https://github.com/FaMoSi/Duckietown-Aido4/blob/6d05e3ef26ccde7283a6f4d97e3ace311565865a/exper_RL/expert.py#L164) 
+(check the [expert.py](expert_RL/expert.py) file for more info).
 
 **Note:** To produce rollouts, the `expert` modify the environment (e.g. position and angle of the agent). 
 Thus, when the agent has to take the "best" action, the environment is modified.
@@ -47,16 +47,17 @@ This solution is **too slow**, because at each step, we have to instantiate a ne
 * **Reset the environment after each rollout prediction**: store the environment parameters (e.g. position and angle of the agent)
 before the rollout prediction and, at the end of the computation,
 the environment is restored. This is a **faster** solution. 
-To do so, I've implemented the [set_env_params](https://github.com/FaMoSi/Duckietown-Aido4/blob/6d05e3ef26ccde7283a6f4d97e3ace311565865a/learning/gym_duckietown/simulator.py#L609) 
+To do so, I've implemented the [set_env_params](https://github.com/FaMoSi/Duckietown-Aido4/blob/6d05e3ef26ccde7283a6f4d97e3ace311565865a/expert_RL/gym_duckietown/simulator.py#L609) 
 function.
 
-You can see here below the `expert` running:
+You can see here below the `expert` running in the `zigzag_dists` [map](https://github.com/FaMoSi/Duckietown-Aido4/blob/master/expert_RL/maps/zigzag_dists.yaml):
 
-<img width="350" height="350" src="learning/media/gifs/duckie.gif">
+<img width="350" height="350" src="expert_RL/media/gifs/duckie.gif">
 
 Trough this tutorial you will:
-* Use the expert to collect data.
-* Train a neural network and build the model. (:construction_worker: **Work in progres...**)
+* Use a [Reinforcement Learning](expert_RL) approach (Decision Tree) to build an `expert`.
+* Use the `expert` to [collect data](duckiebot_IL/collect_data.py).
+* Use an [Imitation Learning](duckiebot_IL) approach to train the `Duckiebot`. (:construction_worker: **Work in progres...**)
 * Submit the solution to the [“AI Driving Olympics” (AI-DO)](http://aido.duckietown.org/). (:construction_worker: **Work in progres...**)
 
 ## Prerequisite
@@ -77,43 +78,18 @@ git clone https://github.com/FaMoSi/duckietown_aido4.git
 
 Change into it:
 ```
-cd duckietown_aido4/learning
+cd duckietown_aido4
 ```
 
-Install all the dependencies using the [requirements.txt](learning/requirements.txt) file:
+Install all the dependencies using the [requirements.txt](requirements.txt) file:
 
 ```
 pip install -r requirements.txt
 ```
 
-That's all, everything is installed and you can run the agent!
+That's all, everything is installed and you can run all the scripts in this project!
 
-### Collect data
-Let's collect data using the [collect_data.py](learning/collect_data.py) script.
 
-What this is script does is:
-* Run an `expert` on a variety of `maps` (see [maps](learning/maps)).  
-* Record the actions it takes and save them (pairs `<observation, action>`) in the `train.log` file.
-
-An important aspect is the number and the variety of samples:
-* To increase/decrease the number of samples you can increase/decrease 
-the value of `STEPS` and/or `EPISODES` in the [collect_data.py](learning/collect_data.py) file.
-* It is possible to run the `expert` on a single/variety of gym-duckietown `maps`. 
-To do so use the `randomize_maps_on_reset` parameters of the class `Simulator` (see [env.py](learning/env.py)).
-
-In general, you can use the parameters of the `Simulator` class
-to change the environment settings.
-
-Run the expert and collect data:
-``` 
-python collect_data.py
-```
-
-### Train the model 
-
-:construction_worker:
-
-**Work in progres...**
 
 
 ## Submit
