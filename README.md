@@ -14,13 +14,13 @@ The AI Driving Olympics competition is structured into the following separate ch
 This project is a solution for the `aido-LF` challenge: 
 * **Control of a Duckiebot to drive on the right lane on streets within Duckietown without other moving Duckiebots present.**
 
-More info about the Duckietown Project and aido-LF challenge [here](http://aido.duckietown.org/).
+More info about the Duckietown Project and `aido-LF` challenge [here](http://aido.duckietown.org/).
 
 ## Table of contents
-* [Description](#descritpion)
+* [Description](#description)
 * [Prerequisite](#prerequisite) 
 * [Getting Started](#getting-started)
-    * [Install](#install)
+    * [Install](#install-the-environment)
 * [Author](#author)
 
 ## Description

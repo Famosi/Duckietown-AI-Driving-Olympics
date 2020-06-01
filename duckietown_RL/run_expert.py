@@ -1,6 +1,6 @@
 import cv2
-from env import launch_env
-from expert import Expert
+from duckietown_RL.env import launch_env
+from duckietown_RL.expert import Expert
 
 env = launch_env()
 DEBUG = True
