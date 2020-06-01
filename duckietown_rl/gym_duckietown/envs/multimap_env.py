@@ -8,7 +8,7 @@ from ..utils import get_subdir_path
 class MultiMapEnv(gym.Env):
     """
     Environment which samples from multiple environments, for
-    multi-taks duckietown_RL
+    multi-taks duckietown_rl
     """
 
     def __init__(self, **kwargs):
