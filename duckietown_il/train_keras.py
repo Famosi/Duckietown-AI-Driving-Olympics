@@ -55,13 +55,10 @@ STORAGE_LOCATION = "trained_models/"   # where we store our trained models
 reader = Reader(f'{DATA}.log')      # where our data lies
 MODEL_NAME = "01_NVIDIA"
 
-print("read..")
 observations, actions = reader.read()  # read the observations from data
 actions = np.array(actions)
 observations = np.array(observations)
 
-
-print("split..")
 # Split the data: Train and Test
 x_train, x_test, y_train, y_test = train_test_split(observations, actions, test_size=0.2, random_state=2)
 # Split Train data once more for Validation data
@@ -84,7 +81,6 @@ x_train, y_train       = x_train[val_size:], y_train[val_size:]
 # test_datagen = ImageDataGenerator(rescale=1./255)
 # test_datagen.fit(x_test)
 
-print("BuildModel...")
 # Build the model
 # model = VGG16_model()
 model = NVIDIA_model()
@@ -105,7 +101,7 @@ log_dir = "logs/fit/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
 tb = TensorBoard(log_dir=log_dir, histogram_freq=1)
 
 
-history = model.fit_generator(x_train, y_train, batch_size=BATCH_SIZE,
+history = model.fit_generator(x_train, y_train,
                               validation_data=(x_validate, y_validate),
                               epochs=EPOCHS,
                               verbose=2,
@@ -116,5 +112,5 @@ history = model.fit_generator(x_train, y_train, batch_size=BATCH_SIZE,
 # Plot & save the plots
 plot_model_history(history, path_to_save=STORAGE_LOCATION, model_name=MODEL_NAME)
 # Test the model on the test set
-test_result = model.evaluate(x_test, y_test)
+test_result = model.evaluate(x_test, y_test, batch_size=BATCH_SIZE)
 print(f"Test loss: {test_result[0]:.3f}\t | Test accuracy: %{test_result[1]:.2f}")
