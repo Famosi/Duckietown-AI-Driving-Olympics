@@ -67,10 +67,10 @@ x_validate, y_validate = x_train[:val_size], y_train[:val_size]
 x_train, y_train       = x_train[val_size:], y_train[val_size:]
 
 # prepare data augmentation configuration
-train_datagen = ImageDataGenerator()
-train_datagen.fit(x_train)
-validation_datagen = ImageDataGenerator()
-validation_datagen.fit(x_validate)
+# train_datagen = ImageDataGenerator()
+# train_datagen.fit(x_train)
+# validation_datagen = ImageDataGenerator()
+# validation_datagen.fit(x_validate)
 
 
 # Build the model
@@ -92,8 +92,8 @@ mc = ModelCheckpoint(STORAGE_LOCATION + MODEL_NAME + '.h5', monitor='val_loss', 
 log_dir = "logs/fit/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
 tb = TensorBoard(log_dir=log_dir, histogram_freq=1)
 
-history = model.fit_generator(train_datagen.flow(x_train, y_train, batch_size=BATCH_SIZE),
-                              validation_data=validation_datagen.flow(x_validate, y_validate, batch_size=BATCH_SIZE),
+history = model.fit_generator(x_train, y_train,
+                              validation_data=(x_validate, y_validate),
                               epochs=EPOCHS,
                               verbose=2,
                               steps_per_epoch=observations.shape[0]//BATCH_SIZE,
