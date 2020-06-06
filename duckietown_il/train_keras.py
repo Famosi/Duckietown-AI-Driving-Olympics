@@ -69,7 +69,7 @@ x_train, y_train       = x_train[val_size:], y_train[val_size:]
 # prepare data augmentation configuration
 train_datagen = ImageDataGenerator()
 train_datagen.fit(x_train)
-validation_datagen = ImageDataGenerator(rescale=1./255)
+validation_datagen = ImageDataGenerator()
 validation_datagen.fit(x_validate)
 
 
