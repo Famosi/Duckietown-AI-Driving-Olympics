@@ -105,6 +105,7 @@ history = model.fit(x_train, y_train,
                     epochs=EPOCHS,
                     verbose=2,
                     steps_per_epoch=observations.shape[0] // BATCH_SIZE,
+                    validation_steps=observations.shape[0] // BATCH_SIZE,
                     callbacks=[es, mc, tb],
                     shuffle=True
                     )
