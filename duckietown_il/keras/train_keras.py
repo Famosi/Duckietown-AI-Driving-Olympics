@@ -52,7 +52,7 @@ DATA = args["data"]
 BATCH_SIZE = args["batch_size"]        # define the batch size
 EPOCHS     = args["epoch"]             # how many times we iterate through our data
 STORAGE_LOCATION = "trained_models/"   # where we store our trained models
-reader = Reader(f'{DATA}.log')      # where our data lies
+reader = Reader(f'../{DATA}.log')      # where our data lies
 MODEL_NAME = "01_NVIDIA"
 
 observations, actions = reader.read()  # read the observations from data
