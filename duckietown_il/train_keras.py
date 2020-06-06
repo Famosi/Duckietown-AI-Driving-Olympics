@@ -55,17 +55,6 @@ STORAGE_LOCATION = "trained_models/"   # where we store our trained models
 reader = Reader(f'{DATA}.log')      # where our data lies
 MODEL_NAME = "01_NVIDIA"
 
-gpus = tf.config.experimental.list_physical_devices('GPU')
-if gpus:
-  # Restrict TensorFlow to only use the first GPU
-  try:
-    tf.config.experimental.set_visible_devices(gpus[0], 'GPU')
-    logical_gpus = tf.config.experimental.list_logical_devices('GPU')
-    print(len(gpus), "Physical GPUs,", len(logical_gpus), "Logical GPU")
-  except RuntimeError as e:
-    # Visible devices must be set before GPUs have been initialized
-    print(e)
-
 observations, actions = reader.read()  # read the observations from data
 actions = np.array(actions)
 observations = np.array(observations)
@@ -103,13 +92,14 @@ model.compile(optimizer=optimizer,
               loss=MSE,
               metrics=["accuracy"])
 
+model.summary()
+
 # Create Keras callbacks
 es = EarlyStopping(monitor='val_loss', verbose=1, patience=30)
 mc = ModelCheckpoint(STORAGE_LOCATION + MODEL_NAME + '.h5', monitor='val_loss', save_best_only=True)
 log_dir = "logs/fit/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
 tb = TensorBoard(log_dir=log_dir, histogram_freq=1)
 
-print("training...")
 
 history = model.fit_generator(train_datagen.flow(x_train, y_train, batch_size=BATCH_SIZE),
                               validation_data=validation_datagen.flow(x_validate, y_validate, batch_size=BATCH_SIZE),
