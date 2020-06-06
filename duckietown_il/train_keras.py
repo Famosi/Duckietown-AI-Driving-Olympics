@@ -97,6 +97,8 @@ mc = ModelCheckpoint(STORAGE_LOCATION + MODEL_NAME + '.h5', monitor='val_loss', 
 log_dir = "logs/fit/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
 tb = TensorBoard(log_dir=log_dir, histogram_freq=1)
 
+print("training...")
+
 history = model.fit_generator(train_datagen.flow(x_train, y_train, batch_size=BATCH_SIZE),
                               validation_data=validation_datagen.flow(x_validate, y_validate, batch_size=BATCH_SIZE),
                               epochs=EPOCHS,
