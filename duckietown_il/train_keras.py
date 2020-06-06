@@ -92,13 +92,22 @@ mc = ModelCheckpoint(STORAGE_LOCATION + MODEL_NAME + '.h5', monitor='val_loss', 
 log_dir = "logs/fit/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
 tb = TensorBoard(log_dir=log_dir, histogram_freq=1)
 
-history = model.fit_generator(ImageDataGenerator.flow(x_train, y_train, BATCH_SIZE),
-                              validation_data=(x_validate, y_validate),
-                              epochs=EPOCHS,
-                              verbose=2,
-                              steps_per_epoch=observations.shape[0]//BATCH_SIZE,
-                              callbacks=[es, mc, tb],
-                              shuffle=True)
+# history = model.fit_generator(ImageDataGenerator.flow(x_train, y_train, BATCH_SIZE),
+#                               validation_data=(x_validate, y_validate),
+#                               epochs=EPOCHS,
+#                               verbose=2,
+#                               steps_per_epoch=observations.shape[0]//BATCH_SIZE,
+#                               callbacks=[es, mc, tb],
+#                               shuffle=True)
+
+history = model.fit(x_train, y_train,
+                    validation_data=(x_validate, y_validate),
+                    epochs=EPOCHS,
+                    verbose=2,
+                    steps_per_epoch=observations.shape[0] // BATCH_SIZE,
+                    callbacks=[es, mc, tb],
+                    shuffle=True
+                    )
 
 # Plot & save the plots
 plot_model_history(history, path_to_save=STORAGE_LOCATION, model_name=MODEL_NAME)
