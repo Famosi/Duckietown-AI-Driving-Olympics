@@ -84,7 +84,7 @@ model.compile(optimizer=optimizer,
               loss=MSE,
               metrics=["accuracy"])
 
-model.summarY()
+model.summary()
 
 # Create Keras callbacks
 es = EarlyStopping(monitor='val_loss', verbose=1, patience=30)
