@@ -2,6 +2,7 @@ pandas
 tensorflow-gpu==1.15.2
 keras
 tensorflow
+scikit-learn
 opencv-python==4.1.0.25
 numpy
 tqdm

@@ -55,10 +55,13 @@ STORAGE_LOCATION = "trained_models/"   # where we store our trained models
 reader = Reader(f'{DATA}.log')      # where our data lies
 MODEL_NAME = "01_NVIDIA"
 
+print("read..")
 observations, actions = reader.read()  # read the observations from data
 actions = np.array(actions)
 observations = np.array(observations)
 
+
+print("split..")
 # Split the data: Train and Test
 x_train, x_test, y_train, y_test = train_test_split(observations, actions, test_size=0.2, random_state=2)
 # Split Train data once more for Validation data
@@ -66,6 +69,7 @@ val_size = int(len(x_train) * 0.1)
 x_validate, y_validate = x_train[:val_size], y_train[:val_size]
 x_train, y_train       = x_train[val_size:], y_train[val_size:]
 
+print("dataGen..")
 # prepare data augmentation configuration
 train_datagen = ImageDataGenerator(rescale=1./255,              # rescaling factor
                                    width_shift_range=0.2,       # float: fraction of total width, if < 1
@@ -73,6 +77,7 @@ train_datagen = ImageDataGenerator(rescale=1./255,              # rescaling fact
                                    brightness_range=None,       # Range for picking a brightness shift value from
                                    zoom_range=0.0,              # Float or [lower, upper]. Range for random zoom
                                    )
+print("datagenFit..")
 train_datagen.fit(x_train)
 # this is the augmentation configuration we will use for validating: only rescaling
 validation_datagen = ImageDataGenerator(rescale=1./255)
@@ -81,6 +86,7 @@ validation_datagen.fit(x_validate)
 test_datagen = ImageDataGenerator(rescale=1./255)
 test_datagen.fit(x_test)
 
+print("buildModel..")
 # Build the model
 # model = VGG16_model()
 model = NVIDIA_model()
