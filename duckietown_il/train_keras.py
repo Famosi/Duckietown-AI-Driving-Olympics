@@ -96,7 +96,7 @@ history = model.fit_generator(x_train, y_train,
                               validation_data=(x_validate, y_validate),
                               epochs=EPOCHS,
                               verbose=2,
-                              steps_per_epoch=observations.shape[0]//BATCH_SIZE,
+                              steps_per_epoch=(observations.shape[0]//BATCH_SIZE),
                               callbacks=[es, mc, tb],
                               shuffle=True)
 
