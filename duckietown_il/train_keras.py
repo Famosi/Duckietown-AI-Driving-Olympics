@@ -92,7 +92,7 @@ mc = ModelCheckpoint(STORAGE_LOCATION + MODEL_NAME + '.h5', monitor='val_loss', 
 log_dir = "logs/fit/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
 tb = TensorBoard(log_dir=log_dir, histogram_freq=1)
 
-history = model.fit_generator(ImageDataGenerator(x_train, y_train, BATCH_SIZE),
+history = model.fit_generator(ImageDataGenerator.flow(x_train, y_train, BATCH_SIZE),
                               validation_data=(x_validate, y_validate),
                               epochs=EPOCHS,
                               verbose=2,
