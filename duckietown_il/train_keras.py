@@ -5,8 +5,9 @@ from tqdm import tqdm
 import datetime
 import matplotlib.pyplot as plt
 import argparse
-from _loggers import Reader
-from model_keras import VGG16_model, NVIDIA_model
+import tensorflow as tf
+from duckietown_il._loggers import Reader
+from duckietown_il.model_keras import VGG16_model, NVIDIA_model
 from keras.optimizers import SGD, Adam
 from keras.losses import mean_squared_error as MSE
 from keras.callbacks import EarlyStopping, ModelCheckpoint, TensorBoard
@@ -51,8 +52,19 @@ DATA = args["data"]
 BATCH_SIZE = args["batch_size"]        # define the batch size
 EPOCHS     = args["epoch"]             # how many times we iterate through our data
 STORAGE_LOCATION = "trained_models/"   # where we store our trained models
-reader = Reader(f'../{DATA}.log')      # where our data lies
+reader = Reader(f'{DATA}.log')      # where our data lies
 MODEL_NAME = "01_NVIDIA"
+
+gpus = tf.config.experimental.list_physical_devices('GPU')
+if gpus:
+  # Restrict TensorFlow to only use the first GPU
+  try:
+    tf.config.experimental.set_visible_devices(gpus[0], 'GPU')
+    logical_gpus = tf.config.experimental.list_logical_devices('GPU')
+    print(len(gpus), "Physical GPUs,", len(logical_gpus), "Logical GPU")
+  except RuntimeError as e:
+    # Visible devices must be set before GPUs have been initialized
+    print(e)
 
 observations, actions = reader.read()  # read the observations from data
 actions = np.array(actions)
