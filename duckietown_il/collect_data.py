@@ -1,7 +1,7 @@
 import cv2
 import time
 import sys
-sys.path.append('../../')
+sys.path.append('../')
 from duckietown_rl.expert import Expert
 from duckietown_il.env import launch_env
 from duckietown_il._loggers import Logger

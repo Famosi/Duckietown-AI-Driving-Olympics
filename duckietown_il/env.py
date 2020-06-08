@@ -1,5 +1,5 @@
 import sys
-sys.path.append('../../')
+sys.path.append('../')
 from duckietown_rl.gym_duckietown.simulator import Simulator
 
 def launch_env():
