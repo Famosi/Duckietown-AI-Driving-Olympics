@@ -6,7 +6,7 @@ from duckietown_ul._loggers import Logger
 
 env = launch_env()
 
-EPISODES, STEPS = 400, 256
+EPISODES, STEPS = 200, 256
 
 logger = Logger(env, log_file=f'train-{int(EPISODES*STEPS/1000)}k.log')
 
