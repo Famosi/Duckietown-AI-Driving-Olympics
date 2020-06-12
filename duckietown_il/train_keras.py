@@ -53,7 +53,8 @@ BATCH_SIZE = args["batch_size"]        # define the batch size
 EPOCHS     = args["epoch"]             # how many times we iterate through our data
 STORAGE_LOCATION = "trained_models/"   # where we store our trained models
 reader = Reader(f'../{DATA}.log')      # where our data lies
-MODEL_NAME = "01_NVIDIA"
+# MODEL_NAME = "01_NVIDIA"
+MODEL_NAME = "VGG_16"
 
 observations, actions = reader.read()  # read the observations from data
 actions = np.array(actions)
@@ -83,8 +84,8 @@ test_datagen.fit(x_test)
 
 
 # Build the model
-# model = VGG16_model()
-model = NVIDIA_model()
+model = VGG16_model()
+# model = NVIDIA_model()
 # Define the optimizer
 # optimizer = SGD(lr=0.01, momentum=0.001, nesterov=False)
 optimizer = Adam(lr=1e-3, decay=1e-3/EPOCHS)
