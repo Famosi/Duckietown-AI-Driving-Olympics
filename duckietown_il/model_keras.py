@@ -4,7 +4,7 @@ from keras.models import Model, load_model, Sequential
 
 
 def VGG16_model():
-    base_model = VGG16(classes=2, input_shape=(60, 80, 3), weights=None, include_top=False)
+    base_model = VGG16(classes=2, input_shape=(60, 120, 3), weights=None, include_top=False)
 
     # add a global spatial average pooling layer
     x = base_model.output
