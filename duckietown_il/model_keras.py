@@ -24,7 +24,7 @@ def NVIDIA_model():
     model = Sequential()
     model.add(Lambda(lambda x: x / 255.0, input_shape=(60, 120, 3)))
     # Conv_1
-    model.add(Conv2D(24, (5, 5), activation="relu", padding="same", strides=(2, 2), input_shape=(60, 120, 3)))
+    model.add(Conv2D(24, (5, 5), activation="relu", padding="same", strides=(2, 2)))
     # Conv_2
     model.add(Conv2D(36, (5, 5), activation="relu", padding="same", strides=(2, 2)))
     # Conv_3
