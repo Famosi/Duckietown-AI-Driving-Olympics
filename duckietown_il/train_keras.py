@@ -59,13 +59,12 @@ MODEL_NAME = "01_NVIDIA"
 observations, _, angles, info = reader.read()  # read the observations from data
 # actions = np.array(actions)
 observations = np.array(observations)
-angles = np.array(angles)
+angle_rad = np.array(angles)
 info = np.array(info)
 
-cur_angle = np.array([i['Simulator']['cur_angle'] for i in info])
 dist = np.array([i['Simulator']['lane_position']['dist'] for i in info])
 
-targets = np.array(list(zip(dist, cur_angle)))
+targets = np.array(list(zip(dist, angle_rad)))
 
 # Split the data: Train and Test
 x_train, x_test, y_train, y_test = train_test_split(observations, targets, test_size=0.2, random_state=2)
@@ -94,8 +93,8 @@ test_datagen.fit(x_test)
 # model = VGG16_model()
 model = NVIDIA_model()
 # Define the optimizer
-# optimizer = SGD(lr=0.01, momentum=0.001, nesterov=False)
-optimizer = Adam(lr=1e-3, decay=1e-3/EPOCHS)
+optimizer = SGD(lr=0.01, momentum=0.001, nesterov=False)
+# optimizer = Adam(lr=1e-3, decay=1e-3/EPOCHS)
 # Compile the model
 model.compile(optimizer=optimizer,
               loss=MSE,
