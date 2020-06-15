@@ -1,9 +1,9 @@
 import cv2
 import time
 import sys
-from expert import Expert
-from env import launch_env
-from _loggers import Logger
+from duckietown_rl.expert import Expert
+from duckietown_il.env import launch_env
+from duckietown_il._loggers import Logger
 
 
 env = launch_env()
