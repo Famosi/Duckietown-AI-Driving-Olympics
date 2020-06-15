@@ -91,8 +91,8 @@ test_datagen.fit(x_test)
 
 
 # Build the model
-model = VGG16_model()
-# model = NVIDIA_model()
+# model = VGG16_model()
+model = NVIDIA_model()
 # Define the optimizer
 # optimizer = SGD(lr=0.01, momentum=0.001, nesterov=False)
 optimizer = Adam(lr=1e-3, decay=1e-3/EPOCHS)
