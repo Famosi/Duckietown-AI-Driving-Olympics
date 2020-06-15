@@ -4,15 +4,38 @@ import sys
 from duckietown_rl.expert import Expert
 from duckietown_il.env import launch_env
 from duckietown_il._loggers import Logger
+import numpy as np
+
+
+def pairwise(iterable):
+    a = iter(iterable)
+    return zip(a, a)
+
+
+angle_intervals = [0.24, 0.18, -0.12, -0.06, -0.01, 0.01, 0.06, 0.12, 0.18, 0.24]
+disp_intervals = [-0.10, -0.08, -0.05, -0.03, -0.01, 0.01, 0.03, 0.05, 0.08, 0.10]
+
+
+def check_intervals(angles, displacements, cur_angle, cur_disp):
+    for x, y in zip(angle_intervals, angle_intervals[1:]):
+        if x < cur_angle < y and np.histogram(angles, bins=(x, y))[0] > 3000:
+            return False
+    for x, y in zip(disp_intervals, disp_intervals[1:]):
+        if x < cur_disp < y and np.histogram(displacements, bins=(x, y))[0] > 3000:
+            return False
+    return True
 
 
 env = launch_env()
 
-EPISODES, STEPS = 350, 200
+EPISODES, STEPS = 500, 200
 
 logger = Logger(env, log_file=f'train-{int(EPISODES*STEPS/1000)}k.log')
 
 expert = Expert(env=env)
+
+angles = []
+displacements = []
 
 start_time = time.time()
 print(f"[INFO]Starting to get logs for {EPISODES} episodes each {STEPS} steps..")
@@ -35,7 +58,14 @@ for episode in range(0, EPISODES):
             print(f"#Episode: {episode}\t | #Step: {step}")
             break
 
-        logger.log(observation, action, reward, done, info)
+        lp = env.get_lane_pos2(env.cur_pos, env.cur_angle)
+        angles.append(lp.angle_rad)
+        displacements.append(lp.dist)
+
+        if check_intervals(angles, displacements, lp.angle_rad, lp.dist):
+            logger.log(observation, action, reward, done, info)
+        elif EPISODES - episode < 2:
+            EPISODES += 1
 
     logger.on_episode_done()  # speed up logging by flushing the file
     env.reset()

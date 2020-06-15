@@ -7,6 +7,7 @@ from duckietown_il._loggers import Reader
 import matplotlib.pyplot as plt
 import cv2
 import os
+import numpy as np
 
 
 # for macOS
@@ -27,7 +28,12 @@ STEPS = 256
 observations = []
 actions_predict = []
 
-reader = Reader(f'train-102k.log')      # where our data lies
+reader = Reader(f'train-102k.log')   # where our data lies
+# obse, _, angles, info = reader.read()
+# dist = np.array([i['Simulator']['lane_position']['dist'] for i in info])
+#
+# values_in_range = ((-0.01 < dist) & (dist < 0.01)).sum()
+
 
 expert = Expert(env=env)
 actions_gt = []

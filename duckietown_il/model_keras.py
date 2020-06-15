@@ -45,3 +45,16 @@ def NVIDIA_model():
     model.add(Dense(2, activation="sigmoid"))
 
     return model
+
+
+def divide(number, parts):
+    chunksize = number//parts
+    chunkstart = 1
+    chunkend = chunkstart + chunksize - 1
+    while chunkstart < number:
+        if chunkend > number:
+            print(chunkstart, number)
+            break
+        print(chunkstart, chunkend)
+        chunkstart += chunksize
+        chunkend += chunksize
