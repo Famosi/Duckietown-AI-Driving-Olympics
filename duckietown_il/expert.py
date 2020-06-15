@@ -1,13 +1,13 @@
 import numpy as np
 import networkx as nx
-from gym_duckietown.simulator import NotInLane
+from duckietown_rl.gym_duckietown.simulator import NotInLane
 import copy
 
 MAX = -100000
 COF_LANE = 1000
 COF_ALIGN = 100000
 COF_DIST = 10000
-COF_SPEED = 100
+COF_SPEED = 500
 
 
 class Expert:
