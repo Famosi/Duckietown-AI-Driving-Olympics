@@ -1,10 +1,10 @@
 import cv2
 import time
 import sys
-sys.path.append('../')
-from duckietown_rl.expert import Expert
-from duckietown_il.env import launch_env
-from duckietown_il._loggers import Logger
+from .expert import Expert
+from env import launch_env
+from _loggers import Logger
+
 
 env = launch_env()
 
@@ -45,4 +45,3 @@ env.close()
 
 end_time = time.time()
 print(f"Process finished. It took {(end_time - start_time) / (60*60):.2f} hours!")
-
