@@ -1,7 +1,7 @@
 import cv2
 import time
 import sys
-from .expert import Expert
+from expert import Expert
 from env import launch_env
 from _loggers import Logger
 
