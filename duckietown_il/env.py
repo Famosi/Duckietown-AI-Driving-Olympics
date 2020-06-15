@@ -1,6 +1,5 @@
-import sys
-sys.path.append('../')
-from duckietown_rl.gym_duckietown.simulator import Simulator
+from gym_duckietown.simulator import Simulator
+
 
 def launch_env():
     env = Simulator(

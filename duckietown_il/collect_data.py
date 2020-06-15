@@ -1,9 +1,8 @@
 import cv2
 import time
-import sys
-from duckietown_rl.expert import Expert
-from duckietown_il.env import launch_env
-from duckietown_il._loggers import Logger
+from expert import Expert
+from env import launch_env
+from d_loggers import Logger
 import numpy as np
 
 
