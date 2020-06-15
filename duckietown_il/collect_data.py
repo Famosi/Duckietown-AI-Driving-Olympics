@@ -15,15 +15,18 @@ def pairwise(iterable):
 angle_intervals = [0.24, 0.18, -0.12, -0.06, -0.01, 0.01, 0.06, 0.12, 0.18, 0.24]
 disp_intervals = [-0.10, -0.08, -0.05, -0.03, -0.01, 0.01, 0.03, 0.05, 0.08, 0.10]
 
-
+# Return FALSE if both we alrady have enough cur_angle AND cur_disp
+# TRUE otherwise
 def check_intervals(angles, displacements, cur_angle, cur_disp):
+    check_angle = True
+    check_disp = True
     for x, y in zip(angle_intervals, angle_intervals[1:]):
         if x < cur_angle < y and np.histogram(angles, bins=(x, y))[0] > 3000:
-            return False
+            check_angle = False
     for x, y in zip(disp_intervals, disp_intervals[1:]):
         if x < cur_disp < y and np.histogram(displacements, bins=(x, y))[0] > 3000:
-            return False
-    return True
+            check_disp = False
+    return check_angle or check_disp
 
 
 env = launch_env()
