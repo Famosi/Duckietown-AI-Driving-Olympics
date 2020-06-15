@@ -3,6 +3,7 @@ sys.path.append("../../")
 from duckietown_rl.gym_duckietown.simulator import Simulator
 from keras.models import load_model
 from duckietown_rl.expert import Expert
+from duckietown_il._loggers import Reader
 import matplotlib.pyplot as plt
 import cv2
 import os
@@ -20,11 +21,13 @@ model = load_model("trained_models/01_NVIDIA.h5")
 observation = env.reset()
 env.render()
 cumulative_reward = 0.0
-EPISODES = 1
-STEPS = 80
+EPISODES = 3
+STEPS = 256
 
 observations = []
 actions_predict = []
+
+reader = Reader(f'train-102k.log')      # where our data lies
 
 expert = Expert(env=env)
 actions_gt = []
@@ -40,13 +43,16 @@ for episode in range(0, EPISODES):
         # Rescale the image
         observation = observation * 1.0/255
 
-        action = model.predict(observation.reshape(1, 60, 120, 3))[0]
-        # action = expert.predict_action(env)
+        # action = model.predict(observation.reshape(1, 60, 120, 3))[0]
+        action = expert.predict_action(env)  # we may want to use the expert for debugging purpose
         observation, reward, done, info = env.step(action)
 
-        observations.append(observation)
-        actions_predict.append(action)
-        actions_gt.append(expert.predict_action(env))
+        angle_deg = env.get_lane_pos2(env.cur_pos, env.cur_angle).angle_deg
+        displacement = env.get_lane_pos2(env.cur_pos, env.cur_angle).dist
+
+        # observations.append(observation)
+        # actions_predict.append(action)
+        # actions_gt.append(expert.predict_action(env))
 
         cumulative_reward += reward
         if done:
@@ -54,7 +60,10 @@ for episode in range(0, EPISODES):
 
         print(f"Reward: {reward:.2f}",
               f"\t| Action: [{action[0]:.3f}, {action[1]:.3f}]",
-              f"\t| Speed: {env.speed:.2f}")
+              f"\t| Speed: {env.speed:.2f}",
+              f"\t| Cur_Angle: {env.cur_angle:.2f}",
+              f"\t| Angle_Deg: {angle_deg:.2f}",
+              f"\t| Displacement: {displacement:.2f}")
 
         # cv2.imshow("obs", observation)
         # if cv2.waitKey() & 0xFF == ord('q'):

@@ -15,19 +15,14 @@ class Logger:
 
     def log(self, observation, action, reward, done, info):
         x, y, z = self.env.cur_pos
-        lp = self.env.get_lane_pos2(self.env.cur_pos, self.env.cur_angle)
-        displacement = lp.dist
-        angle_deg = lp.angle_deg
         self._recording.append({
             'step': [
                 observation,
-                (displacement, self.env.cur_angle),  # store <displacement, cur_angles>
-                (displacement, angle_deg)  # store <displacement, angle_deg>
+                action,
             ],
             # this is metadata, you may not use it at all, but it may be helpful for debugging purposes
             'metadata': [
-                (x, y, z),  # we store the pose, just in case we need it
-                action,
+                (x, y, z, self.env.cur_angle),  # we store the pose, just in case we need it
                 reward,
                 done,
                 info
@@ -57,7 +52,9 @@ class Reader:
     def read(self):
         end = False
         observations = []
-        displacements = []
+        actions = []
+
+        info = []
         angles = []
 
         while not end:
@@ -65,12 +62,17 @@ class Reader:
                 log = pickle.load(self._log_file)
                 for entry in log:
                     step = entry['step']
-                    observations.append(step[1][0])
-                    displacements.append(step[1][1])
+                    observations.append(step[0])
+                    actions.append(step[1])
+
+                    metadata = entry['metadata']
+                    angles.append(metadata[0][3])
+                    info.append(metadata[3])
+
             except EOFError:
                 end = True
 
-        return observations, (displacements, angles)
+        return observations, actions, angles, info
 
     def close(self):
         self._log_file.close()

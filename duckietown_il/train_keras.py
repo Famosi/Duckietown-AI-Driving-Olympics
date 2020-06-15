@@ -52,16 +52,23 @@ DATA = args["data"]
 BATCH_SIZE = args["batch_size"]        # define the batch size
 EPOCHS     = args["epoch"]             # how many times we iterate through our data
 STORAGE_LOCATION = "trained_models/"   # where we store our trained models
-reader = Reader(f'../{DATA}.log')      # where our data lies
-# MODEL_NAME = "01_NVIDIA"
-MODEL_NAME = "VGG_16"
+reader = Reader(f'{DATA}.log')      # where our data lies
+MODEL_NAME = "01_NVIDIA"
+# MODEL_NAME = "VGG_16"
 
-observations, actions = reader.read()  # read the observations from data
-actions = np.array(actions)
+observations, _, angles, info = reader.read()  # read the observations from data
+# actions = np.array(actions)
 observations = np.array(observations)
+angles = np.array(angles)
+info = np.array(info)
+
+cur_angle = np.array([i['Simulator']['cur_angle'] for i in info])
+dist = np.array([i['Simulator']['lane_position']['dist'] for i in info])
+
+targets = np.array(list(zip(dist, cur_angle)))
 
 # Split the data: Train and Test
-x_train, x_test, y_train, y_test = train_test_split(observations, actions, test_size=0.2, random_state=2)
+x_train, x_test, y_train, y_test = train_test_split(observations, targets, test_size=0.2, random_state=2)
 # Split Train data once more for Validation data
 val_size = int(len(x_train) * 0.1)
 x_validate, y_validate = x_train[:val_size], y_train[:val_size]
