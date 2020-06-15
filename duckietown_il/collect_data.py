@@ -8,7 +8,7 @@ from _loggers import Logger
 
 env = launch_env()
 
-EPISODES, STEPS = 400, 256
+EPISODES, STEPS = 350, 200
 
 logger = Logger(env, log_file=f'train-{int(EPISODES*STEPS/1000)}k.log')
 
