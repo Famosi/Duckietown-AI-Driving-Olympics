@@ -14,7 +14,8 @@ def pairwise(iterable):
 angle_intervals = [0.24, 0.18, -0.12, -0.06, -0.01, 0.01, 0.06, 0.12, 0.18, 0.24]
 disp_intervals = [-0.10, -0.08, -0.05, -0.03, -0.01, 0.01, 0.03, 0.05, 0.08, 0.10]
 
-# Return FALSE if both we alrady have enough cur_angle AND cur_disp
+
+# Return TRUE if don't have enough cur_angle OR cur_displacement
 # TRUE otherwise
 def check_intervals(angles, displacements, cur_angle, cur_disp):
     check_angle = True
@@ -26,6 +27,19 @@ def check_intervals(angles, displacements, cur_angle, cur_disp):
         if x < cur_disp < y and np.histogram(displacements, bins=(x, y))[0] > 3000:
             check_disp = False
     return check_angle or check_disp
+
+
+# Return TRUE if we have, for all intervals, more than 2500 samples
+def is_log(angles, displacements):
+    angle_is_log = True
+    disp_is_log = True
+    for x, y in zip(angle_intervals, angle_intervals[1:]):
+        if np.histogram(angles, bins=(x, y))[0] < 2500:
+            angle_is_log = False
+    for x, y in zip(disp_intervals, disp_intervals[1:]):
+        if np.histogram(displacements, bins=(x, y))[0] < 2500:
+            disp_is_log = False
+    return angle_is_log and disp_is_log
 
 
 env = launch_env()
@@ -66,7 +80,7 @@ for episode in range(0, EPISODES):
 
         if check_intervals(angles, displacements, lp.angle_rad, lp.dist):
             logger.log(observation, action, reward, done, info)
-        elif EPISODES - episode < 2:
+        if not is_log(angles, displacements) and EPISODES-episode == 0:
             EPISODES += 1
 
     logger.on_episode_done()  # speed up logging by flushing the file
