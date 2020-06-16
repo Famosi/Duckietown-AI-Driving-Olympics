@@ -81,7 +81,7 @@ for episode in range(0, EPISODES):
         if check_intervals(angles, displacements, lp.angle_rad, lp.dist):
             logger.log(observation, action, reward, done, info)
         if not is_log(angles, displacements) and EPISODES-episode == 0:
-            EPISODES += 1
+            episode -= 1
 
     logger.on_episode_done()  # speed up logging by flushing the file
     env.reset()
