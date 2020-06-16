@@ -6,12 +6,7 @@ from _loggers import Logger
 import numpy as np
 
 
-def pairwise(iterable):
-    a = iter(iterable)
-    return zip(a, a)
-
-
-angle_intervals = [0.24, 0.18, -0.12, -0.06, -0.01, 0.01, 0.06, 0.12, 0.18, 0.24]
+angle_intervals = [-0.24, -0.18, -0.12, -0.06, -0.01, 0.01, 0.06, 0.12, 0.18, 0.24]
 disp_intervals = [-0.10, -0.08, -0.05, -0.03, -0.01, 0.01, 0.03, 0.05, 0.08, 0.10]
 
 
