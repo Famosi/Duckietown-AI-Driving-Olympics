@@ -5,6 +5,7 @@ from keras.models import load_model
 from duckietown_rl.expert import Expert
 from duckietown_il._loggers import Reader
 import matplotlib.pyplot as plt
+# from gym_duckietown.simulator import NotInLane
 import cv2
 import os
 import numpy as np
@@ -17,18 +18,15 @@ env = Simulator(seed=123, map_name="zigzag_dists", max_steps=5000001, domain_ran
                 camera_height=480, accept_start_angle_deg=4, full_transparency=True, distortion=True,
                 randomize_maps_on_reset=True, draw_curve=False, draw_bbox=False, frame_skip=2, frame_rate=15)
 
-model = load_model("trained_models/01_NVIDIA.h5")
+model = load_model("trained_models/01_NVIDIA_actions.h5")
 
 observation = env.reset()
 env.render()
 cumulative_reward = 0.0
 EPISODES = 3
-STEPS = 256
+STEPS = 40
 
-observations = []
-actions_predict = []
-
-reader = Reader(f'train-102k.log')   # where our data lies
+# reader = Reader(f'train-102k.log')   # where our data lies
 # obse, _, angles, info = reader.read()
 # dist = np.array([i['Simulator']['lane_position']['dist'] for i in info])
 #
@@ -36,7 +34,10 @@ reader = Reader(f'train-102k.log')   # where our data lies
 
 
 expert = Expert(env=env)
-actions_gt = []
+
+observations = []
+predictions = []
+gts = []
 
 for episode in range(0, EPISODES):
     for steps in range(0, STEPS):
@@ -49,16 +50,19 @@ for episode in range(0, EPISODES):
         # Rescale the image
         observation = observation * 1.0/255
 
-        # action = model.predict(observation.reshape(1, 60, 120, 3))[0]
-        action = expert.predict_action(env)  # we may want to use the expert for debugging purpose
+        action = model.predict(observation.reshape(1, 60, 120, 3))[0]
+
+        action_pred = expert.predict_action(env)  # we may want to use the expert for debugging purpose
         observation, reward, done, info = env.step(action)
 
-        angle_deg = env.get_lane_pos2(env.cur_pos, env.cur_angle).angle_deg
-        displacement = env.get_lane_pos2(env.cur_pos, env.cur_angle).dist
+        try:
+            lp = env.get_lane_pos2(env.cur_pos, env.cur_angle)
+        except:
+            break
 
-        # observations.append(observation)
-        # actions_predict.append(action)
-        # actions_gt.append(expert.predict_action(env))
+        observations.append(observation)
+        predictions.append(action)
+        gts.append(action_pred)
 
         cumulative_reward += reward
         if done:
@@ -67,9 +71,7 @@ for episode in range(0, EPISODES):
         print(f"Reward: {reward:.2f}",
               f"\t| Action: [{action[0]:.3f}, {action[1]:.3f}]",
               f"\t| Speed: {env.speed:.2f}",
-              f"\t| Cur_Angle: {env.cur_angle:.2f}",
-              f"\t| Angle_Deg: {angle_deg:.2f}",
-              f"\t| Displacement: {displacement:.2f}")
+              f"\t| Cur_Angle: {env.cur_angle:.2f}")
 
         # cv2.imshow("obs", observation)
         # if cv2.waitKey() & 0xFF == ord('q'):
@@ -83,13 +85,13 @@ print('total reward: {}, mean reward: {}'.format(cumulative_reward, cumulative_r
 env.close()
 # model.close()
 
-fig = plt.figure(figsize=(40, 30))
-i = 0
-for action_predict, action_gt, img in zip(actions_predict, actions_gt, observations):
-    ax = fig.add_subplot(12, 10, i+1, xticks=[], yticks=[])
-    ax.imshow(img)
-    ax.set_title(f"Action_predict: [{action_predict[0]:.1f}, {action_predict[1]:.1f}]\n"
-                 f"GT: [{action_gt[0]:.1f}, {action_gt[1]:.1f}]")
-    i += 1
-
-plt.show()
+# fig = plt.figure(figsize=(40, 30))
+# i = 0
+# for prediction, gt, img in zip(predictions, gts, observations):
+#     ax = fig.add_subplot(12, 10, i+1, xticks=[], yticks=[])
+#     ax.imshow(img)
+#     ax.set_title(f"Pred: [{prediction[0]:.3f}, {prediction[1]:.3f}]\n"
+#                  f"GT: [{gt[0]:.3f}, {gt[1]:.3f}]")
+#     i += 1
+#
+# plt.show()

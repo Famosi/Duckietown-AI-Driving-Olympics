@@ -70,10 +70,10 @@ for episode in range(0, EPISODES):
             break
 
         lp = env.get_lane_pos2(env.cur_pos, env.cur_angle)
-        angles.append(lp.angle_rad)
+        angles.append(lp.angles)
         displacements.append(lp.dist)
 
-        if check_intervals(angles, displacements, lp.angle_rad, lp.dist):
+        if check_intervals(angles, displacements, lp.angles, lp.dist):
             logger.log(observation, action, reward, done, info)
         if not is_log(angles, displacements) and EPISODES-episode == 0:
             episode -= 1

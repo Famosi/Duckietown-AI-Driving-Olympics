@@ -59,15 +59,15 @@ MODEL_NAME = "01_NVIDIA"
 observations, actions, angles, info = reader.read()  # read the observations from data
 actions = np.array(actions)
 observations = np.array(observations)
-# angle_rad = np.array(angles)
-# info = np.array(info)
+angles = np.array(angles)
+info = np.array(info)
 
-# dist = np.array([i['Simulator']['lane_position']['dist'] for i in info])
+dist = np.array([i['Simulator']['lane_position']['dist'] for i in info])
 
-# actions = np.array(list(zip(dist, angle_rad)))
+targets = np.array(list(zip(dist, angles)))
 
 # Split the data: Train and Test
-x_train, x_test, y_train, y_test = train_test_split(observations, actions, test_size=0.2, random_state=2)
+x_train, x_test, y_train, y_test = train_test_split(observations, targets, test_size=0.2, random_state=2)
 # Split Train data once more for Validation data
 val_size = int(len(x_train) * 0.1)
 x_validate, y_validate = x_train[:val_size], y_train[:val_size]
