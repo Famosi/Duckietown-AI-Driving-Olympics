@@ -56,18 +56,18 @@ reader = Reader(f'../{DATA}.log')      # where our data lies
 MODEL_NAME = "01_NVIDIA"
 # MODEL_NAME = "VGG_16"
 
-observations, _, angles, info = reader.read()  # read the observations from data
-# actions = np.array(actions)
+observations, actions, angles, info = reader.read()  # read the observations from data
+actions = np.array(actions)
 observations = np.array(observations)
-angle_rad = np.array(angles)
-info = np.array(info)
+# angle_rad = np.array(angles)
+# info = np.array(info)
 
-dist = np.array([i['Simulator']['lane_position']['dist'] for i in info])
+# dist = np.array([i['Simulator']['lane_position']['dist'] for i in info])
 
-targets = np.array(list(zip(dist, angle_rad)))
+# actions = np.array(list(zip(dist, angle_rad)))
 
 # Split the data: Train and Test
-x_train, x_test, y_train, y_test = train_test_split(observations, targets, test_size=0.2, random_state=2)
+x_train, x_test, y_train, y_test = train_test_split(observations, actions, test_size=0.2, random_state=2)
 # Split Train data once more for Validation data
 val_size = int(len(x_train) * 0.1)
 x_validate, y_validate = x_train[:val_size], y_train[:val_size]
@@ -93,8 +93,8 @@ test_datagen.fit(x_test)
 # model = VGG16_model()
 model = NVIDIA_model()
 # Define the optimizer
-optimizer = SGD(lr=0.01, momentum=0.001, nesterov=False)
-# optimizer = Adam(lr=1e-3, decay=1e-3/EPOCHS)
+# optimizer = SGD(lr=0.01, momentum=0.001, nesterov=False)
+optimizer = Adam(lr=1e-3, decay=1e-3/EPOCHS)
 # Compile the model
 model.compile(optimizer=optimizer,
               loss=MSE,
