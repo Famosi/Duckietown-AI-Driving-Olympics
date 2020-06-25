@@ -47,6 +47,8 @@ expert = Expert(env=env)
 
 angles = []
 displacements = []
+pts = []
+observations = []
 
 start_time = time.time()
 print(f"[INFO]Starting to get logs for {EPISODES} episodes each {STEPS} steps..")
@@ -73,8 +75,8 @@ for episode in range(0, EPISODES):
         angles.append(lp.angles)
         displacements.append(lp.dist)
 
-        pts = env.get_pts()
-        print(pts)
+        pts.append(env.get_pts())
+        observations.append(observation)
 
         # logger.log(observation, action, reward, done, info)
 
@@ -91,4 +93,5 @@ logger.close()
 env.close()
 
 end_time = time.time()
+print(pts)
 print(f"Process finished. It took {(end_time - start_time) / (60*60):.2f} hours!")
