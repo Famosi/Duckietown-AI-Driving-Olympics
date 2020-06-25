@@ -39,7 +39,7 @@ def is_log(angles, displacements):
 
 env = launch_env()
 
-EPISODES, STEPS = 500, 200
+EPISODES, STEPS = 1, 4
 
 logger = Logger(env, log_file=f'train-{int(EPISODES*STEPS/1000)}k.log')
 
@@ -73,10 +73,16 @@ for episode in range(0, EPISODES):
         angles.append(lp.angles)
         displacements.append(lp.dist)
 
-        if check_intervals(angles, displacements, lp.angles, lp.dist):
-            logger.log(observation, action, reward, done, info)
-        if not is_log(angles, displacements) and EPISODES-episode == 0:
-            episode -= 1
+        pts = env.get_pts()
+        print(pts)
+
+        # logger.log(observation, action, reward, done, info)
+
+
+        # if check_intervals(angles, displacements, lp.angles, lp.dist):
+        #     logger.log(observation, action, reward, done, info)
+        # if not is_log(angles, displacements) and EPISODES-episode == 0:
+        #     episode -= 1
 
     logger.on_episode_done()  # speed up logging by flushing the file
     env.reset()

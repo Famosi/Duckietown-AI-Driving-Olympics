@@ -1903,6 +1903,7 @@ class Simulator(gym.Env):
 
         curves_next = self._get_tile(i, j)['curves']
         bezier_draw_points_curve(curves_next[ii])
+
         # draw points on the previous tile
         i, j = tile_coords[idx - 1]
         curves_prev = self._get_tile(i, j)['curves']
@@ -1923,6 +1924,60 @@ class Simulator(gym.Env):
                      list(pts),
                      self.get_dir_vec(self.cur_angle),
                      debug=False)
+
+    def get_pts(self):
+        # @riza
+        """This is for getting which part are we in tile-> right, or left"""
+        # if self.step_count < 10:
+        i, j = self.get_grid_coords(self.cur_pos)
+        tile = self._get_tile(i, j)
+
+        if tile is None or not tile['drivable']:
+            return None
+
+        curves = tile['curves']
+        curve_headings = curves[:, -1, :] - curves[:, 0, :]
+        curve_headings = curve_headings / np.linalg.norm(curve_headings).reshape(1, -1)
+        dirVec = get_dir_vec(self.cur_angle)
+        dot_prods = np.dot(curve_headings, dirVec)
+        curve = np.argmax(dot_prods)
+
+        # Curve points: 1->right, 0->left w.r.t car's perspective
+        ii = curve  # 1
+        # Draw points on bezier curve on the current tile
+        i, j = self.get_grid_coords(self.cur_pos)
+        curves = self._get_tile(i, j)['curves']
+        bezier_draw_points_curve(curves[ii])
+
+        # draw points on the upcoming tile
+        tile_coords = get_tiles(self.map_name)
+        idx = tile_coords.index((i, j))
+        # if we're at the end of the list return to beginning
+        if len(tile_coords) - 1 == idx:
+            i, j = tile_coords[0]
+        else:
+            i, j = tile_coords[idx + 1]
+
+        curves_next = self._get_tile(i, j)['curves']
+        bezier_draw_points_curve(curves_next[ii])
+
+        # draw points on the previous tile
+        i, j = tile_coords[idx - 1]
+        curves_prev = self._get_tile(i, j)['curves']
+        bezier_draw_points_curve(curves_prev[ii])
+
+        # Get bezier points on 3 tiles(current, prev, next) and compute dist
+        n = 50
+        pts = np.vstack((
+            [bezier_point(curves[ii], i / (n - 1)) for i in range(0, n)],
+            [bezier_point(curves_next[ii], i / (n - 1)) for i in range(0, n)],
+            [bezier_point(curves_prev[ii], i / (n - 1)) for i in range(0, n)]))
+
+        bezier_draw_line(get_dir_line(self.cur_angle, self.cur_pos))
+        # Draw the center of the robot
+        draw_point(_actual_center(self.cur_pos, self.cur_angle))
+
+        return list(pts)
 
     def get_features(self):
         """
