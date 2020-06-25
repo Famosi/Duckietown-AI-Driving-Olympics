@@ -72,7 +72,7 @@ for episode in range(0, EPISODES):
             break
 
         lp = env.get_lane_pos2(env.cur_pos, env.cur_angle)
-        angles.append(lp.angles)
+        angles.append(lp.angle_deg)
         displacements.append(lp.dist)
 
         pts.append(env.get_pts())

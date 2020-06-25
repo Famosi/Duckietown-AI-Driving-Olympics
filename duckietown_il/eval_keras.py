@@ -15,21 +15,21 @@ import numpy as np
 os.environ['KMP_DUPLICATE_LIB_OK']='True'
 
 env = Simulator(seed=123, map_name="zigzag_dists", max_steps=5000001, domain_rand=True, camera_width=640,
-                camera_height=480, accept_start_angle_deg=4, full_transparency=True, distortion=True,
-                randomize_maps_on_reset=True, draw_curve=False, draw_bbox=False, frame_skip=2, frame_rate=15)
+                camera_height=480, accept_start_angle_deg=1, full_transparency=True, distortion=True,
+                randomize_maps_on_reset=True, draw_curve=False, draw_bbox=False, frame_skip=1, frame_rate=30)
 
 model = load_model("trained_models/01_NVIDIA_actions.h5")
 
 observation = env.reset()
-env.render()
+# env.render()
 cumulative_reward = 0.0
-EPISODES = 3
-STEPS = 40
+EPISODES = 1
+STEPS = 200
 
 # reader = Reader(f'train-102k.log')   # where our data lies
 # obse, _, angles, info = reader.read()
 # dist = np.array([i['Simulator']['lane_position']['dist'] for i in info])
-#
+
 # values_in_range = ((-0.01 < dist) & (dist < 0.01)).sum()
 
 
@@ -50,9 +50,9 @@ for episode in range(0, EPISODES):
         # Rescale the image
         observation = observation * 1.0/255
 
-        action = model.predict(observation.reshape(1, 60, 120, 3))[0]
+        action = model.predict(observation.reshape(1, 60, 120, 3))[0] # Predict
+        action_pred = expert.predict_action(env)  # Ground Truth
 
-        action_pred = expert.predict_action(env)  # we may want to use the expert for debugging purpose
         observation, reward, done, info = env.step(action)
 
         try:
@@ -73,11 +73,12 @@ for episode in range(0, EPISODES):
               f"\t| Speed: {env.speed:.2f}",
               f"\t| Cur_Angle: {env.cur_angle:.2f}")
 
-        # cv2.imshow("obs", observation)
+        cv2.imshow("obs", observation)
+        cv2.waitKey(1)
         # if cv2.waitKey() & 0xFF == ord('q'):
         #     break
 
-        env.render()
+        # env.render()
     env.reset()
 
 print('total reward: {}, mean reward: {}'.format(cumulative_reward, cumulative_reward // EPISODES))
