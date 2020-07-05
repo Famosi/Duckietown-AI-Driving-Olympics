@@ -65,6 +65,6 @@ def NVIDIA_model_2(inputs, output_name):
     x = Dense(100, activation="relu")(x)
     x = Dense(50, activation="relu")(x)
     x = Dense(10, activation="relu")(x)
-    x = Dense(20, activation="sigmoid", name=output_name)(x)
+    x = Dense(20, activation="softmax", name=output_name)(x)
 
     return x
