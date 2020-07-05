@@ -70,9 +70,9 @@ class Reader:
                     step = entry['step']
                     observations.append(step[0])
                     actions.append(step[1])
-                    pts_prev.append(step[2])
-                    pts_cur.append(step[3])
-                    pts_next.append(step[4])
+                    # pts_prev.append(step[2])
+                    # pts_cur.append(step[3])
+                    # pts_next.append(step[4])
 
                     metadata = entry['metadata']
                     angles.append(metadata[0][3])
@@ -81,7 +81,7 @@ class Reader:
             except EOFError:
                 end = True
 
-        return observations, actions, [pts_prev, pts_cur, pts_next], angles, info
+        return observations, actions, angles, info
 
     def close(self):
         self._log_file.close()

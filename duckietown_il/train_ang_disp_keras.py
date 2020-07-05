@@ -62,7 +62,7 @@ MODEL_NAME = "01_NVIDIA"
 
 
 #################### Data PRE-PROCESSING ####################
-observations, _, _, angles, info = reader.read()  # read the observations from data
+observations, _, angles, info = reader.read()  # read the observations from data
 observations = np.array(observations)
 angles = np.array(angles)
 dist = np.array([i['Simulator']['lane_position']['dist'] for i in info])
