@@ -23,43 +23,51 @@ from sklearn.model_selection import train_test_split
 def plot_model_history(model_history, path_to_save, model_name):
     fig, axs = plt.subplots(2, 2, figsize=(25, 8))
     # summarize history for DIST accuracy
-    axs[0][0].plot(range(1, len(model_history.history['dist_output_accuracy']) + 1), model_history.history['dist_output_accuracy'])
-    axs[0][0].plot(range(1, len(model_history.history['val_dist_output_loss']) + 1), model_history.history['val_dist_output_loss'])
+    axs[0][0].plot(range(1, len(model_history.history['dist_output_accuracy']) + 1),
+                   model_history.history['dist_output_accuracy'])
+    axs[0][0].plot(range(1, len(model_history.history['val_dist_output_accuracy']) + 1),
+                   model_history.history['val_dist_output_accuracy'])
     axs[0][0].set_title('Model Accuracy DIST')
     axs[0][0].set_ylabel('Accuracy')
     axs[0][0].set_xlabel('Epoch')
     axs[0][0].set_xticks(np.arange(1, len(model_history.history['dist_output_accuracy']) + 1),
-                      len(model_history.history['dist_output_accuracy']) / 10)
+                         len(model_history.history['dist_output_accuracy']) / 10)
     axs[0][0].legend(['train', 'val'], loc='best')
 
     # summarize history for ANGLE accuracy
     axs[0][1].plot(range(1, len(model_history.history['angle_output_accuracy']) + 1),
-                model_history.history['angle_output_accuracy'])
-    axs[0][1].plot(range(1, len(model_history.history['val_angle_output_loss']) + 1),
-                model_history.history['val_angle_output_loss'])
+                   model_history.history['angle_output_accuracy'])
+    axs[0][1].plot(range(1, len(model_history.history['val_angle_output_accuracy']) + 1),
+                   model_history.history['val_angle_output_accuracy'])
     axs[0][1].set_title('Model Accuracy ANGLE')
     axs[0][1].set_ylabel('Accuracy')
     axs[0][1].set_xlabel('Epoch')
     axs[0][1].set_xticks(np.arange(1, len(model_history.history['angle_output_accuracy']) + 1),
-                      len(model_history.history['angle_output_accuracy']) / 10)
+                         len(model_history.history['angle_output_accuracy']) / 10)
     axs[0][1].legend(['train', 'val'], loc='best')
 
     # summarize history for DIST loss
-    axs[1][0].plot(range(1, len(model_history.history['dist_output_loss']) + 1), model_history.history['dist_output_loss'])
-    axs[1][0].plot(range(1, len(model_history.history['val_dist_output_loss']) + 1), model_history.history['val_dist_output_loss'])
+    axs[1][0].plot(range(1, len(model_history.history['dist_output_loss']) + 1),
+                   model_history.history['dist_output_loss'])
+    axs[1][0].plot(range(1, len(model_history.history['val_dist_output_loss']) + 1),
+                   model_history.history['val_dist_output_loss'])
     axs[1][0].set_title('Model Loss DIST')
     axs[1][0].set_ylabel('Loss')
     axs[1][0].set_xlabel('Epoch')
-    axs[1][0].set_xticks(np.arange(1, len(model_history.history['dist_output_loss']) + 1), len(model_history.history['dist_output_loss']) / 10)
+    axs[1][0].set_xticks(np.arange(1, len(model_history.history['dist_output_loss']) + 1),
+                         len(model_history.history['dist_output_loss']) / 10)
     axs[1][0].legend(['train', 'val'], loc='best')
 
     # summarize history for ANGLE loss
-    axs[1][1].plot(range(1, len(model_history.history['angle_output_loss']) + 1), model_history.history['angle_output_loss'])
-    axs[1][1].plot(range(1, len(model_history.history['val_angle_output_loss']) + 1), model_history.history['val_angle_output_loss'])
+    axs[1][1].plot(range(1, len(model_history.history['angle_output_loss']) + 1),
+                   model_history.history['angle_output_loss'])
+    axs[1][1].plot(range(1, len(model_history.history['val_angle_output_loss']) + 1),
+                   model_history.history['val_angle_output_loss'])
     axs[1][1].set_title('Model Loss ANGLE')
     axs[1][1].set_ylabel('Loss')
     axs[1][1].set_xlabel('Epoch')
-    axs[1][1].set_xticks(np.arange(1, len(model_history.history['angle_output_loss']) + 1), len(model_history.history['angle_output_loss']) / 10)
+    axs[1][1].set_xticks(np.arange(1, len(model_history.history['angle_output_loss']) + 1),
+                         len(model_history.history['angle_output_loss']) / 10)
     axs[1][1].legend(['train', 'val'], loc='best')
 
     plt.savefig(path_to_save + '/' + model_name + '_model_history.png')
