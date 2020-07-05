@@ -46,23 +46,22 @@ def plot_model_history(model_history, path_to_save, model_name):
 
 # construct the argument parser and parse the arguments
 ap = argparse.ArgumentParser()
-# ap.add_argument("-d", "--data", required=True, type=str, help="name of the data to learn from (without .log)")
+ap.add_argument("-d", "--data", required=True, type=str, help="name of the data to learn from (without .log)")
 ap.add_argument("-e", "--epoch", required=True, type=int, help="number of epochs")
-# ap.add_argument("-b", "--batch-size", required=True, type=int, help="batch size")
+ap.add_argument("-b", "--batch-size", required=True, type=int, help="batch size")
 args = vars(ap.parse_args())
-# DATA = args["data"]
+DATA = args["data"]
 
 # configuration zone
-# BATCH_SIZE = args["batch_size"]        # define the batch size
+BATCH_SIZE = args["batch_size"]  # define the batch size
 EPOCHS = args["epoch"]  # how many times we iterate through our data
-# STORAGE_LOCATION = "trained_models/"   # where we store our trained models
-# reader = Reader(f'../{DATA}.log')      # where our data lies
-# MODEL_NAME = "01_NVIDIA"
+STORAGE_LOCATION = "trained_models/"  # where we store our trained models
+reader = Reader(f'../{DATA}.log')  # where our data lies
+MODEL_NAME = "01_NVIDIA"
 # MODEL_NAME = "VGG_16"
 
 
 #################### Data PRE-PROCESSING ####################
-reader = Reader(f'data-10.log')
 observations, _, _, angles, info = reader.read()  # read the observations from data
 observations = np.array(observations)
 angles = np.array(angles)
@@ -129,7 +128,6 @@ x_train, x_test, y_train_dists, y_test_dists, y_train_angle, y_test_angle = \
         x_train, y_label_dists, y_label_angle, test_size=0.2, random_state=2
     )
 
-
 # #################### BUILD the model ####################
 inputs = Input(shape=(60, 120, 3))
 dist_model = NVIDIA_model_2(inputs, "dist_output")
@@ -163,10 +161,14 @@ history = model.fit(x=x_train,
                     epochs=EPOCHS,
                     verbose=1)
 
-
 # #################### PLOT AND SAVE the model ####################
 
-# plot_model_history(history, path_to_save=STORAGE_LOCATION, model_name=MODEL_NAME)
-# # Test the model on the test set
-# test_result = model.evaluate(x_test, y_test)
-# print(f"Test loss: {test_result[0]:.3f}\t | Test accuracy: %{test_result[1]:.2f}")
+plot_model_history(history, path_to_save=STORAGE_LOCATION, model_name=MODEL_NAME)
+# Test the model on the test set
+# test_result = model.evaluate(x_test, y_train_dists, y_test_angle)
+
+test_result = model.evaluate(x=x_test,
+               y={"dist_output": y_test_dists, "angle_output": y_test_angle},
+               batch_size=BATCH_SIZE)
+
+print(f"Test loss: {test_result[0]:.3f}\t | Test accuracy: %{test_result[1]:.2f}")
