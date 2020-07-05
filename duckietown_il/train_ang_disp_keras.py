@@ -21,26 +21,49 @@ from sklearn.model_selection import train_test_split
 
 # Function to plot model's validation loss and validation accuracy
 def plot_model_history(model_history, path_to_save, model_name):
-    fig, axs = plt.subplots(1, 2, figsize=(25, 8))
-    # summarize history for accuracy
-    axs[0].plot(range(1, len(model_history.history['accuracy']) + 1), model_history.history['accuracy'])
-    axs[0].plot(range(1, len(model_history.history['val_accuracy']) + 1), model_history.history['val_accuracy'])
-    axs[0].set_title('Model Accuracy')
+    fig, axs = plt.subplots(1, 4, figsize=(25, 8))
+    # summarize history for DIST accuracy
+    axs[0].plot(range(1, len(model_history.history['dist_output_accuracy']) + 1), model_history.history['dist_output_accuracy'])
+    axs[0].plot(range(1, len(model_history.history['val_dist_output_loss']) + 1), model_history.history['val_dist_output_loss'])
+    axs[0].set_title('Model Accuracy DIST')
     axs[0].set_ylabel('Accuracy')
     axs[0].set_xlabel('Epoch')
-    axs[0].set_xticks(np.arange(1, len(model_history.history['accuracy']) + 1),
-                      len(model_history.history['accuracy']) / 10)
+    axs[0].set_xticks(np.arange(1, len(model_history.history['dist_output_accuracy']) + 1),
+                      len(model_history.history['dist_output_accuracy']) / 10)
     axs[0].legend(['train', 'val'], loc='best')
-    # summarize history for loss
-    axs[1].plot(range(1, len(model_history.history['loss']) + 1), model_history.history['loss'])
-    axs[1].plot(range(1, len(model_history.history['val_loss']) + 1), model_history.history['val_loss'])
-    axs[1].set_title('Model Loss')
-    axs[1].set_ylabel('Loss')
-    axs[1].set_xlabel('Epoch')
-    axs[1].set_xticks(np.arange(1, len(model_history.history['loss']) + 1), len(model_history.history['loss']) / 10)
-    axs[1].legend(['train', 'val'], loc='best')
-    plt.savefig(path_to_save + '/' + model_name + '_model_history.png')
 
+    # summarize history for ANGLE accuracy
+    axs[1].plot(range(1, len(model_history.history['angle_output_accuracy']) + 1),
+                model_history.history['angle_output_accuracy'])
+    axs[1].plot(range(1, len(model_history.history['val_angle_output_loss']) + 1),
+                model_history.history['val_angle_output_loss'])
+    axs[1].set_title('Model Accuracy ANGLE')
+    axs[1].set_ylabel('Accuracy')
+    axs[1].set_xlabel('Epoch')
+    axs[1].set_xticks(np.arange(1, len(model_history.history['angle_output_accuracy']) + 1),
+                      len(model_history.history['angle_output_accuracy']) / 10)
+    axs[1].legend(['train', 'val'], loc='best')
+
+    # summarize history for DIST loss
+    axs[2].plot(range(1, len(model_history.history['dist_output_loss']) + 1), model_history.history['dist_output_loss'])
+    axs[2].plot(range(1, len(model_history.history['val_dist_output_loss']) + 1), model_history.history['val_dist_output_loss'])
+    axs[2].set_title('Model Loss DIST')
+    axs[2].set_ylabel('Loss')
+    axs[2].set_xlabel('Epoch')
+    axs[2].set_xticks(np.arange(1, len(model_history.history['dist_output_loss']) + 1), len(model_history.history['dist_output_loss']) / 10)
+    axs[2].legend(['train', 'val'], loc='best')
+
+    # summarize history for ANGLE loss
+    axs[2].plot(range(1, len(model_history.history['angle_output_loss']) + 1), model_history.history['angle_output_loss'])
+    axs[2].plot(range(1, len(model_history.history['val_angle_output_loss']) + 1), model_history.history['val_angle_output_loss'])
+    axs[2].set_title('Model Loss ANGLE')
+    axs[2].set_ylabel('Loss')
+    axs[2].set_xlabel('Epoch')
+    axs[2].set_xticks(np.arange(1, len(model_history.history['angle_output_loss']) + 1), len(model_history.history['angle_output_loss']) / 10)
+    axs[2].legend(['train', 'val'], loc='best')
+
+
+    plt.savefig(path_to_save + '/' + model_name + '_model_history.png')
     plt.show()
 
 
@@ -168,7 +191,7 @@ plot_model_history(history, path_to_save=STORAGE_LOCATION, model_name=MODEL_NAME
 # test_result = model.evaluate(x_test, y_train_dists, y_test_angle)
 
 test_result = model.evaluate(x=x_test,
-               y={"dist_output": y_test_dists, "angle_output": y_test_angle},
-               batch_size=BATCH_SIZE)
+                             y={"dist_output": y_test_dists, "angle_output": y_test_angle},
+                             batch_size=BATCH_SIZE)
 
 print(f"Test loss: {test_result[0]:.3f}\t | Test accuracy: %{test_result[1]:.2f}")
