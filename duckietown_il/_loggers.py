@@ -13,12 +13,15 @@ class Logger:
         self._multithreaded_recording = ThreadPoolExecutor(4)
         self._recording = []
 
-    def log(self, observation, action, reward, done, info):
+    def log(self, observation, action, pts_prev, pts_cur, pts_next, reward, done, info):
         x, y, z = self.env.cur_pos
         self._recording.append({
             'step': [
                 observation,
                 action,
+                pts_prev,
+                pts_cur,
+                pts_next
             ],
             # this is metadata, you may not use it at all, but it may be helpful for debugging purposes
             'metadata': [
@@ -53,6 +56,9 @@ class Reader:
         end = False
         observations = []
         actions = []
+        pts_prev = []
+        pts_cur = []
+        pts_next = []
 
         info = []
         angles = []
@@ -64,6 +70,9 @@ class Reader:
                     step = entry['step']
                     observations.append(step[0])
                     actions.append(step[1])
+                    pts_prev.append(step[2])
+                    pts_cur.append(step[3])
+                    pts_next.append(step[4])
 
                     metadata = entry['metadata']
                     angles.append(metadata[0][3])
@@ -72,7 +81,7 @@ class Reader:
             except EOFError:
                 end = True
 
-        return observations, actions, angles, info
+        return observations, actions, [pts_prev, pts_cur, pts_next], angles, info
 
     def close(self):
         self._log_file.close()

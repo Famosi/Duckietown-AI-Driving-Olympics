@@ -1,9 +1,10 @@
 import cv2
 import time
-from expert import Expert
-from env import launch_env
-from _loggers import Logger
+from duckietown_rl.expert import Expert
+from duckietown_il.env import launch_env
+from duckietown_il._loggers import Logger
 import numpy as np
+import matplotlib.pyplot as plt
 
 
 angle_intervals = [-0.24, -0.18, -0.12, -0.06, -0.01, 0.01, 0.06, 0.12, 0.18, 0.24]
@@ -39,17 +40,24 @@ def is_log(angles, displacements):
 
 env = launch_env()
 
-EPISODES, STEPS = 1, 4
+EPISODES, STEPS = 1, 10
 
-logger = Logger(env, log_file=f'train-{int(EPISODES*STEPS/1000)}k.log')
+# logger = Logger(env, log_file=f'train-{int(EPISODES*STEPS/1000)}k.log')
+
+logger = Logger(env, log_file=f'data-{int(EPISODES*STEPS)}.log')
 
 expert = Expert(env=env)
 
 angles = []
 displacements = []
 pts = []
+positions = []
+positions_x = []
+positions_y = []
+
 observations = []
 
+# env.render()
 start_time = time.time()
 print(f"[INFO]Starting to get logs for {EPISODES} episodes each {STEPS} steps..")
 # let's collect our samples
@@ -71,15 +79,25 @@ for episode in range(0, EPISODES):
             print(f"#Episode: {episode}\t | #Step: {step}")
             break
 
-        lp = env.get_lane_pos2(env.cur_pos, env.cur_angle)
-        angles.append(lp.angle_deg)
-        displacements.append(lp.dist)
-
+        # lp = env.get_lane_pos2(env.cur_pos, env.cur_angle)
+        # angles.append(lp.angle_deg)
+        # displacements.append(lp.dist)
+        #
         pts.append(env.get_pts())
-        observations.append(observation)
+        positions.append(env.cur_pos)
 
-        # logger.log(observation, action, reward, done, info)
+        # observations.append(observation)
 
+        # env.render()
+
+        pts = env.get_pts()
+        pts_prev = pts[:10]
+        pts_cur = pts[10:20]
+        pts_next = pts[20:30]
+
+        logger.log(observation, action, pts_prev, pts_cur, pts_next, reward, done, info)
+
+        # cv2.imshow("obs", observation)
 
         # if check_intervals(angles, displacements, lp.angles, lp.dist):
         #     logger.log(observation, action, reward, done, info)
@@ -93,5 +111,27 @@ logger.close()
 env.close()
 
 end_time = time.time()
-print(pts)
+
 print(f"Process finished. It took {(end_time - start_time) / (60*60):.2f} hours!")
+
+# pts_new = []
+# for i in range(0, len(pts)):
+#     for j in range(0, len(pts[i])):
+#         pts_new.append(pts[i][j])
+#
+# pts_x = []
+# pts_y = []
+# for i in range(len(pts_new)):
+#     pts_x.append((pts_new[i][0]))
+#     pts_y.append((pts_new[i][2]))
+#
+# fig = plt.figure(figsize=(10, 10))
+# i = 0
+# for pts_i, pos in zip(pts, positions):
+#     ax = fig.add_subplot(5, 5, i+1)
+#     ax.scatter(pos[0], pos[2], c='blue')
+#     for j in range(0, len(pts_i)):
+#         ax.scatter(pts_i[j][0], pts_i[j][2], c='red')
+#     i += 1
+#
+# plt.show()
