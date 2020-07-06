@@ -193,7 +193,11 @@ history = model.fit(x=x_train,
                     validation_data=(x_test,
                                      {"dist_output": y_test_dists, "angle_output": y_test_angle}),
                     epochs=EPOCHS,
-                    verbose=1)
+                    verbose=2,
+                    steps_per_epoch=observations.shape[0] // BATCH_SIZE,
+                    callbacks=[es, mc, tb],
+                    shuffle=True
+                    )
 
 # #################### PLOT AND SAVE ####################
 
