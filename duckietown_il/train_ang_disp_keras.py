@@ -183,11 +183,11 @@ model.compile(optimizer=optimizer,
 
 model.summary()
 
-# #################### TRAIN the model ####################
+# #################### TRAIN AND SAVE the model ####################
 es = EarlyStopping(monitor='val_loss', verbose=1, patience=30)
 mc = ModelCheckpoint(STORAGE_LOCATION + MODEL_NAME + '.h5', monitor='val_loss', save_best_only=True)
-# log_dir = "logs_manual/fit/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-# tb = TensorBoard(log_dir=log_dir, histogram_freq=1)
+log_dir = "logs/fit/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+tb = TensorBoard(log_dir=log_dir, histogram_freq=1)
 history = model.fit(x=x_train,
                     y={"dist_output": y_train_dists, "angle_output": y_train_angle},
                     validation_data=(x_test,
@@ -195,7 +195,7 @@ history = model.fit(x=x_train,
                     epochs=EPOCHS,
                     verbose=1)
 
-# #################### PLOT AND SAVE the model ####################
+# #################### PLOT AND SAVE ####################
 
 plot_model_history(history, path_to_save=STORAGE_LOCATION, model_name=MODEL_NAME)
 # Test the model on the test set
