@@ -70,6 +70,7 @@ def plot_model_history(model_history, path_to_save, model_name):
                          len(model_history.history['angle_output_loss']) / 10)
     axs[1][1].legend(['train', 'val'], loc='best')
 
+    fig.tight_layout(pad=3.0)
     plt.savefig(path_to_save + '/' + model_name + '_model_history.png')
     plt.show()
 
@@ -183,7 +184,10 @@ model.compile(optimizer=optimizer,
 model.summary()
 
 # #################### TRAIN the model ####################
-
+es = EarlyStopping(monitor='val_loss', verbose=1, patience=30)
+mc = ModelCheckpoint(STORAGE_LOCATION + MODEL_NAME + '.h5', monitor='val_loss', save_best_only=True)
+# log_dir = "logs_manual/fit/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+# tb = TensorBoard(log_dir=log_dir, histogram_freq=1)
 history = model.fit(x=x_train,
                     y={"dist_output": y_train_dists, "angle_output": y_train_angle},
                     validation_data=(x_test,
