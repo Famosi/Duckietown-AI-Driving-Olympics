@@ -87,7 +87,7 @@ DATA = args["data"]
 BATCH_SIZE = args["batch_size"]  # define the batch size
 EPOCHS = args["epoch"]  # how many times we iterate through our data
 STORAGE_LOCATION = "trained_models/"  # where we store our trained models
-reader = Reader(f'../{DATA}.log')  # where our data lies
+reader = Reader(f'{DATA}.log')  # where our data lies
 MODEL_NAME = "01_NVIDIA"
 # MODEL_NAME = "VGG_16"
 
@@ -163,10 +163,11 @@ x_train, x_test, y_train_dists, y_test_dists, y_train_angle, y_test_angle = \
 val_size = int(len(x_train) * 0.1)
 # DIST
 x_validate, y_validate_dists = x_train[:val_size], y_train_dists[:val_size]
-x_train, y_train_dists       = x_train[val_size:], y_train_dists[val_size:]
+y_train_dists = y_train_dists[val_size:]
 # ANGLE
 y_validate_angle = y_train_angle[:val_size]
-x_train, y_train_angle       = x_train[val_size:], y_train_angle[val_size:]
+x_train, y_train_angle = x_train[val_size:], y_train_angle[val_size:]
+
 
 # prepare data augmentation configuration
 train_datagen = ImageDataGenerator(rescale=1./255,              # rescaling factor
