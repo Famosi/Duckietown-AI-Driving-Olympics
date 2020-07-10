@@ -159,6 +159,15 @@ x_train, x_test, y_train_dists, y_test_dists, y_train_angle, y_test_angle = \
         x_train, y_label_dists, y_label_angle, test_size=0.2, random_state=2
     )
 
+# Split Train data once more for Validation data
+val_size = int(len(x_train) * 0.1)
+# DIST
+x_validate, y_validate_dists = x_train[:val_size], y_train_dists[:val_size]
+x_train, y_train_dists       = x_train[val_size:], y_train_dists[val_size:]
+# ANGLE
+y_validate_angle = y_train_angle[:val_size]
+x_train, y_train_angle       = x_train[val_size:], y_train_angle[val_size:]
+
 # #################### BUILD the model ####################
 inputs = Input(shape=(60, 120, 3))
 dist_model = NVIDIA_model_2(inputs, "dist_output")
@@ -190,11 +199,12 @@ log_dir = "logs/fit/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
 tb = TensorBoard(log_dir=log_dir, histogram_freq=1)
 history = model.fit(x=x_train,
                     y={"dist_output": y_train_dists, "angle_output": y_train_angle},
-                    validation_data=(x_test,
-                                     {"dist_output": y_test_dists, "angle_output": y_test_angle}),
+                    validation_data=(x_validate,
+                                     {"dist_output": y_validate_dists, "angle_output": y_validate_angle}),
                     epochs=EPOCHS,
                     verbose=2,
-                    callbacks=[es, mc, tb]
+                    callbacks=[es, mc, tb],
+                    shuffle=True
                     )
 
 # #################### PLOT AND SAVE ####################
