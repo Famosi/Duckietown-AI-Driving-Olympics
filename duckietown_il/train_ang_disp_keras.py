@@ -93,18 +93,18 @@ MODEL_NAME = "01_NVIDIA"
 
 
 #################### Data PRE-PROCESSING ####################
-observations, _, angles, info = reader.read()  # read the observations from data
+observations, _, _, info = reader.read()  # read the observations from data
 observations = np.array(observations)
-angles = np.array(angles)
+angles = np.array([i['Simulator']['lane_position']['angle_deg'] for i in info])
 dist = np.array([i['Simulator']['lane_position']['dist'] for i in info])
 
 df = pd.DataFrame({'angles': angles, 'dists': dist})
 
 
-def process_data(dataframe, arg, dict, where_to_cut, label_names):
-    # Handle missing values
+def hot_encoding(dataframe, arg, dict, where_to_cut, label_names):
     dataframe[dict[arg]] = pd.cut(dataframe[arg], where_to_cut, labels=label_names)
     return dataframe
+
 
 
 # Angle: 0, 0.02, 0.04, 0.06, 0.08, 0.1, 0.12, 0.14, 0.16, 0.18, 0.2
@@ -133,8 +133,8 @@ dict = {
     "dists": "dists_cat"
 }
 
-df = process_data(df, "angles", dict, cut_points_angle, labels_angle)
-df = process_data(df, "dists", dict, cut_points_dist, labels_dist)
+df = hot_encoding(df, "angles", dict, cut_points_angle, labels_angle)
+df = hot_encoding(df, "dists", dict, cut_points_dist, labels_dist)
 
 
 def create_dummies(dataframe, column_name):
@@ -150,20 +150,21 @@ targets_dist = [dict["dists"] + '_' + col_name for col_name in labels_dist]
 targets_angle = [dict["angles"] + '_' + col_name for col_name in labels_angle]
 
 x_train = observations
-y_label_dists = df[targets_dist]
-y_label_angle = df[targets_angle]
+y_dist = df[targets_dist]
+y_angle = df[targets_angle]
+
 
 # # Split the data: Train and Test
-x_train, x_test, y_train_dists, y_test_dists, y_train_angle, y_test_angle = \
+x_train, x_test, y_train_dist, y_test_dist, y_train_angle, y_test_angle = \
     train_test_split(
-        x_train, y_label_dists, y_label_angle, test_size=0.2, random_state=2
+        x_train, y_dist, y_angle, test_size=0.2, random_state=2
     )
 
 # Split Train data once more for Validation data
 val_size = int(len(x_train) * 0.1)
 # DIST
-x_validate, y_validate_dists = x_train[:val_size], y_train_dists[:val_size]
-y_train_dists = y_train_dists[val_size:]
+x_validate, y_validate_dist = x_train[:val_size], y_train_dist[:val_size]
+y_train_dist = y_train_dist[val_size:]
 # ANGLE
 y_validate_angle = y_train_angle[:val_size]
 x_train, y_train_angle = x_train[val_size:], y_train_angle[val_size:]
@@ -214,9 +215,9 @@ mc = ModelCheckpoint(STORAGE_LOCATION + MODEL_NAME + '.h5', monitor='val_loss', 
 log_dir = "logs/fit/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
 tb = TensorBoard(log_dir=log_dir, histogram_freq=1)
 history = model.fit(x=x_train,
-                    y={"dist_output": y_train_dists, "angle_output": y_train_angle},
+                    y={"dist_output": y_train_dist, "angle_output": y_train_angle},
                     validation_data=(x_validate,
-                                     {"dist_output": y_validate_dists, "angle_output": y_validate_angle}),
+                                     {"dist_output": y_validate_dist, "angle_output": y_validate_angle}),
                     epochs=EPOCHS,
                     verbose=2,
                     callbacks=[es, mc, tb],
@@ -227,10 +228,10 @@ history = model.fit(x=x_train,
 
 plot_model_history(history, path_to_save=STORAGE_LOCATION, model_name=MODEL_NAME)
 # Test the model on the test set
-# test_result = model.evaluate(x_test, y_train_dists, y_test_angle)
+# test_result = model.evaluate(x_test, y_train_dist, y_test_angle)
 
 test_result = model.evaluate(x=x_test,
-                             y={"dist_output": y_test_dists, "angle_output": y_test_angle},
+                             y={"dist_output": y_test_dist, "angle_output": y_test_angle},
                              batch_size=BATCH_SIZE)
 
 print(f"Test loss: {test_result[0]:.3f}\t | Test accuracy: %{test_result[1]:.2f}")
