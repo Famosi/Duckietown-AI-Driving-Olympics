@@ -173,10 +173,10 @@ sort_dist = sort_samples(df, targets_dist)
 def sample_for_training(arr):
     samples = []
     for entry in arr:
-        for _ in range(0, 1000):
+        for _ in range(0, 40):
             try:
                 idx = entry[randrange(len(entry))][1]
-                samples.append([df['obs'][idx], df['angles'][idx], df['dists'][idx]])
+                samples.append([observations[idx], angles[idx], dists[idx]])
             except:
                 continue
     return samples
