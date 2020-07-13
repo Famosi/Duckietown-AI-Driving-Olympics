@@ -17,57 +17,58 @@ from keras.losses import mean_squared_error as MSE
 from keras.callbacks import EarlyStopping, ModelCheckpoint, TensorBoard
 from keras.preprocessing.image import ImageDataGenerator
 from sklearn.model_selection import train_test_split
+from random import randrange
 
 
 # Function to plot model's validation loss and validation accuracy
 def plot_model_history(model_history, path_to_save, model_name):
     fig, axs = plt.subplots(2, 2, figsize=(25, 8))
     # summarize history for DIST accuracy
-    axs[0][0].plot(range(1, len(model_history.history['dist_output_accuracy']) + 1),
-                   model_history.history['dist_output_accuracy'])
-    axs[0][0].plot(range(1, len(model_history.history['val_dist_output_accuracy']) + 1),
-                   model_history.history['val_dist_output_accuracy'])
+    axs[0][0].plot(range(1, len(model_history.history['dist_accuracy']) + 1),
+                   model_history.history['dist_accuracy'])
+    axs[0][0].plot(range(1, len(model_history.history['val_dist_accuracy']) + 1),
+                   model_history.history['val_dist_accuracy'])
     axs[0][0].set_title('Model Accuracy DIST')
     axs[0][0].set_ylabel('Accuracy')
     axs[0][0].set_xlabel('Epoch')
-    axs[0][0].set_xticks(np.arange(1, len(model_history.history['dist_output_accuracy']) + 1),
-                         len(model_history.history['dist_output_accuracy']) / 10)
+    axs[0][0].set_xticks(np.arange(1, len(model_history.history['dist_accuracy']) + 1),
+                         len(model_history.history['dist_accuracy']) / 10)
     axs[0][0].legend(['train', 'val'], loc='best')
 
     # summarize history for ANGLE accuracy
-    axs[0][1].plot(range(1, len(model_history.history['angle_output_accuracy']) + 1),
-                   model_history.history['angle_output_accuracy'])
-    axs[0][1].plot(range(1, len(model_history.history['val_angle_output_accuracy']) + 1),
-                   model_history.history['val_angle_output_accuracy'])
+    axs[0][1].plot(range(1, len(model_history.history['angle_accuracy']) + 1),
+                   model_history.history['angle_accuracy'])
+    axs[0][1].plot(range(1, len(model_history.history['val_angle_accuracy']) + 1),
+                   model_history.history['val_angle_accuracy'])
     axs[0][1].set_title('Model Accuracy ANGLE')
     axs[0][1].set_ylabel('Accuracy')
     axs[0][1].set_xlabel('Epoch')
-    axs[0][1].set_xticks(np.arange(1, len(model_history.history['angle_output_accuracy']) + 1),
-                         len(model_history.history['angle_output_accuracy']) / 10)
+    axs[0][1].set_xticks(np.arange(1, len(model_history.history['angle_accuracy']) + 1),
+                         len(model_history.history['angle_accuracy']) / 10)
     axs[0][1].legend(['train', 'val'], loc='best')
 
     # summarize history for DIST loss
-    axs[1][0].plot(range(1, len(model_history.history['dist_output_loss']) + 1),
-                   model_history.history['dist_output_loss'])
-    axs[1][0].plot(range(1, len(model_history.history['val_dist_output_loss']) + 1),
-                   model_history.history['val_dist_output_loss'])
+    axs[1][0].plot(range(1, len(model_history.history['dist_loss']) + 1),
+                   model_history.history['dist_loss'])
+    axs[1][0].plot(range(1, len(model_history.history['val_dist_loss']) + 1),
+                   model_history.history['val_dist_loss'])
     axs[1][0].set_title('Model Loss DIST')
     axs[1][0].set_ylabel('Loss')
     axs[1][0].set_xlabel('Epoch')
-    axs[1][0].set_xticks(np.arange(1, len(model_history.history['dist_output_loss']) + 1),
-                         len(model_history.history['dist_output_loss']) / 10)
+    axs[1][0].set_xticks(np.arange(1, len(model_history.history['dist_loss']) + 1),
+                         len(model_history.history['dist_loss']) / 10)
     axs[1][0].legend(['train', 'val'], loc='best')
 
     # summarize history for ANGLE loss
-    axs[1][1].plot(range(1, len(model_history.history['angle_output_loss']) + 1),
-                   model_history.history['angle_output_loss'])
-    axs[1][1].plot(range(1, len(model_history.history['val_angle_output_loss']) + 1),
-                   model_history.history['val_angle_output_loss'])
+    axs[1][1].plot(range(1, len(model_history.history['angle_loss']) + 1),
+                   model_history.history['angle_loss'])
+    axs[1][1].plot(range(1, len(model_history.history['val_angle_loss']) + 1),
+                   model_history.history['val_angle_loss'])
     axs[1][1].set_title('Model Loss ANGLE')
     axs[1][1].set_ylabel('Loss')
     axs[1][1].set_xlabel('Epoch')
-    axs[1][1].set_xticks(np.arange(1, len(model_history.history['angle_output_loss']) + 1),
-                         len(model_history.history['angle_output_loss']) / 10)
+    axs[1][1].set_xticks(np.arange(1, len(model_history.history['angle_loss']) + 1),
+                         len(model_history.history['angle_loss']) / 10)
     axs[1][1].legend(['train', 'val'], loc='best')
 
     fig.tight_layout(pad=3.0)
@@ -98,7 +99,7 @@ observations = np.array(observations)
 angles = np.array([i['Simulator']['lane_position']['angle_deg'] for i in info])
 dists = np.array([i['Simulator']['lane_position']['dist'] for i in info])
 
-df = pd.DataFrame({'angles': angles, 'dists': dists})
+df = pd.DataFrame({'obs': list(observations), 'angles': angles, 'dists': dists})
 
 
 def hot_encoding(dataframe, arg, dict, where_to_cut, label_names):
@@ -149,22 +150,47 @@ targets_dist = [dict["dists"] + '_' + col_name for col_name in labels_dist]
 targets_angle = [dict["angles"] + '_' + col_name for col_name in labels_angle]
 
 # ################## DISTRIBUTE DATA ####################
-# obs_sorted = []
-# def sort_samples(df, targets):
-#     for label in targets:
-#         obs_category = []
-#         idxs = df.index[df[label] == 1].tolist()
-#         for i in idxs:
-#             obs_category.append(observations[i])
-#         obs_sorted.append(obs_category)
-#
-#
-# sort_samples(df, targets_dist)
-#
-x_train = observations
+def sort_samples(df, targets):
+    data_sorted = []
+    for label in targets:
+        obs_category = []
+        idxs = df.index[df[label] == 1].tolist()
+        for i in idxs:
+            obs_category.append([observations[i], i])
+        data_sorted.append(obs_category)
+
+    return data_sorted
+
+
+sort_angle = sort_samples(df, targets_angle)
+sort_dist = sort_samples(df, targets_dist)
+
+
+def sample_for_training(sorted):
+    samples = []
+    for entry in sorted:
+        for _ in range(0, 2000):
+            try:
+                rand_idx = randrange(len(entry))
+                samples.append([entry[rand_idx][0], df['angles'][entry[rand_idx][1]], df['dists'][entry[rand_idx][1]]])
+            except:
+                continue
+    return samples
+
+
+data = np.concatenate((np.array(sample_for_training(sort_angle)), np.array(sample_for_training(sort_dist))), axis=0)
+
+df = pd.DataFrame({'angles': data[:, 1], 'dists': data[:, 2]})
+
+df = hot_encoding(df, "angles", dict, cut_points_angle, labels_angle)
+df = hot_encoding(df, "dists", dict, cut_points_dist, labels_dist)
+
+df = create_dummies(df, dict["dists"])
+df = create_dummies(df, dict["angles"])
+
+x_train = np.stack(data[:, 0])
 y_dist = df[targets_dist]
 y_angle = df[targets_angle]
-
 
 # # Split the data: Train and Test
 x_train, x_test, y_train_dist, y_test_dist, y_train_angle, y_test_angle = \
@@ -182,7 +208,7 @@ y_validate_angle = y_train_angle[:val_size]
 x_train, y_train_angle = x_train[val_size:], y_train_angle[val_size:]
 
 
-# prepare data augmentation configuration
+# # prepare data augmentation configuration
 # train_datagen = ImageDataGenerator(rescale=1./255,              # rescaling factor
 #                                    width_shift_range=0.2,       # float: fraction of total width, if < 1
 #                                    height_shift_range=0.2,      # float: fraction of total height, if < 1
