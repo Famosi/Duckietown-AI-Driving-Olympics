@@ -18,6 +18,7 @@ from keras.callbacks import EarlyStopping, ModelCheckpoint, TensorBoard
 from keras.preprocessing.image import ImageDataGenerator
 from sklearn.model_selection import train_test_split
 from random import randrange
+from duckietown_il.read_data import plot_distribution
 
 
 # Function to plot model's validation loss and validation accuracy
@@ -99,7 +100,9 @@ observations = np.array(observations)
 angles = np.array([i['Simulator']['lane_position']['angle_deg'] for i in info])
 dists = np.array([i['Simulator']['lane_position']['dist'] for i in info])
 
-df = pd.DataFrame({'angles': angles, 'dists': dists})
+plot_distribution(angles, dists)
+
+df = pd.DataFrame({'obs': list(observations), 'angles': angles, 'dists': dists})
 
 
 def hot_encoding(dataframe, arg, dict, where_to_cut, label_names):
@@ -151,46 +154,48 @@ targets_angle = [dict["angles"] + '_' + col_name for col_name in labels_angle]
 
 # ################## DISTRIBUTE DATA ####################
 
-# def sort_samples(df, targets):
-#     data_sorted = []
-#     for label in targets:
-#         obs_category = []
-#         idxs = df.index[df[label] == 1].tolist()
-#         for i in idxs:
-#             obs_category.append([observations[i], i])
-#         data_sorted.append(obs_category)
-#
-#     return data_sorted
-#
-#
-# sort_angle = sort_samples(df, targets_angle)
-# sort_dist = sort_samples(df, targets_dist)
-#
-#
-# def sample_for_training(arr):
-#     samples = []
-#     for entry in arr:
-#         for _ in range(0, 30):
-#             try:
-#                 idx = entry[randrange(len(entry))][1]
-#                 samples.append([observations[idx], df['angles'][idx], df['dists'][idx]])
-#             except:
-#                 continue
-#     return samples
-#
-#
-# data = np.concatenate((np.array(sample_for_training(sort_angle)), np.array(sample_for_training(sort_dist))), axis=0)
-# np.random.shuffle(data)
-#
-# df = pd.DataFrame({'angles': data[:, 1], 'dists': data[:, 2]})
-#
-# df = hot_encoding(df, "angles", dict, cut_points_angle, labels_angle)
-# df = hot_encoding(df, "dists", dict, cut_points_dist, labels_dist)
-#
-# df = create_dummies(df, dict["dists"])
-# df = create_dummies(df, dict["angles"])
-#
-# observations = np.stack(data[:, 0])
+def sort_samples(df, targets):
+    data_sorted = []
+    for label in targets:
+        obs_category = []
+        idxs = df.index[df[label] == 1].tolist()
+        for i in idxs:
+            obs_category.append([observations[i], i])
+        data_sorted.append(obs_category)
+
+    return data_sorted
+
+
+sort_angle = sort_samples(df, targets_angle)
+sort_dist = sort_samples(df, targets_dist)
+
+
+def sample_for_training(arr):
+    samples = []
+    for entry in arr:
+        for _ in range(0, randrange(60)):
+            try:
+                idx = entry[randrange(len(entry))][1]
+                samples.append([df['obs'][idx], df['angles'][idx], df['dists'][idx]])
+            except:
+                continue
+    return samples
+
+
+data = np.concatenate((np.array(sample_for_training(sort_angle)), np.array(sample_for_training(sort_dist))), axis=0)
+np.random.shuffle(data)
+
+df = pd.DataFrame({'angles': data[:, 1], 'dists': data[:, 2]})
+
+df = hot_encoding(df, "angles", dict, cut_points_angle, labels_angle)
+df = hot_encoding(df, "dists", dict, cut_points_dist, labels_dist)
+
+df = create_dummies(df, dict["dists"])
+df = create_dummies(df, dict["angles"])
+
+observations = np.stack(data[:, 0])
+
+plot_distribution(data[:, 1], data[:, 2])
 
 # ###################### PREPARE DATA FOR TRAINING ###########################
 
