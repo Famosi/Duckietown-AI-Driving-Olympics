@@ -56,7 +56,7 @@ def Model_a_d(inputs):
 
     # Angles
     a = Dense(1024, activation="relu")(x)
-    a = Dense(20, activation="softmax", name="angles")(a)
+    a = Dense(20, activation="softmax", name="angle")(a)
 
     # Displacements
     d = Dense(1024, activation="relu")(x)
