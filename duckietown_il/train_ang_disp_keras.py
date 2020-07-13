@@ -171,14 +171,15 @@ def sample_for_training(arr):
     for entry in arr:
         for _ in range(0, randrange(2000)):
             try:
-                rand_idx = randrange(len(entry))
-                samples.append([entry[rand_idx][0], df['angles'][entry[rand_idx][1]], df['dists'][entry[rand_idx][1]]])
+                idx = entry[randrange(len(entry))][1]
+                samples.append([observations[idx], df['angles'][idx], df['dists'][idx]])
             except:
                 continue
     return samples
 
 
 data = np.concatenate((np.array(sample_for_training(sort_angle)), np.array(sample_for_training(sort_dist))), axis=0)
+np.random.shuffle(data)
 
 df = pd.DataFrame({'angles': data[:, 1], 'dists': data[:, 2]})
 
