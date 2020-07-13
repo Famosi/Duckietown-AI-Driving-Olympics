@@ -189,8 +189,8 @@ df = create_dummies(df, dict["dists"])
 df = create_dummies(df, dict["angles"])
 
 x_train = np.stack(data[:, 0])
-y_dist = np.array(df[targets_dist])
-y_angle = np.array(df[targets_angle])
+y_dist = df[targets_dist]
+y_angle = df[targets_angle]
 
 # # Split the data: Train and Test
 x_train, x_test, y_train_dist, y_test_dist, y_train_angle, y_test_angle = \
@@ -236,24 +236,25 @@ model = Model(
 )
 
 optimizer = Adam(lr=1e-3, decay=1e-3 / EPOCHS)
-losses = {
-    "angles": "categorical_crossentropy",
-    "displacement": "categorical_crossentropy",
-}
-lossWeights = {"angles": 1.0, "displacement": 1.0}
+# losses = {
+#     "angles": "categorical_crossentropy",
+#     "displacement": "categorical_crossentropy",
+# }
+# lossWeights = {"angles": 1.0, "displacement": 1.0}
 
 model.compile(optimizer=optimizer,
-              loss=losses,
-              loss_weights=lossWeights,
+              loss=['categorical_crossentropy', 'categorical_crossentropy'],
               metrics=["accuracy"])
 
 model.summary()
 
 # #################### TRAIN AND SAVE the model ####################
+
 es = EarlyStopping(monitor='val_loss', verbose=1, patience=30)
 mc = ModelCheckpoint(STORAGE_LOCATION + MODEL_NAME + '.h5', monitor='val_loss', save_best_only=True)
 log_dir = "logs/fit/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
 tb = TensorBoard(log_dir=log_dir, histogram_freq=1)
+
 history = model.fit(x=x_train,
                     y={"angles": y_train_angle, "displacement": y_train_dist},
                     validation_data=(x_validate,
