@@ -24,15 +24,15 @@ from random import randrange
 def plot_model_history(model_history, path_to_save, model_name):
     fig, axs = plt.subplots(2, 2, figsize=(25, 8))
     # summarize history for DIST accuracy
-    axs[0][0].plot(range(1, len(model_history.history['dist_accuracy']) + 1),
-                   model_history.history['dist_accuracy'])
-    axs[0][0].plot(range(1, len(model_history.history['val_dist_accuracy']) + 1),
-                   model_history.history['val_dist_accuracy'])
+    axs[0][0].plot(range(1, len(model_history.history['displacement_accuracy']) + 1),
+                   model_history.history['displacement_accuracy'])
+    axs[0][0].plot(range(1, len(model_history.history['val_displacement_accuracy']) + 1),
+                   model_history.history['val_displacement_accuracy'])
     axs[0][0].set_title('Model Accuracy DIST')
     axs[0][0].set_ylabel('Accuracy')
     axs[0][0].set_xlabel('Epoch')
-    axs[0][0].set_xticks(np.arange(1, len(model_history.history['dist_accuracy']) + 1),
-                         len(model_history.history['dist_accuracy']) / 10)
+    axs[0][0].set_xticks(np.arange(1, len(model_history.history['displacement_accuracy']) + 1),
+                         len(model_history.history['displacement_accuracy']) / 10)
     axs[0][0].legend(['train', 'val'], loc='best')
 
     # summarize history for ANGLE accuracy
@@ -48,15 +48,15 @@ def plot_model_history(model_history, path_to_save, model_name):
     axs[0][1].legend(['train', 'val'], loc='best')
 
     # summarize history for DIST loss
-    axs[1][0].plot(range(1, len(model_history.history['dist_loss']) + 1),
-                   model_history.history['dist_loss'])
-    axs[1][0].plot(range(1, len(model_history.history['val_dist_loss']) + 1),
-                   model_history.history['val_dist_loss'])
+    axs[1][0].plot(range(1, len(model_history.history['displacement_loss']) + 1),
+                   model_history.history['displacement_loss'])
+    axs[1][0].plot(range(1, len(model_history.history['val_displacement_loss']) + 1),
+                   model_history.history['val_displacement_loss'])
     axs[1][0].set_title('Model Loss DIST')
     axs[1][0].set_ylabel('Loss')
     axs[1][0].set_xlabel('Epoch')
-    axs[1][0].set_xticks(np.arange(1, len(model_history.history['dist_loss']) + 1),
-                         len(model_history.history['dist_loss']) / 10)
+    axs[1][0].set_xticks(np.arange(1, len(model_history.history['displacement_loss']) + 1),
+                         len(model_history.history['displacement_loss']) / 10)
     axs[1][0].legend(['train', 'val'], loc='best')
 
     # summarize history for ANGLE loss
@@ -169,7 +169,7 @@ sort_dist = sort_samples(df, targets_dist)
 def sample_for_training(arr):
     samples = []
     for entry in arr:
-        for _ in range(0, 60):
+        for _ in range(0, 200):
             try:
                 idx = entry[randrange(len(entry))][1]
                 samples.append([observations[idx], df['angles'][idx], df['dists'][idx]])
