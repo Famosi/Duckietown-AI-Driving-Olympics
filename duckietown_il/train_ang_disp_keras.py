@@ -99,7 +99,7 @@ observations = np.array(observations)
 angles = np.array([i['Simulator']['lane_position']['angle_deg'] for i in info])
 dists = np.array([i['Simulator']['lane_position']['dist'] for i in info])
 
-df = pd.DataFrame({'obs': list(observations), 'angles': angles, 'dists': dists})
+df = pd.DataFrame({'angles': angles, 'dists': dists})
 
 
 def hot_encoding(dataframe, arg, dict, where_to_cut, label_names):
@@ -166,10 +166,10 @@ sort_angle = sort_samples(df, targets_angle)
 sort_dist = sort_samples(df, targets_dist)
 
 
-def sample_for_training(sorted):
+def sample_for_training(arr):
     samples = []
-    for entry in sorted:
-        for _ in range(0, 2000):
+    for entry in arr:
+        for _ in range(0, randrange(2000)):
             try:
                 rand_idx = randrange(len(entry))
                 samples.append([entry[rand_idx][0], df['angles'][entry[rand_idx][1]], df['dists'][entry[rand_idx][1]]])
@@ -189,8 +189,8 @@ df = create_dummies(df, dict["dists"])
 df = create_dummies(df, dict["angles"])
 
 x_train = np.stack(data[:, 0])
-y_dist = df[targets_dist]
-y_angle = df[targets_angle]
+y_dist = np.array(df[targets_dist])
+y_angle = np.array(df[targets_angle])
 
 # # Split the data: Train and Test
 x_train, x_test, y_train_dist, y_test_dist, y_train_angle, y_test_angle = \
