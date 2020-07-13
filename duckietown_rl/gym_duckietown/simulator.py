@@ -1487,9 +1487,9 @@ class Simulator(gym.Env):
 
         return reward
 
-    def step(self, action: np.ndarray):
+    def step(self, action):
         # @riza: don't go backwards
-        action = np.clip(action, 0, 1)       # action = np.clip(action, -1, 1)
+        # action = np.clip(action, 0, 1)       # action = np.clip(action, -1, 1)
         # Actions could be a Python list
         action = np.array(action)
         for _ in range(self.frame_skip):
@@ -1926,7 +1926,7 @@ class Simulator(gym.Env):
                      debug=False)
 
     def get_pts(self):
-        # @riza
+        # @simone
         """This is for getting which part are we in tile-> right, or left"""
         # if self.step_count < 10:
         i, j = self.get_grid_coords(self.cur_pos)
@@ -1967,7 +1967,7 @@ class Simulator(gym.Env):
         bezier_draw_points_curve(curves_prev[ii])
 
         # Get bezier points on 3 tiles(current, prev, next) and compute dist
-        n = 50
+        n = 10
         pts = np.vstack((
             [bezier_point(curves[ii], i / (n - 1)) for i in range(0, n)],
             [bezier_point(curves_next[ii], i / (n - 1)) for i in range(0, n)],

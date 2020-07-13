@@ -26,13 +26,6 @@ cumulative_reward = 0.0
 EPISODES = 1
 STEPS = 200
 
-# reader = Reader(f'train-102k.log')   # where our data lies
-# obse, _, angles, info = reader.read()
-# dist = np.array([i['Simulator']['lane_position']['dist'] for i in info])
-
-# values_in_range = ((-0.01 < dist) & (dist < 0.01)).sum()
-
-
 expert = Expert(env=env)
 
 observations = []
@@ -84,12 +77,13 @@ for episode in range(0, EPISODES):
 print('total reward: {}, mean reward: {}'.format(cumulative_reward, cumulative_reward // EPISODES))
 
 env.close()
+
 # model.close()
 
 # fig = plt.figure(figsize=(40, 30))
 # i = 0
 # for prediction, gt, img in zip(predictions, gts, observations):
-#     ax = fig.add_subplot(12, 10, i+1, xticks=[], yticks=[])
+#     fig, ax = plt.subplots(1, 1, constrained_layout=True)
 #     ax.imshow(img)
 #     ax.set_title(f"Pred: [{prediction[0]:.3f}, {prediction[1]:.3f}]\n"
 #                  f"GT: [{gt[0]:.3f}, {gt[1]:.3f}]")

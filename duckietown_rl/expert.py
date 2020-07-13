@@ -184,26 +184,26 @@ class Expert:
         return action
 
     def predict_action(self, dream_env):
-        # # Check if the agent is in a curve
-        # try:
-        #     curve = dream_env._get_tile(
-        #         dream_env.get_tile()[1][0],
-        #         dream_env.get_tile()[1][1]
-        #     )['kind'].startswith('curve')
-        # except ValueError:
-        #     curve = False
-        #
-        # # distance from the center of the right lane
-        # dist = dream_env.get_lane_pos2(dream_env.cur_pos, dream_env.cur_angle).dist
-        #
-        # if not curve:
-        #     if abs(dist) < 0.05:
-        #         self.cof_speed = COF_SPEED * 5
-        #     if dist < -0.04:
-        #         return [1., 0.9]
-        #     elif dist > 0.04:
-        #         return [0.9, 1.]
-        # else:
-        #     self.cof_speed = COF_SPEED
+        # Check if the agent is in a curve
+        try:
+            curve = dream_env._get_tile(
+                dream_env.get_tile()[1][0],
+                dream_env.get_tile()[1][1]
+            )['kind'].startswith('curve')
+        except ValueError:
+            curve = False
+
+        # distance from the center of the right lane
+        dist = dream_env.get_lane_pos2(dream_env.cur_pos, dream_env.cur_angle).dists
+
+        if not curve:
+            if abs(dist) < 0.05:
+                self.cof_speed = COF_SPEED * 5
+            if dist < -0.04:
+                return [1., 0.9]
+            elif dist > 0.04:
+                return [0.9, 1.]
+        else:
+            self.cof_speed = COF_SPEED
 
         return self.collect_rollout(dream_env)

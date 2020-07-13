@@ -16,7 +16,7 @@ def launch_env():
         distortion=True,
         randomize_maps_on_reset=True,
         draw_curve=False,
-        draw_bbox=False,  # top view
+        draw_bbox=True,  # top view
         evaluate=False
     )
 
