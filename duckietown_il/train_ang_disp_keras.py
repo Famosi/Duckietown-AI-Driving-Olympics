@@ -9,7 +9,7 @@ import argparse
 import tensorflow as tf
 from duckietown_il._loggers import Reader
 import pandas as pd
-from duckietown_il.model_keras import VGG16_model, NVIDIA_model, NVIDIA_model_2
+from duckietown_il.model_keras import VGG16_model, NVIDIA_model, Model_a_d
 from keras.optimizers import SGD, Adam
 from keras.models import Model, Input
 from keras.layers import Concatenate
@@ -87,7 +87,7 @@ DATA = args["data"]
 BATCH_SIZE = args["batch_size"]  # define the batch size
 EPOCHS = args["epoch"]  # how many times we iterate through our data
 STORAGE_LOCATION = "trained_models/"  # where we store our trained models
-reader = Reader(f'../{DATA}.log')  # where our data lies
+reader = Reader(f'{DATA}.log')  # where our data lies
 MODEL_NAME = "01_NVIDIA"
 # MODEL_NAME = "VGG_16"
 
@@ -109,23 +109,23 @@ def hot_encoding(dataframe, arg, dict, where_to_cut, label_names):
 # Displacement: 0, 0.02, 0.04, 0.06, 0.08, 0.1, 0.12, 0.14, 0.16, 0.18, 0.2 (and negatives)
 # Angle: 0, 9, 18, 27, 36, 45, 54, 63, 72, 81, 90 (and negatives)
 
-labels_dist = ["-0.2/-0.18", "-0.18/-0.16", "-0.16/-0.14", "-0.14/-0.12", "-0.12/0.1",
-               "-0.1/-0.08", "-0.8/-0.6", "-0.6/-0.4", "-0.4/-0.2", "-0.2/0.0",
-               "0.0/0.02", "0.02/0.04", "0.04/0.06", "0.06/0.08", "0.08/0.1",
-               "0.1/0.12", "0.12/0.14", "0.14/0.16", "0.16/0.18", "0.18/0.2"]
-cut_points_dist = [-0.2, -0.18, -0.16, -0.14, -0.12, -0.1,
-                   -0.08, -0.06, -0.04, -0.02, 0.0,
-                   0.02, 0.04, 0.06, 0.08, 0.1,
-                   0.12, 0.14, 0.16, 0.18, 0.2]
+labels_dist = ["-0.15/-0.0135", "-0.0135/-0.12", "-0.12/-0.105", "-0.105/-0.09", "-0.09/0.075",
+               "-0.075/-0.06", "-0.06/-0.045", "-0.045/-0.03", "-0.03/-0.015", "-0.015/0.0",
+               "0.0/0.015", "0.015/0.03", "0.03/0.045", "0.045/0.06", "0.06/0.075",
+               "0.075/0.09", "0.09/0.105", "0.105/0.12", "0.12/0.135", "0.135/0.15"]
+cut_points_dist = [-0.15, -0.0135, -0.12, -0.105, -0.09,
+                   -0.075, -0.06, -0.045, -0.03, 0.015, 0,
+                   0.015, 0.03, 0.045, 0.06, 0.075,
+                   0.09, 0.105, 0.12, 0.135, 0.15]
 
-labels_angle = ["-90/-81", "-81/-72", "-72/-63", "-63/-54", "-54/-45",
-                "-45/-36", "-36/-27", "-27/-18", "-18/-9", "-9/0",
-                "0/9", "9/18", "18/27", "27/36", "36/45",
-                "45/54", "54/63", "63/72", "72/81", "81/90"]
-cut_points_angle = [-90, -81, -72, -63, -54, -45,
-                    -36, -27, -18, -9, 0,
-                    9, 18, 27, 36, 45,
-                    54, 63, 72, 81, 90]
+labels_angle = ["-45/-41.5", "-41.5/-36", "-36/-31.5", "-31.5/-27", "-27/-22.5",
+                "-22.5/-18", "-18/-13.5", "-13.5/-9", "-9/-4.5", "-4.5/0",
+                "0/4.5", "4.5/9", "9/13.5", "13.5/18", "18/22.5",
+                "22.5/27", "27/31.5", "31.5/36", "36/41.5", "41.5/45"]
+cut_points_angle = [-45, -41.5, -36, -31.5, -27, -22.5,
+                    -18, -13.5, -9, -4.5, 0,
+                    4.5, 9, 13.5, 18, 22.5,
+                    27, 31.5, 36, 41.5, 45]
 
 dict = {
     "angles": "angles_cat",
@@ -148,6 +148,19 @@ df = create_dummies(df, dict["angles"])
 targets_dist = [dict["dists"] + '_' + col_name for col_name in labels_dist]
 targets_angle = [dict["angles"] + '_' + col_name for col_name in labels_angle]
 
+# ################## DISTRIBUTE DATA ####################
+# obs_sorted = []
+# def sort_samples(df, targets):
+#     for label in targets:
+#         obs_category = []
+#         idxs = df.index[df[label] == 1].tolist()
+#         for i in idxs:
+#             obs_category.append(observations[i])
+#         obs_sorted.append(obs_category)
+#
+#
+# sort_samples(df, targets_dist)
+#
 x_train = observations
 y_dist = df[targets_dist]
 y_angle = df[targets_angle]
@@ -189,20 +202,19 @@ x_train, y_train_angle = x_train[val_size:], y_train_angle[val_size:]
 
 # #################### BUILD the model ####################
 inputs = Input(shape=(60, 120, 3))
-dist_model = NVIDIA_model_2(inputs, "dist_output")
-angle_model = NVIDIA_model_2(inputs, "angle_output")
+angle_model, dist_model = Model_a_d(inputs)
 
 model = Model(
     inputs=inputs,
-    outputs=[dist_model, angle_model]
+    outputs=[angle_model, dist_model]
 )
 
 optimizer = Adam(lr=1e-3, decay=1e-3 / EPOCHS)
 losses = {
-    "dist_output": "categorical_crossentropy",
-    "angle_output": "categorical_crossentropy",
+    "angles": "categorical_crossentropy",
+    "displacement": "categorical_crossentropy",
 }
-lossWeights = {"dist_output": 1.0, "angle_output": 1.0}
+lossWeights = {"angles": 1.0, "displacement": 1.0}
 
 model.compile(optimizer=optimizer,
               loss=losses,
@@ -217,9 +229,9 @@ mc = ModelCheckpoint(STORAGE_LOCATION + MODEL_NAME + '.h5', monitor='val_loss', 
 log_dir = "logs/fit/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
 tb = TensorBoard(log_dir=log_dir, histogram_freq=1)
 history = model.fit(x=x_train,
-                    y={"dist_output": y_train_dist, "angle_output": y_train_angle},
+                    y={"angles": y_train_angle, "displacement": y_train_dist},
                     validation_data=(x_validate,
-                                     {"dist_output": y_validate_dist, "angle_output": y_validate_angle}),
+                                     {"angles": y_validate_angle, "displacement": y_validate_dist}),
                     epochs=EPOCHS,
                     verbose=2,
                     callbacks=[es, mc, tb],
@@ -233,7 +245,7 @@ plot_model_history(history, path_to_save=STORAGE_LOCATION, model_name=MODEL_NAME
 # test_result = model.evaluate(x_test, y_train_dist, y_test_angle)
 
 test_result = model.evaluate(x=x_test,
-                             y={"dist_output": y_test_dist, "angle_output": y_test_angle},
+                             y={"angles": y_test_angle, "displacement": y_test_dist},
                              batch_size=BATCH_SIZE)
 
 print(f"Test loss: {test_result[0]:.3f}\t | Test accuracy: %{test_result[1]:.2f}")
