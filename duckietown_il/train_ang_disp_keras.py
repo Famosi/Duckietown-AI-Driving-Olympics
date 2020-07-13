@@ -179,6 +179,7 @@ def sample_for_training(arr):
 
 
 data = np.concatenate((np.array(sample_for_training(sort_angle)), np.array(sample_for_training(sort_dist))), axis=0)
+np.random.shuffle(data)
 
 df = pd.DataFrame({'angles': data[:, 1], 'dists': data[:, 2]})
 
@@ -209,22 +210,22 @@ x_train, y_train_angle = x_train[val_size:], y_train_angle[val_size:]
 
 
 # prepare data augmentation configuration
-train_datagen = ImageDataGenerator(rescale=1./255,              # rescaling factor
-                                   width_shift_range=0.2,       # float: fraction of total width, if < 1
-                                   height_shift_range=0.2,      # float: fraction of total height, if < 1
-                                   brightness_range=None,       # Range for picking a brightness shift value from
-                                   zoom_range=0.0,              # Float or [lower, upper]. Range for random zoom
-                                   )
-
-train_datagen.fit(x_train)
-
-# this is the augmentation configuration we will use for validating: only rescaling
-validation_datagen = ImageDataGenerator(rescale=1./255)
-validation_datagen.fit(x_validate)
-
-# this is the augmentation configuration we will use for testing: only rescaling
-test_datagen = ImageDataGenerator(rescale=1./255)
-test_datagen.fit(x_test)
+# train_datagen = ImageDataGenerator(rescale=1./255,              # rescaling factor
+#                                    width_shift_range=0.2,       # float: fraction of total width, if < 1
+#                                    height_shift_range=0.2,      # float: fraction of total height, if < 1
+#                                    brightness_range=None,       # Range for picking a brightness shift value from
+#                                    zoom_range=0.0,              # Float or [lower, upper]. Range for random zoom
+#                                    )
+#
+# train_datagen.fit(x_train)
+#
+# # this is the augmentation configuration we will use for validating: only rescaling
+# validation_datagen = ImageDataGenerator(rescale=1./255)
+# validation_datagen.fit(x_validate)
+#
+# # this is the augmentation configuration we will use for testing: only rescaling
+# test_datagen = ImageDataGenerator(rescale=1./255)
+# test_datagen.fit(x_test)
 
 # #################### BUILD the model ####################
 inputs = Input(shape=(60, 120, 3))
