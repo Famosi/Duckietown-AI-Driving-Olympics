@@ -235,7 +235,7 @@ model = Model(
     outputs=[angle_model, dist_model]
 )
 
-optimizer = Adam(lr=1e-4, decay=1e-3 / EPOCHS)
+optimizer = Adam(lr=1e-4, decay=1e-4 / EPOCHS)
 # losses = {
 #     "angles": "categorical_crossentropy",
 #     "displacement": "categorical_crossentropy",
