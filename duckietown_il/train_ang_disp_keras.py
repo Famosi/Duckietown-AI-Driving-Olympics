@@ -18,7 +18,7 @@ from keras.callbacks import EarlyStopping, ModelCheckpoint, TensorBoard
 from keras.preprocessing.image import ImageDataGenerator
 from sklearn.model_selection import train_test_split
 from random import randrange
-# from duckietown_il.read_data import plot_distribution
+from duckietown_il.read_data import plot_distribution
 
 
 # Function to plot model's validation loss and validation accuracy
@@ -100,7 +100,7 @@ observations = np.array(observations)
 angles = np.array([i['Simulator']['lane_position']['angle_deg'] for i in info])
 dists = np.array([i['Simulator']['lane_position']['dist'] for i in info])
 
-# plot_distribution(angles, dists)
+plot_distribution(angles, dists)
 
 df = pd.DataFrame({'obs': list(observations), 'angles': angles, 'dists': dists})
 
@@ -173,7 +173,7 @@ sort_dist = sort_samples(df, targets_dist)
 def sample_for_training(arr):
     samples = []
     for entry in arr:
-        for _ in range(0, 300):
+        for _ in range(0, 60):
             try:
                 idx = entry[randrange(len(entry))][1]
                 samples.append([df['obs'][idx], df['angles'][idx], df['dists'][idx]])
@@ -183,7 +183,7 @@ def sample_for_training(arr):
 
 
 data = np.concatenate((np.array(sample_for_training(sort_angle)), np.array(sample_for_training(sort_dist))), axis=0)
-np.random.shuffle(data)
+# np.random.shuffle(data)
 
 df = pd.DataFrame({'angles': data[:, 1], 'dists': data[:, 2]})
 
@@ -195,7 +195,7 @@ df = create_dummies(df, dict["angles"])
 
 observations = np.stack(data[:, 0])
 
-# plot_distribution(data[:, 1], data[:, 2])
+plot_distribution(data[:, 1], data[:, 2])
 
 # ###################### PREPARE DATA FOR TRAINING ###########################
 
