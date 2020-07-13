@@ -256,7 +256,7 @@ log_dir = "logs/fit/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
 tb = TensorBoard(log_dir=log_dir, histogram_freq=1)
 
 history = model.fit(x=x_train,
-                    y={"angles": y_train_angle, "displacement": y_train_dist},
+                    y={"angle": y_train_angle, "displacement": y_train_dist},
                     validation_data=(x_validate,
                                      {"angle": y_validate_angle, "displacement": y_validate_dist}),
                     epochs=EPOCHS,
