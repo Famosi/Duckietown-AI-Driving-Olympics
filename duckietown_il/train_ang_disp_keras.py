@@ -87,7 +87,7 @@ DATA = args["data"]
 BATCH_SIZE = args["batch_size"]  # define the batch size
 EPOCHS = args["epoch"]  # how many times we iterate through our data
 STORAGE_LOCATION = "trained_models/"  # where we store our trained models
-reader = Reader(f'../{DATA}.log')  # where our data lies
+reader = Reader(f'{DATA}.log')  # where our data lies
 MODEL_NAME = "01_NVIDIA"
 # MODEL_NAME = "VGG_16"
 
@@ -114,7 +114,7 @@ labels_dist = ["-0.15/-0.0135", "-0.0135/-0.12", "-0.12/-0.105", "-0.105/-0.09",
                "0.0/0.015", "0.015/0.03", "0.03/0.045", "0.045/0.06", "0.06/0.075",
                "0.075/0.09", "0.09/0.105", "0.105/0.12", "0.12/0.135", "0.135/0.15"]
 cut_points_dist = [-0.15, -0.0135, -0.12, -0.105, -0.09,
-                   -0.075, -0.06, -0.045, -0.03, 0.015, 0,
+                   -0.075, -0.06, -0.045, -0.03, -0.015, 0,
                    0.015, 0.03, 0.045, 0.06, 0.075,
                    0.09, 0.105, 0.12, 0.135, 0.15]
 
