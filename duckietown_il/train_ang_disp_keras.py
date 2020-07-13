@@ -258,7 +258,7 @@ tb = TensorBoard(log_dir=log_dir, histogram_freq=1)
 history = model.fit(x=x_train,
                     y={"angles": y_train_angle, "displacement": y_train_dist},
                     validation_data=(x_validate,
-                                     {"angles": y_validate_angle, "displacement": y_validate_dist}),
+                                     {"angle": y_validate_angle, "displacement": y_validate_dist}),
                     epochs=EPOCHS,
                     verbose=2,
                     callbacks=[es, mc, tb],
@@ -272,7 +272,7 @@ plot_model_history(history, path_to_save=STORAGE_LOCATION, model_name=MODEL_NAME
 # test_result = model.evaluate(x_test, y_train_dist, y_test_angle)
 
 test_result = model.evaluate(x=x_test,
-                             y={"angles": y_test_angle, "displacement": y_test_dist},
+                             y={"angle": y_test_angle, "displacement": y_test_dist},
                              batch_size=BATCH_SIZE)
 
 print(f"Test loss: {test_result[0]:.3f}\t | Test accuracy: %{test_result[1]:.2f}")
