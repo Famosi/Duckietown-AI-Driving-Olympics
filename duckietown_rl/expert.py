@@ -194,7 +194,7 @@ class Expert:
             curve = False
 
         # distance from the center of the right lane
-        dist = dream_env.get_lane_pos2(dream_env.cur_pos, dream_env.cur_angle).dists
+        dist = dream_env.get_lane_pos2(dream_env.cur_pos, dream_env.cur_angle).dist
 
         if not curve:
             if abs(dist) < 0.05:
