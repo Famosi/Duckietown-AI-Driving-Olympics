@@ -183,7 +183,7 @@ def sample_for_training(arr):
 
 
 data = np.concatenate((np.array(sample_for_training(sort_angle)), np.array(sample_for_training(sort_dist))), axis=0)
-# np.random.shuffle(data)
+np.random.shuffle(data)
 
 df = pd.DataFrame({'angles': data[:, 1], 'dists': data[:, 2]})
 
@@ -211,12 +211,15 @@ x_train, x_test, y_train_dist, y_test_dist, y_train_angle, y_test_angle = \
 
 # Split Train data once more for Validation data
 val_size = int(len(x_train) * 0.1)
+
+x_train = x_train[val_size:]
+x_validate = x_train[:val_size]
 # DIST
-x_validate, y_validate_dist = x_train[:val_size], y_train_dist[:val_size]
 y_train_dist = y_train_dist[val_size:]
+y_validate_dist = y_train_dist[:val_size]
 # ANGLE
+y_train_angle = y_train_angle[val_size:]
 y_validate_angle = y_train_angle[:val_size]
-x_train, y_train_angle = x_train[val_size:], y_train_angle[val_size:]
 
 
 # prepare data augmentation configuration
