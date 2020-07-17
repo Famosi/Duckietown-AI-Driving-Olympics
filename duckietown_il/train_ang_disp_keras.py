@@ -173,7 +173,7 @@ sort_dist = sort_samples(df, targets_dist)
 def sample_for_training(arr):
     samples = []
     for entry in arr:
-        for _ in range(0, 40):
+        for _ in range(0, 100):
             try:
                 idx = entry[randrange(len(entry))][1]
                 samples.append([observations[idx], angles[idx], dists[idx]])
@@ -249,7 +249,7 @@ model = Model(
     outputs=[angle_model, dist_model]
 )
 
-optimizer = Adam(lr=1e-5, decay=1e-5 / EPOCHS)
+optimizer = Adam(lr=1e-3, decay=1e-3 / EPOCHS)
 # losses = {
 #     "angles": "categorical_crossentropy",
 #     "displacement": "categorical_crossentropy",
