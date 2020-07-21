@@ -1,4 +1,4 @@
-from duckietown_rl.gym_duckietown.simulator import Simulator
+from duckietown_il.gym_duckietown.simulator import Simulator
 
 
 def launch_env():
