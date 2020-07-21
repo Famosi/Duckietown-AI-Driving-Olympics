@@ -154,48 +154,48 @@ targets_angle = [dict["angles"] + '_' + col_name for col_name in labels_angle]
 
 # ################## DISTRIBUTE DATA ####################
 
-def sort_samples(df, targets):
-    data_sorted = []
-    for label in targets:
-        obs_category = []
-        idxs = df.index[df[label] == 1].tolist()
-        for i in idxs:
-            obs_category.append([observations[i], i])
-        data_sorted.append(obs_category)
-
-    return data_sorted
-
-
-sort_angle = sort_samples(df, targets_angle)
-sort_dist = sort_samples(df, targets_dist)
-
-
-def sample_for_training(arr):
-    samples = []
-    for entry in arr:
-        for _ in range(0, 60):
-            try:
-                idx = entry[randrange(len(entry))][1]
-                samples.append([observations[idx], angles[idx], dists[idx]])
-            except:
-                continue
-    return samples
-
-
-data = np.concatenate((np.array(sample_for_training(sort_angle)), np.array(sample_for_training(sort_dist))), axis=0)
-np.random.shuffle(data)
-
-df = pd.DataFrame({'angles': data[:, 1], 'dists': data[:, 2]})
-
-df = hot_encoding(df, "angles", dict, cut_points_angle, labels_angle)
-df = hot_encoding(df, "dists", dict, cut_points_dist, labels_dist)
-
-df = create_dummies(df, dict["dists"])
-df = create_dummies(df, dict["angles"])
-
-observations = np.stack(data[:, 0])
-
-# plot_distribution(data[:, 1], data[:, 2])
+# def sort_samples(df, targets):
+#     data_sorted = []
+#     for label in targets:
+#         obs_category = []
+#         idxs = df.index[df[label] == 1].tolist()
+#         for i in idxs:
+#             obs_category.append([observations[i], i])
+#         data_sorted.append(obs_category)
+#
+#     return data_sorted
+#
+#
+# sort_angle = sort_samples(df, targets_angle)
+# sort_dist = sort_samples(df, targets_dist)
+#
+#
+# def sample_for_training(arr):
+#     samples = []
+#     for entry in arr:
+#         for _ in range(0, 60):
+#             try:
+#                 idx = entry[randrange(len(entry))][1]
+#                 samples.append([observations[idx], angles[idx], dists[idx]])
+#             except:
+#                 continue
+#     return samples
+#
+#
+# data = np.concatenate((np.array(sample_for_training(sort_angle)), np.array(sample_for_training(sort_dist))), axis=0)
+# np.random.shuffle(data)
+#
+# df = pd.DataFrame({'angles': data[:, 1], 'dists': data[:, 2]})
+#
+# df = hot_encoding(df, "angles", dict, cut_points_angle, labels_angle)
+# df = hot_encoding(df, "dists", dict, cut_points_dist, labels_dist)
+#
+# df = create_dummies(df, dict["dists"])
+# df = create_dummies(df, dict["angles"])
+#
+# observations = np.stack(data[:, 0])
+#
+# # plot_distribution(data[:, 1], data[:, 2])
 
 # ###################### PREPARE DATA FOR TRAINING ###########################
 
