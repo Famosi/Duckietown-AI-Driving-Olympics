@@ -64,7 +64,7 @@ info = np.array(info)
 
 dist = np.array([i['Simulator']['lane_position']['dist'] for i in info])
 
-targets = np.array(list(zip(dist, angles)))
+targets = actions
 
 # Split the data: Train and Test
 x_train, x_test, y_train, y_test = train_test_split(observations, targets, test_size=0.2, random_state=2)
@@ -93,8 +93,8 @@ test_datagen.fit(x_test)
 # model = VGG16_model()
 model = NVIDIA_model()
 # Define the optimizer
-optimizer = SGD(lr=0.01, momentum=0.001, nesterov=False)
-# optimizer = Adam(lr=1e-3, decay=1e-3/EPOCHS)
+# optimizer = SGD(lr=0.01, momentum=0.001, nesterov=False)
+optimizer = Adam(lr=1e-3, decay=1e-3/EPOCHS)
 # Compile the model
 model.compile(optimizer=optimizer,
               loss=MSE,
