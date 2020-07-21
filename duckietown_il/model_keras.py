@@ -41,7 +41,7 @@ def NVIDIA_model():
     model.add(Dense(100, activation="relu"))
     model.add(Dense(50, activation="relu"))
     model.add(Dense(10, activation="relu"))
-    model.add(Dense(21, activation="sigmoid"))
+    model.add(Dense(2, activation="sigmoid"))
 
     return model
 
