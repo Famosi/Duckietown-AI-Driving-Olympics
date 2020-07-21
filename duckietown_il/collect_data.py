@@ -6,45 +6,45 @@ from duckietown_il._loggers import Logger
 import numpy as np
 import matplotlib.pyplot as plt
 
-
-angle_intervals = [-0.24, -0.18, -0.12, -0.06, -0.01, 0.01, 0.06, 0.12, 0.18, 0.24]
-disp_intervals = [-0.10, -0.08, -0.05, -0.03, -0.01, 0.01, 0.03, 0.05, 0.08, 0.10]
+#
+# angle_intervals = [-0.24, -0.18, -0.12, -0.06, -0.01, 0.01, 0.06, 0.12, 0.18, 0.24]
+# disp_intervals = [-0.10, -0.08, -0.05, -0.03, -0.01, 0.01, 0.03, 0.05, 0.08, 0.10]
 
 
 # Return TRUE if don't have enough cur_angle OR cur_displacement
 # TRUE otherwise
-def check_intervals(angles, displacements, cur_angle, cur_disp):
-    check_angle = True
-    check_disp = True
-    for x, y in zip(angle_intervals, angle_intervals[1:]):
-        if x < cur_angle < y and np.histogram(angles, bins=(x, y))[0] > 3000:
-            check_angle = False
-    for x, y in zip(disp_intervals, disp_intervals[1:]):
-        if x < cur_disp < y and np.histogram(displacements, bins=(x, y))[0] > 3000:
-            check_disp = False
-    return check_angle or check_disp
-
-
-# Return TRUE if we have, for all intervals, more than 2500 samples
-def is_log(angles, displacements):
-    angle_is_log = True
-    disp_is_log = True
-    for x, y in zip(angle_intervals, angle_intervals[1:]):
-        if np.histogram(angles, bins=(x, y))[0] < 2500:
-            angle_is_log = False
-    for x, y in zip(disp_intervals, disp_intervals[1:]):
-        if np.histogram(displacements, bins=(x, y))[0] < 2500:
-            disp_is_log = False
-    return angle_is_log and disp_is_log
+# def check_intervals(angles, displacements, cur_angle, cur_disp):
+#     check_angle = True
+#     check_disp = True
+#     for x, y in zip(angle_intervals, angle_intervals[1:]):
+#         if x < cur_angle < y and np.histogram(angles, bins=(x, y))[0] > 3000:
+#             check_angle = False
+#     for x, y in zip(disp_intervals, disp_intervals[1:]):
+#         if x < cur_disp < y and np.histogram(displacements, bins=(x, y))[0] > 3000:
+#             check_disp = False
+#     return check_angle or check_disp
+#
+#
+# # Return TRUE if we have, for all intervals, more than 2500 samples
+# def is_log(angles, displacements):
+#     angle_is_log = True
+#     disp_is_log = True
+#     for x, y in zip(angle_intervals, angle_intervals[1:]):
+#         if np.histogram(angles, bins=(x, y))[0] < 2500:
+#             angle_is_log = False
+#     for x, y in zip(disp_intervals, disp_intervals[1:]):
+#         if np.histogram(displacements, bins=(x, y))[0] < 2500:
+#             disp_is_log = False
+#     return angle_is_log and disp_is_log
 
 
 env = launch_env()
 
-EPISODES, STEPS = 1, 10
+EPISODES, STEPS = 100, 200
 
-# logger = Logger(env, log_file=f'train-{int(EPISODES*STEPS/1000)}k.log')
+logger = Logger(env, log_file=f'train-{int(EPISODES*STEPS/1000)}k.log')
 
-logger = Logger(env, log_file=f'data-{int(EPISODES*STEPS)}.log')
+# logger = Logger(env, log_file=f'data-{int(EPISODES*STEPS)}.log')
 
 expert = Expert(env=env)
 
