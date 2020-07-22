@@ -13,6 +13,7 @@ from keras.losses import mean_squared_error as MSE
 from keras.callbacks import EarlyStopping, ModelCheckpoint, TensorBoard
 from keras.preprocessing.image import ImageDataGenerator
 from sklearn.model_selection import train_test_split
+from keras.models import load_model
 
 
 # Function to plot model's validation loss and validation accuracy
@@ -56,18 +57,13 @@ reader = Reader(f'../{DATA}.log')      # where our data lies
 MODEL_NAME = "01_NVIDIA"
 # MODEL_NAME = "VGG_16"
 
-observations, actions, angles, info = reader.read()  # read the observations from data
+observations, actions, _, _ = reader.read()  # read the observations from data
 actions = np.array(actions)
 observations = np.array(observations)
-angles = np.array(angles)
-info = np.array(info)
 
-dist = np.array([i['Simulator']['lane_position']['dist'] for i in info])
-
-targets = actions
 
 # Split the data: Train and Test
-x_train, x_test, y_train, y_test = train_test_split(observations, targets, test_size=0.2, random_state=2)
+x_train, x_test, y_train, y_test = train_test_split(observations, actions, test_size=0.2, random_state=2)
 # Split Train data once more for Validation data
 val_size = int(len(x_train) * 0.1)
 x_validate, y_validate = x_train[:val_size], y_train[:val_size]
@@ -91,7 +87,8 @@ test_datagen.fit(x_test)
 
 # Build the model
 # model = VGG16_model()
-model = NVIDIA_model()
+# model = NVIDIA_model()
+model = load_model("trained_models/03_NVIDIA_actions.h5")
 # Define the optimizer
 # optimizer = SGD(lr=0.01, momentum=0.001, nesterov=False)
 optimizer = Adam(lr=1e-3, decay=1e-3/EPOCHS)
@@ -104,10 +101,9 @@ model.summary()
 
 # Create Keras callbacks
 es = EarlyStopping(monitor='val_loss', verbose=1, patience=30)
-mc = ModelCheckpoint(STORAGE_LOCATION + MODEL_NAME + '.h5', monitor='val_loss', save_best_only=True)
+mc = ModelCheckpoint("trained_models/03_NVIDIA_actions.h5", monitor='val_loss', save_best_only=True)
 log_dir = "logs/fit/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
 tb = TensorBoard(log_dir=log_dir, histogram_freq=1)
-
 history = model.fit_generator(train_datagen.flow(x_train, y_train, batch_size=BATCH_SIZE),
                               validation_data=validation_datagen.flow(x_validate, y_validate, batch_size=BATCH_SIZE),
                               epochs=EPOCHS,
