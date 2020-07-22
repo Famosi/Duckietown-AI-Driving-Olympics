@@ -40,7 +40,7 @@ import matplotlib.pyplot as plt
 
 env = launch_env()
 
-EPISODES, STEPS = 200, 300
+EPISODES, STEPS = 100, 100
 
 logger = Logger(env, log_file=f'train-{int(EPISODES*STEPS/1000)}k.log')
 
