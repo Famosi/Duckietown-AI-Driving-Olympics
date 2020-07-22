@@ -88,7 +88,7 @@ test_datagen.fit(x_test)
 # Build the model
 # model = VGG16_model()
 # model = NVIDIA_model()
-model = load_model("trained_models/03_NVIDIA_actions.h5")
+model = load_model(STORAGE_LOCATION + MODEL_NAME + '.h5')
 # Define the optimizer
 # optimizer = SGD(lr=0.01, momentum=0.001, nesterov=False)
 optimizer = Adam(lr=1e-3, decay=1e-3/EPOCHS)
@@ -101,7 +101,7 @@ model.summary()
 
 # Create Keras callbacks
 es = EarlyStopping(monitor='val_loss', verbose=1, patience=30)
-mc = ModelCheckpoint("trained_models/03_NVIDIA_actions.h5", monitor='val_loss', save_best_only=True)
+mc = ModelCheckpoint(STORAGE_LOCATION + MODEL_NAME + '.h5', monitor='val_loss', save_best_only=True)
 log_dir = "logs/fit/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
 tb = TensorBoard(log_dir=log_dir, histogram_freq=1)
 history = model.fit_generator(train_datagen.flow(x_train, y_train, batch_size=BATCH_SIZE),
