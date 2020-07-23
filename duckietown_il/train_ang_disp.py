@@ -9,7 +9,7 @@ import argparse
 import tensorflow as tf
 from duckietown_il._loggers import Reader
 import pandas as pd
-from duckietown_il.model_keras import VGG16_model, NVIDIA_model, Model_a_d
+from duckietown_il.model import VGG16_model, NVIDIA_model, Model_a_d
 from keras.optimizers import SGD, Adam
 from keras.models import Model, Input
 from keras.layers import Concatenate

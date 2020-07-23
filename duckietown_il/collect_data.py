@@ -6,11 +6,9 @@ from duckietown_il._loggers import Logger
 
 env = launch_env()
 
-EPISODES, STEPS = 50, 250
+EPISODES, STEPS = 500, 200
 
 logger = Logger(env, log_file=f'train-{int(EPISODES*STEPS/1000)}k.log')
-
-# logger = Logger(env, log_file=f'data-{int(EPISODES*STEPS)}.log')
 
 expert = Expert(env=env)
 

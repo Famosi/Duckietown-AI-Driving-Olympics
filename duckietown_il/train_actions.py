@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import argparse
 import tensorflow as tf
 from duckietown_il._loggers import Reader
-from duckietown_il.model_keras import VGG16_model, NVIDIA_model
+from duckietown_il.model import VGG16_model, NVIDIA_model
 from keras.optimizers import SGD, Adam
 from keras.losses import mean_squared_error as MSE
 from keras.callbacks import EarlyStopping, ModelCheckpoint, TensorBoard
