@@ -1,5 +1,5 @@
 import numpy as np
-from expert import Expert
+from duckietown_rl.expert import Expert
 from statistics import median
 from duckietown_rl.gym_duckietown.simulator import Simulator
 import matplotlib.pyplot as plt
