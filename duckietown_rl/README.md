@@ -35,25 +35,29 @@ You can see here below the `expert` running in the [`zigzag_dists` map](https://
 ## Getting Started
 
 ### Prerequisite
-[Install all the environment dependencies](../README.md#install-the-environment)
+Remember to [install all the environment dependencies](../README.md#install-the-environment)
 
 ### Run The Expert
-:construction_worker:
-
-**Description...**
-
+You can run the Expert using the [run_expert.py](./run_expert.py) script:
 ``` 
 python run_expert.py
 ```
+If you want to change the number of episodes and steps, you can simply
+do it using the  [`EPISODES`](https://github.com/FaMoSi/Duckietown-Aido4/blob/4b3033f6037e201a2c2f8a46507f72094847dfc5/duckietown_rl/run_expert.py#L9) 
+and [`STEPS`](https://github.com/FaMoSi/Duckietown-Aido4/blob/4b3033f6037e201a2c2f8a46507f72094847dfc5/duckietown_rl/run_expert.py#L8) variables.
+
+You can also change environment settings (e.g. top-down view) in the [env.py](./env.py) file.
 
 ### Evaluation
-:construction_worker:
-
-**Description...**
-
+The evaluation script allows to evaluate the performance of the Expert on different maps.
+You can run the evaluation using the [evaluation.py](./evaluation.py) script:
 ``` 
 python evaluation.py
 ```
+
+This script evaluates and shows:
+* The **reward** taken by the agent.
+* The **distance** traveled by the agent.
 
 ## Folder Details
 <details>

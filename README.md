@@ -21,6 +21,7 @@ More info about the Duckietown Project and `aido-LF` challenge [here](http://aid
 * [Prerequisite](#prerequisite) 
 * [Getting Started](#getting-started)
     * [Install](#install-the-environment)
+    * [Run](#run)
 * [Author](#author)
 
 ## Description
@@ -64,6 +65,10 @@ pip install -r requirements.txt
 ```
 
 That's all, everything is installed and you can run all the scripts in this project!
+
+### Run
+* **RL Expert**: follow the [Reinforcement Learning](duckietown_rl) instructions.
+* **IL Duckiebot**: follow the [Imitation Learning](duckietown_il) instructions.
 
 ## Author
 * **[Simone Faggi](https://github.com/FaMoSi)**

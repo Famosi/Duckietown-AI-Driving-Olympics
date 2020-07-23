@@ -6,6 +6,7 @@ This folder contains all the scripts required for the Imitation Learning approac
     * [Prerequisite](#prerequisite)
     * [Collect Data](#collect-data) 
     * [Train](#train-the-model)
+    * [Evaluate](#evaluate-the-model)
 * [Folder Details](#folder-details)
 * [Author](#author)
 
@@ -45,6 +46,8 @@ python collect_data.py
 :construction_worker:
 
 **Work in progres...**
+
+### Evaluate the model
 
 ## Folder Details
 <details>
