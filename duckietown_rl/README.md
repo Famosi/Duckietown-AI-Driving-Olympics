@@ -30,7 +30,7 @@ function.
 
 You can see here below the `expert` running in the [`zigzag_dists` map](https://github.com/FaMoSi/Duckietown-Aido4/blob/master/duckietown_RL/maps/zigzag_dists.yaml):
 
-<img width="350" height="350" src="./media/gifs/duckie.gif">
+<img width="350" height="350" src="../media/gifs/duckie.gif">
 
 ## Getting Started
 

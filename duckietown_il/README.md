@@ -15,6 +15,10 @@ This folder contains all the scripts required for the Imitation Learning approac
 
 **Work in progres...**
 
+You can see here below the trained `Duckiebot` running in two different [maps](https://github.com/FaMoSi/Duckietown-Aido4/blob/master/duckietown_RL/maps):
+
+<img width="350" height="350" alt="Trained Duckiebot" src="../media/gifs/duckiebot.gif">
+
 ## Getting Started
 
 ### Prerequisite

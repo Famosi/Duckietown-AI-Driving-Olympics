@@ -1,6 +1,10 @@
 # Duckietown - AI Driving Olympics
 <a href="http://aido.duckietown.org"><img width="200" src="https://www.duckietown.org/wp-content/uploads/2018/12/AIDO_no_text-e1544555660271.png"/></a>
 
+Expert            |  Trained Duckiebot
+:-------------------------:|:-------------------------:
+![Expert](./media/gifs/duckie.gif)  |  ![Trained Duckiebot](./media/gifs/duckiebot.gif)
+
 The [“AI Driving Olympics” (AI-DO)](http://aido.duckietown.org/) is a competition with the objective of 
 evaluating the state of the art in machine learning and artificial intelligence for mobile robotics.
 The goal of the competition is to build a machine learning (ML) model that allows a self-driving "car", called `Duckiebot`, to drive on streets within `Duckietown`.
