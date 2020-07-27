@@ -11,9 +11,13 @@ This folder contains all the scripts required for the Imitation Learning approac
 * [Author](#author)
 
 ## Description
-:construction_worker:
-
-**Work in progres...**
+The only sensor available on the Duckiebot is a camera. 
+The final objective is to build a model that allows the Duckiebot to
+drive on streets within Duckietown using only the camera.
+In order to do so we collected data using the Expert, then, train a NN 
+hat predicts actions the Duckiebot has to take to drive safely.
+The NN takes as input an observation captured by the camera and gives in 
+output the action to take.
 
 You can see here below the trained `Duckiebot` running in two different [maps](https://github.com/FaMoSi/Duckietown-Aido4/blob/master/duckietown_RL/maps):
 
