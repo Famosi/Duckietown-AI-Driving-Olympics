@@ -4,13 +4,23 @@
 
 <a href="http://aido.duckietown.org"><img width="200" src="https://www.duckietown.org/wp-content/uploads/2018/12/AIDO_no_text-e1544555660271.png"/></a>
 
-## Submit
-**Remember to install the `duckietown-shell` in order to make a submission.**
+## Evaluate and Submit
+**Remember to install the `duckietown-shell` in order to evaluate or make a submission.**
+learning
+You will need to copy the relevant files from the [duckietown_il/](../duckietown_il) directory to the [submission/](../submission) one. 
+In particular, you will need to overwrite [submission/model.py](./model.py) to match [duckietown_il/model.py](../duckietown_il/model.py)
+and place your final model inside of 
+submission/tf_models/ so you can load it correctly. 
+Then, you are ready to evaluate!
 
-:construction_worker:
-
-**Work in progres...**
-
+Either locally with
+```
+dts challenges evaluate
+```
+Or make an official submission
+```
+dts challengs submit
+```
 
 ## Template "Imitation Learning from Simulation" for challenge [`aido_LF`][lf], [`aido_LFV`][lfv] and [`aido_LFVI`][lfvi]
 
