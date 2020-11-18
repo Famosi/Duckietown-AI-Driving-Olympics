@@ -38,8 +38,8 @@ Finally, you have a self-driving car that navigates within Duckietown using only
 Trough this tutorial you will:
 * Use the [Reinforcement Learning](duckietown_rl) approach (Decision Tree) to build an `expert`.
 * Use the `expert` to [collect data](duckietown_il/collect_data.py).
-* Use the [Imitation Learning](duckietown_il) approach to train the `Duckiebot`. (:construction_worker: **Work in progres...**)
-* [Submit](submission) the solution to the [“AI Driving Olympics” (AI-DO)](http://aido.duckietown.org/). (:construction_worker: **Work in progres...**)
+* Use the [Imitation Learning](duckietown_il) approach to train the `Duckiebot`.
+* [Submit](submission) the solution to the [“AI Driving Olympics” (AI-DO)](http://aido.duckietown.org/).
 
 ## Prerequisite
 **It's highly recommended to create a virtual environment using `virtualenv` or `anaconda`**
