@@ -54,12 +54,12 @@ Before proceeding:
 
 Clone this repository:
 ```
-git clone https://github.com/FaMoSi/duckietown_aido4.git
+git clone https://github.com/FaMoSi/Duckietown-AI-Driving-Olympics.git
 ```
 
 Change into it:
 ```
-cd duckietown_aido4
+cd Duckietown-AI-Driving-Olympics
 ```
 
 Install all the dependencies using the [requirements.txt](requirements.txt) file:
