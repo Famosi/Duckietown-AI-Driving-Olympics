@@ -1,4 +1,4 @@
-opencv-python==4.0.0.21
+opencv-python==4.2.0.32
 numpy==1.16.2
 
 -e git://github.com/AndreaCensi/zuper-utils.git@z2#egg=zuper-utils

@@ -3,7 +3,7 @@ tensorflow-gpu==2.3.1
 keras
 tensorflow
 scikit-learn
-opencv-python==4.1.0.25
+opencv-python==4.2.0.32
 numpy
 tqdm
 duckietown-gym-daffy>=5.0.16
