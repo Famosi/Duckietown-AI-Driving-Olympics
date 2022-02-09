@@ -1,5 +1,5 @@
 pandas
-tensorflow-gpu==2.5.2
+tensorflow-gpu==2.5.3
 keras
 tensorflow
 scikit-learn
